@@ -3,6 +3,7 @@ Git repo for analysis code for low-pt tracking studies for Exclusive WW analysis
 My fork of athena must be checked-out!!  You can do this in your clone of TrkExclusiveWW, but make sure you include your athena folder in .gitignore (if that doesn't automatically happen).  Instructions are as follows to do a sparse checkout:
 
 ///////////////////////////////////////
+
 mkdir <name of folder you want athena in>
 
 cd <name of folder you want athena in>
