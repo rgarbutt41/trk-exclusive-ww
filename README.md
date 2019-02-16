@@ -4,9 +4,9 @@ My fork of athena must be checked-out!!  You can do this in your clone of TrkExc
 
 ///////////////////////////////////////
 
-mkdir <name of folder you want athena in>
+mkdir (name of folder you want athena in)
 
-cd <name of folder you want athena in>
+cd (name of folder you want athena in)
 
 git atlas init-workdir https://:@gitlab.cern.ch:8443/wmccorma/athena.git
 
@@ -38,7 +38,8 @@ source x86_64-slc6-gcc62-opt/setup.sh
 
 cd ../..
 
->>Then use your favorite text editor to make a file called ".gitignore".  Add <name of folder you want athena in> to .gitignore
+Then use your favorite text editor to make a file called ".gitignore".  Add (name of folder you want athena in) to .gitignore
 
 //////////////////////////////////////
-You should be able to reco_tf in <name of folder you want athena in>
+
+You should be able to reco_tf in (name of folder you want athena in)
