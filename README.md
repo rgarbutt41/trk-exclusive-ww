@@ -43,3 +43,15 @@ Then use your favorite text editor to make a file called ".gitignore".  Add (nam
 //////////////////////////////////////
 
 You should be able to reco_tf in (name of folder you want athena in)
+
+
+
+
+////////////////////////////////////
+FOR ANALYSIS
+
+'analysis' is the subdirector for doing analysis work.  There is an additional README file there.
+
+The actual analysis code is in analysis/LowPtAnalysis/source
+Compile in analysis/LowPtAnalysis/build
+Run in analysis/LowPtAnalysis/run
