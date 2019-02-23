@@ -1,0 +1,26 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/build/MyAnalysis/CMakeFiles/MyAnalysisDictReflexDict.cxx",
+			"labels" : 
+			[
+				"MyAnalysis"
+			]
+		},
+		{
+			"file" : "/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/source/MyAnalysis/MyAnalysis/MyAnalysisDict.h"
+		},
+		{
+			"file" : "/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/source/MyAnalysis/MyAnalysis/selection.xml"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"MyAnalysis"
+		],
+		"name" : "MyAnalysisDict"
+	}
+}

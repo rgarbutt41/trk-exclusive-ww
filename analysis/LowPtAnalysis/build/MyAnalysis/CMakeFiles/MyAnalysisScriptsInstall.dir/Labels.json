@@ -1,0 +1,22 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/build/x86_64-slc6-gcc62-opt/bin/ATestRun_eljob.py"
+		},
+		{
+			"file" : "/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/source/MyAnalysis/share/ATestRun_eljob.py"
+		},
+		{
+			"file" : "/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/build/x86_64-slc6-gcc62-opt/bin/ATestRun_eljob.py.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"MyAnalysis"
+		],
+		"name" : "MyAnalysisScriptsInstall"
+	}
+}

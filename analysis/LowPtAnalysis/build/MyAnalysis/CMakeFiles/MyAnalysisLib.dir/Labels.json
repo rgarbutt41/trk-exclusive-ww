@@ -1,0 +1,22 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/source/MyAnalysis/MyAnalysis/MyAnalysisDict.h"
+		},
+		{
+			"file" : "/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/source/MyAnalysis/MyAnalysis/MyxAODAnalysis.h"
+		},
+		{
+			"file" : "/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/source/MyAnalysis/Root/MyxAODAnalysis.cxx"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"MyAnalysis"
+		],
+		"name" : "MyAnalysisLib"
+	}
+}

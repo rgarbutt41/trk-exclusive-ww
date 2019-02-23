@@ -1,0 +1,6 @@
+# Target labels
+ MyAnalysis
+# Source files and their labels
+/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/build/MyAnalysis/CMakeFiles/MyAnalysisDictDictGen
+/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/build/MyAnalysis/CMakeFiles/MyAnalysisDictDictGen.rule
+/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/build/MyAnalysis/CMakeFiles/MyAnalysisDict.dsomap.rule
