@@ -1,46 +1,51 @@
+# Introduction
+
 Folder for doing analysis.
 
 
-///////////////////////
+# Initial setup
 
-To set this up
-
-In TrkExclusiveWW/analysis/LowPtAnalysis/build do:
+To set this up the first time, from the main repository folder:
+```
+cd analysis/
+mkdir build
+cd build/
 asetup 21.2.48,AnalysisBase
 cmake ../source/
 make
-source x86_64-slc6-gcc62-opt/setup.sh
+source ./*/setup.sh
+```
 
 
+# Code structure
 
-/////////////////////////////
-
-Actual analysis code is in TrkExclusiveWW/analysis/LowPtAnalysis/source
-
+Actual analysis code is in TrkExclusiveWW/analysis/source
 
 
-///////////////////////////
+# Running instructions
 
-To run the analysis go to: TrkExclusiveWW/analysis/LowPtAnalysis/run
+To run the analysis go to: make a folder called e.g. `TrkExclusiveWW/analysis/run`, and cd into it
 Run with:
-ATestRun_eljob.py --submission-dir=submitDir
+```
+runBasicPerf.py --submission-dir=submitDir
+```
 
-where '--submission-dir=submitDir' specifies the output directory.  This must be renamed every time (or else delete the old submitDir)
+where `--submission-dir=submitDir` specifies the output directory.  This must be renamed every time (or else delete the old submitDir)
 
-If you  make a new steering macro, you must make it an executable with:
+If you  make a new steering macro, please put it it TrkExclusiveWW/analysis/source/LowPtAnalysis/python, you must make it an executable with:
+```
 chmod +x <macro.py>
-You must then go to TrkExclusiveWW/analysis/LowPtAnalysis/build and do
+```
+You must then go to `TrkExclusiveWW/analysis/build` and do
+```
 cmake ../source/
 make
 source x86_64-slc6-gcc62-opt/setup.sh
-
-
-
-////////////////////////////
+```
 
 Right now the code just accesses an AOD from Simone's directory and makes a very simple NTuple with some event and Tau information
 
-The retrieved AOD is: /global/projecta/projectdirs/atlas/spgriso/code/trk-exclusive-ww-3/run/AOD.pool.root
+The retrieved AOD is: `/global/projecta/projectdirs/atlas/spgriso/code/trk-exclusive-ww-3/run/AOD.pool.root`
 
 
 

@@ -1,7 +1,0 @@
-# Target labels
- MyAnalysis
-# Source files and their labels
-/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/build/MyAnalysis/CMakeFiles/MyAnalysisDictReflexDict.cxx
- MyAnalysis
-/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/source/MyAnalysis/MyAnalysis/MyAnalysisDict.h
-/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/source/MyAnalysis/MyAnalysis/selection.xml
