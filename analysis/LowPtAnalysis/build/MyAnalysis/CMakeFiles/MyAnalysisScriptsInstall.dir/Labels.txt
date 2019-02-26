@@ -1,6 +1,0 @@
-# Target labels
- MyAnalysis
-# Source files and their labels
-/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/build/x86_64-slc6-gcc62-opt/bin/ATestRun_eljob.py
-/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/source/MyAnalysis/share/ATestRun_eljob.py
-/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/LowPtAnalysis/build/x86_64-slc6-gcc62-opt/bin/ATestRun_eljob.py.rule
