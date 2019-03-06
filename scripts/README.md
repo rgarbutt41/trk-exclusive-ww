@@ -12,4 +12,4 @@ The .slr files run the .sh files within SLURM
 
 To actually run, do e.g.:
 
-sbatch -p shared-chos -t 10:00:00 example_slr.slr
+sbatch example_slr.slr
