@@ -2,4 +2,4 @@ trk-exclusive-ww-athena
 *~
 analysis/build
 analysis/run
-*out
+*slurm*
