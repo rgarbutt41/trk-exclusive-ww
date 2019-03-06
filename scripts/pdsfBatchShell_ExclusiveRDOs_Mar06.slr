@@ -1,0 +1,13 @@
+#!/bin/bash
+# Submit as e.g. 
+# sbatch --array 1-100 pdsfBatchShell_r8788_1step.slr
+#SBATCH --output=slurm-%j.out
+#SBATCH --error=slurm-%j.err
+#SBATCH --account=atlas
+#SBATCH --partition=short
+#SBATCH --time=2:00:00
+##SBATCH --mem=4000
+#SBATCH --image=custom:pdsf-chos-sl64:v4 --export=NONE
+export TMPDIR=${SLURM_TMP}
+CHOS=sl64 chos runatlascode.sh
+shifter --volume=/global/project:/project --volume=/global/projecta:/projecta /bin/bash pdsfBatchShell_r9877.sh
