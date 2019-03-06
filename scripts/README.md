@@ -1,4 +1,4 @@
-#Intro
+# Intro
 
 This folder contains scripts for running simulation and reconstruction.
 
@@ -8,7 +8,7 @@ The .sh files contain actual reco_tf commands
 
 The .slr files run the .sh files within SLURM
 
-#Running
+# Running
 
 To actually run, do e.g.:
 
