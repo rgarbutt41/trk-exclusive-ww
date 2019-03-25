@@ -10,12 +10,15 @@ To set this up the first time, from the main repository folder:
 cd analysis/
 mkdir build
 cd build/
-asetup 21.2.48,AnalysisBase
+asetup 21.2.69,AnalysisBase
 cmake ../source/
 make
-source ./*/setup.sh
+asetup source ./*/setup.sh
 ```
 
+Note that having `asetup` preceding the `source` commmand allows the file to be sourced automatically
+the next time you setup the release with `asetup --restore`.
+Otherwise you need to remember to source this file every time you log in and setup the release.
 
 # Code structure
 

@@ -7,6 +7,12 @@ parser = optparse.OptionParser()
 parser.add_option( '-s', '--submission-dir', dest = 'submission_dir',
                    action = 'store', type = 'string', default = 'submitDir',
                    help = 'Submission directory for EventLoop' )
+parser.add_option( '-i', '--input-dir', dest = 'input_dir',
+                   action = 'store', type = 'string', default = '/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/trk-exclusive-ww-athena/run/Mar19_arraytest_1',
+                   help = 'Input directory with xAOD files' )
+parser.add_option('-d', '--debug', dest = 'debug',
+                  action = 'store_true', default=False,
+                  help = "Enable DEBUG printout")
 ( options, args ) = parser.parse_args()
 
 # Set up (Py)ROOT.
@@ -18,28 +24,25 @@ ROOT.xAOD.Init().ignore()
 import os
 sh = ROOT.SH.SampleHandler()
 sh.setMetaString( 'nc_tree', 'CollectionTree' )
-#inputFilePath = os.getenv( 'ALRB_TutorialData' ) + '/r9315/'
-#inputFilePath = '/global/projecta/projectdirs/atlas/spgriso/code/trk-exclusive-ww-3/run'
-inputFilePath = '/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/trk-exclusive-ww-athena/run/Mar19_arraytest_1'
-print inputFilePath
-#ROOT.SH.ScanDir().filePattern( 'AOD.11182705._000001.pool.root.1' ).scan( sh, inputFilePath )
-ROOT.SH.ScanDir().filePattern( 'AOD.3.pool.root' ).scan( sh, inputFilePath )
+inputFilePath = options.input_dir
+print("Input folder: %s" % inputFilePath)
+ROOT.SH.ScanDir().filePattern( '*.pool.root*' ).scan( sh, inputFilePath )
 sh.printContent()
 
 # Create an EventLoop job.
 job = ROOT.EL.Job()
 job.sampleHandler( sh )
 job.options().setDouble( ROOT.EL.Job.optMaxEvents, 500 )
-
 job.outputAdd (ROOT.EL.OutputStream ('ANALYSIS'))
 
 
 # Create the algorithm's configuration.
 from AnaAlgorithm.DualUseConfig import createAlgorithm
-alg = createAlgorithm ( 'BasicPerf', 'AnalysisAlg' )
-
+alg = createAlgorithm ( 'BasicPerf', 'AnalysisAlg')
 
 # later on we'll add some configuration options for our algorithm that go here
+if (options.debug):
+    alg.OutputLevel = ROOT.MSG.DEBUG
 
 # Add our algorithm to the job
 job.algsAdd( alg )

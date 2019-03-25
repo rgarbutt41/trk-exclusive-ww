@@ -4,6 +4,7 @@
 #include <xAODEventInfo/EventInfo.h>
 
 #include <xAODTruth/TruthParticleContainer.h>
+#include <xAODTruth/xAODTruthHelpers.h>
 #include <xAODTracking/TrackParticleContainer.h>
 
 BasicPerf :: BasicPerf (const std::string& name,
@@ -59,43 +60,21 @@ StatusCode BasicPerf :: initialize ()
 
 StatusCode BasicPerf :: execute ()
 {
-  // Here you do everything that needs to be done on every single
-  // events, e.g. read input variables, apply cuts, and fill
-  // histograms and trees.  This is where most of your actual analysis
-  // code will go.
-
-  std::cout<<"start execute"<<std::endl;
-
   // Read/fill the EventInfo variables:
   const xAOD::EventInfo* ei = nullptr;
-  std::cout<<"1"<<std::endl;
   ANA_CHECK (evtStore()->retrieve (ei, "EventInfo"));
-  std::cout<<"2"<<std::endl;
   m_runNumber = ei->runNumber ();
-  std::cout<<"3"<<std::endl;
   m_eventNumber = ei->eventNumber ();
-  std::cout<<"4"<<std::endl;
 
   // get truth particle container of interest
   const xAOD::TruthParticleContainer* truthParts = 0;
-  std::cout<<"5"<<std::endl;
   ANA_CHECK (evtStore()->retrieve( truthParts, "TruthParticles"));
-  //if ( !evtStore()->retrieve( truthParts, "TruthParticles").isSuccess() ){
-  //Error("execute()", "Failed to retrieve Input Jet container. Exiting." );
-  //return StatusCode::FAILURE;
-  //}
-  std::cout<<"6"<<std::endl;
   ANA_MSG_INFO ("execute(): number of truth particles = " << truthParts->size());
-  std::cout<<"7"<<std::endl;
 
   // get truth particle container of interest
   const xAOD::TrackParticleContainer* trackParts = 0;
-  std::cout<<"8"<<std::endl;
   ANA_CHECK (evtStore()->retrieve( trackParts, "InDetTrackParticles"));
-  std::cout<<"9"<<std::endl;
   ANA_MSG_INFO ("execute(): number of track particles = " << trackParts->size());
-
-  std::cout<<"clearing"<<std::endl;
 
   m_truthEta->clear();
   m_truthPhi->clear();
@@ -103,60 +82,46 @@ StatusCode BasicPerf :: execute ()
   m_truthE->clear();
   m_truthQoverP->clear();
   m_truthPDGID->clear();
-
   m_trackPt->clear();
 
   int particle_is_reconstructed;
-
-  std::cout<<"about to start truth loop"<<std::endl;
 
   // loop over the particles in the container
   for (const xAOD::TruthParticle *part : *truthParts) {
 
     particle_is_reconstructed = 0;
 
-    if( part->auxdata<int>("status") == 1 && part->auxdata<int>("barcode") < 200000 && std::abs(part->charge()) > 0){
-      std::cout<<part->auxdata<int>("pdgId")<<" "<<part->charge()<<std::endl;
-      m_truthEta->push_back (part->eta ());
-      m_truthPhi->push_back (part->phi ());
-      m_truthPt-> push_back (part->pt ());
-      m_truthE->  push_back (part->e ());
-      //if(part->isAvailable< auxdata<float> >("qOverP")){
-      //m_truthQoverP->push_back (part->auxdata<float>("qOverP")) ;
-      //}
-      m_truthPDGID->push_back (part->auxdata<int>("pdgId"));
-      //if(1./part->auxdata<float>("qOverP") > 1){
-      //std::cout<<1./part->auxdata<float>("qOverP")<<std::endl;
-      //}
+    //select fiducial truth particles
+    if (part->auxdata<int>("status") != 1) continue;
+    if (part->auxdata<int>("barcode") > 200000) continue;
+    if (part->charge() == 0) continue;
 
-      std::cout<<"truth barcode "<<part->barcode()<<std::endl;
-      
-      /*
-      ElementLink< xAOD::TruthParticleContainer > truthLink;
-      for (const xAOD::TrackParticle *trpart : *trackParts) {
-      	//ElementLink< xAOD::TruthParticleContainer > truthLink;
-	if ((trpart)->isAvailable< ElementLink< xAOD::TruthParticleContainer > > ("truthParticleLink")){
-	  //std::cout<<"it's available"<<std::endl;
-	  truthLink = (trpart)->auxdata< ElementLink< xAOD::TruthParticleContainer>  >("truthParticleLink");
-	  if(truthLink.isValid()){
-	    std::cout<<(*truthLink)->barcode()<<std::endl;
-	    ////if( truthLink ){
-	    ////particle_is_reconstructed = 1;
-	    ////}
-	  }
+    //store basic kinematic and particle info
+    m_truthEta->push_back (part->eta ());
+    m_truthPhi->push_back (part->phi ());
+    m_truthPt-> push_back (part->pt ());
+    m_truthE->  push_back (part->e ());
+    m_truthPDGID->push_back (part->auxdata<int>("pdgId"));
+
+    //retrieve reco track matched to this particle (first one considered, TODO: improve!)
+    ElementLink< xAOD::TruthParticleContainer > truthLink;
+    for (const xAOD::TrackParticle *trpart : *trackParts) {
+      float probMatch = trpart->auxdataConst<float>("truthMatchProbability");
+      ANA_MSG_DEBUG("Truth particle with match prob=" << probMatch);
+      if (probMatch < 0.5) continue; //not a good match
+      ANA_MSG_DEBUG( "Truth matched particle. Finding truth link, if it exists." );
+      if ((trpart)->isAvailable< ElementLink< xAOD::TruthParticleContainer > > ("truthParticleLink")){
+	truthLink = (trpart)->auxdata< ElementLink< xAOD::TruthParticleContainer>  >("truthParticleLink");
+	if(truthLink.isValid()){
+	  ANA_MSG_DEBUG( "Matching particle found. Barcode: " << (*truthLink)->barcode() );
+	  particle_is_reconstructed = 1;
 	}
       }
-*/      
-
-      //p_Reco_eff_vs_track_pt->Fill(part->pt()/1000., particle_is_reconstructed);
-      hist("Reco_eff_vs_track_pt")->Fill(part->pt()/1000., particle_is_reconstructed);
-
     }
 
-    //ANA_MSG_INFO ("execute(): jet pt = " << (jet->pt() * 0.001) << " GeV"); // just to print out something
-  } // end for loop over truth particles
+    hist("Reco_eff_vs_track_pt")->Fill(part->pt()/1000., particle_is_reconstructed);
 
-  std::cout<<"end of truth part loop"<<std::endl;
+  } // end for loop over truth particles
 
   for (const xAOD::TrackParticle *track_part : *trackParts) {
 
@@ -164,12 +129,8 @@ StatusCode BasicPerf :: execute ()
 
   } // end for loop over track particles
 
-  std::cout<<"end of track part loop"<<std::endl;
-
   // Fill the event into the tree:
   tree ("analysis")->Fill ();
-
-  std::cout<<"filled tree"<<std::endl;
 
   return StatusCode::SUCCESS;
 }
