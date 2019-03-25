@@ -45,13 +45,14 @@ StatusCode BasicPerf :: initialize ()
   mytree->Branch ("TruthQoverP", &m_truthQoverP);
   m_truthPDGID = new std::vector<int>();
   mytree->Branch ("TruthPDGID", &m_truthPDGID);
+  m_truthReco = new std::vector<char>();
+  mytree->Branch ("TruthReco", &m_truthReco);
 
 
   m_trackPt = new std::vector<float>();
   mytree->Branch ("TrackPt", &m_trackPt);
 
-  ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt", "Reco_eff_vs_track_pt", 100, 0, 1000) ));
-  //p_Reco_eff_vs_track_pt = new TProfile("Reco_eff_vs_track_pt", "", 100, 0, 1000);
+  ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt", "Reco_eff_vs_track_pt", 200, 0, 10) ));
 
   return StatusCode::SUCCESS;
 }
@@ -69,12 +70,12 @@ StatusCode BasicPerf :: execute ()
   // get truth particle container of interest
   const xAOD::TruthParticleContainer* truthParts = 0;
   ANA_CHECK (evtStore()->retrieve( truthParts, "TruthParticles"));
-  ANA_MSG_INFO ("execute(): number of truth particles = " << truthParts->size());
+  ANA_MSG_DEBUG ("execute(): number of truth particles = " << truthParts->size());
 
   // get truth particle container of interest
   const xAOD::TrackParticleContainer* trackParts = 0;
   ANA_CHECK (evtStore()->retrieve( trackParts, "InDetTrackParticles"));
-  ANA_MSG_INFO ("execute(): number of track particles = " << trackParts->size());
+  ANA_MSG_DEBUG ("execute(): number of track particles = " << trackParts->size());
 
   m_truthEta->clear();
   m_truthPhi->clear();
@@ -84,7 +85,7 @@ StatusCode BasicPerf :: execute ()
   m_truthPDGID->clear();
   m_trackPt->clear();
 
-  int particle_is_reconstructed;
+  char particle_is_reconstructed;
 
   // loop over the particles in the container
   for (const xAOD::TruthParticle *part : *truthParts) {
@@ -92,9 +93,11 @@ StatusCode BasicPerf :: execute ()
     particle_is_reconstructed = 0;
 
     //select fiducial truth particles
+    if (part->pt() < 100.0) continue;
+    if (part->abseta() > 2.5 ) continue;
+    if (part->charge() == 0) continue;
     if (part->auxdata<int>("status") != 1) continue;
     if (part->auxdata<int>("barcode") > 200000) continue;
-    if (part->charge() == 0) continue;
 
     //store basic kinematic and particle info
     m_truthEta->push_back (part->eta ());
@@ -107,19 +110,20 @@ StatusCode BasicPerf :: execute ()
     ElementLink< xAOD::TruthParticleContainer > truthLink;
     for (const xAOD::TrackParticle *trpart : *trackParts) {
       float probMatch = trpart->auxdataConst<float>("truthMatchProbability");
-      ANA_MSG_DEBUG("Truth particle with match prob=" << probMatch);
+      ANA_MSG_VERBOSE("Track particle with match prob=" << probMatch);
       if (probMatch < 0.5) continue; //not a good match
-      ANA_MSG_DEBUG( "Truth matched particle. Finding truth link, if it exists." );
+      ANA_MSG_VERBOSE( "Truth matched particle. Finding truth link, if it exists." );
       if ((trpart)->isAvailable< ElementLink< xAOD::TruthParticleContainer > > ("truthParticleLink")){
 	truthLink = (trpart)->auxdata< ElementLink< xAOD::TruthParticleContainer>  >("truthParticleLink");
 	if(truthLink.isValid()){
-	  ANA_MSG_DEBUG( "Matching particle found. Barcode: " << (*truthLink)->barcode() );
+	  ANA_MSG_VERBOSE( "Matching particle found. Barcode: " << (*truthLink)->barcode() );
 	  particle_is_reconstructed = 1;
 	}
       }
     }
 
     hist("Reco_eff_vs_track_pt")->Fill(part->pt()/1000., particle_is_reconstructed);
+    m_truthReco->push_back(particle_is_reconstructed);
 
   } // end for loop over truth particles
 

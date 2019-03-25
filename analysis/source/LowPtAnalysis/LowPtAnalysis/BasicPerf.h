@@ -39,6 +39,7 @@ private:
   std::vector<float> *m_truthE = nullptr;
   std::vector<float> *m_truthQoverP = nullptr;
   std::vector<int> *m_truthPDGID = nullptr;
+  std::vector<char> *m_truthReco = nullptr;
 
 
   std::vector<float> *m_trackPt = nullptr;
