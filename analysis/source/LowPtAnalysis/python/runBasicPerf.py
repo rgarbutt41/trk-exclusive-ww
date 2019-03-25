@@ -11,8 +11,8 @@ parser.add_option( '-i', '--input-dir', dest = 'input_dir',
                    action = 'store', type = 'string', default = '/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/trk-exclusive-ww-athena/run/Mar19_arraytest_1',
                    help = 'Input directory with xAOD files' )
 parser.add_option('-d', '--debug', dest = 'debug',
-                  action = 'store_true', default=False,
-                  help = "Enable DEBUG printout")
+                  action = 'store', type='int', default=0,
+                  help = "Enable DEBUG printout: 0=INFO, 1=DEBUG, 2=VERBOSE")
 ( options, args ) = parser.parse_args()
 
 # Set up (Py)ROOT.
@@ -41,8 +41,10 @@ from AnaAlgorithm.DualUseConfig import createAlgorithm
 alg = createAlgorithm ( 'BasicPerf', 'AnalysisAlg')
 
 # later on we'll add some configuration options for our algorithm that go here
-if (options.debug):
+if (options.debug == 1):    
     alg.OutputLevel = ROOT.MSG.DEBUG
+elif (options.debug == 2):    
+    alg.OutputLevel = ROOT.MSG.VERBOSE
 
 # Add our algorithm to the job
 job.algsAdd( alg )

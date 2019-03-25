@@ -110,14 +110,16 @@ StatusCode BasicPerf :: execute ()
     ElementLink< xAOD::TruthParticleContainer > truthLink;
     for (const xAOD::TrackParticle *trpart : *trackParts) {
       float probMatch = trpart->auxdataConst<float>("truthMatchProbability");
-      ANA_MSG_VERBOSE("Track particle with match prob=" << probMatch);
       if (probMatch < 0.5) continue; //not a good match
-      ANA_MSG_VERBOSE( "Truth matched particle. Finding truth link, if it exists." );
       if ((trpart)->isAvailable< ElementLink< xAOD::TruthParticleContainer > > ("truthParticleLink")){
 	truthLink = (trpart)->auxdata< ElementLink< xAOD::TruthParticleContainer>  >("truthParticleLink");
 	if(truthLink.isValid()){
-	  ANA_MSG_VERBOSE( "Matching particle found. Barcode: " << (*truthLink)->barcode() );
-	  particle_is_reconstructed = 1;
+	  if ( (*truthLink) == part ) {
+	    ANA_MSG_VERBOSE( "Matching particle found. Barcode: " << (*truthLink)->barcode() << ", reco,truth pT (MeV) = " <<  trpart->pt() << ", " << (*truthLink)->pt());
+	    particle_is_reconstructed = 1;
+	  }
+	} else {
+	  //ANA_MSG_VERBOSE( "Matching track with no truth information found." );
 	}
       }
     }
