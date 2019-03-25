@@ -19,10 +19,11 @@ import os
 sh = ROOT.SH.SampleHandler()
 sh.setMetaString( 'nc_tree', 'CollectionTree' )
 #inputFilePath = os.getenv( 'ALRB_TutorialData' ) + '/r9315/'
-inputFilePath = '/global/projecta/projectdirs/atlas/spgriso/code/trk-exclusive-ww-3/run'
+#inputFilePath = '/global/projecta/projectdirs/atlas/spgriso/code/trk-exclusive-ww-3/run'
+inputFilePath = '/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/trk-exclusive-ww-athena/run/Mar19_arraytest_1'
 print inputFilePath
 #ROOT.SH.ScanDir().filePattern( 'AOD.11182705._000001.pool.root.1' ).scan( sh, inputFilePath )
-ROOT.SH.ScanDir().filePattern( 'AOD.pool.root' ).scan( sh, inputFilePath )
+ROOT.SH.ScanDir().filePattern( 'AOD.3.pool.root' ).scan( sh, inputFilePath )
 sh.printContent()
 
 # Create an EventLoop job.

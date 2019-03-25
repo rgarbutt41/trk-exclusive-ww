@@ -4,6 +4,8 @@
 #include <AnaAlgorithm/AnaAlgorithm.h>
 
 #include <TTree.h>
+#include <TH1.h>
+#include <TProfile.h>
 #include <vector>
 
 class BasicPerf : public EL::AnaAlgorithm
@@ -39,6 +41,9 @@ private:
   std::vector<int> *m_truthPDGID = nullptr;
 
 
+  std::vector<float> *m_trackPt = nullptr;
+
+  TProfile* p_Reco_eff_vs_track_pt; //!
 
 };
 
