@@ -33,16 +33,18 @@ private:
   unsigned long long m_eventNumber = 0; ///< Event number
   /// Jet 4-momentum variables
 
+  //Truth particles
   std::vector<float> *m_truthEta = nullptr;
   std::vector<float> *m_truthPhi = nullptr;
   std::vector<float> *m_truthPt = nullptr;
   std::vector<float> *m_truthE = nullptr;
   std::vector<float> *m_truthQoverP = nullptr;
   std::vector<int> *m_truthPDGID = nullptr;
-  std::vector<char> *m_truthReco = nullptr;
+  std::vector<int> *m_truthRecoIndex = nullptr;
 
-
+  //Reconstructed particles
   std::vector<float> *m_trackPt = nullptr;
+  std::vector<int> *m_trackTruthIndex = nullptr;
 
   TProfile* p_Reco_eff_vs_track_pt; //!
 

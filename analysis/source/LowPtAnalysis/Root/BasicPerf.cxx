@@ -31,8 +31,12 @@ StatusCode BasicPerf :: initialize ()
 
   ANA_CHECK (book (TTree ("analysis", "My analysis ntuple")));
   TTree* mytree = tree ("analysis");
+
+  //Event-level
   mytree->Branch ("RunNumber", &m_runNumber);
   mytree->Branch ("EventNumber", &m_eventNumber);
+
+  //Truth particles
   m_truthEta = new std::vector<float>();
   mytree->Branch ("TruthEta", &m_truthEta);
   m_truthPhi = new std::vector<float>();
@@ -45,12 +49,14 @@ StatusCode BasicPerf :: initialize ()
   mytree->Branch ("TruthQoverP", &m_truthQoverP);
   m_truthPDGID = new std::vector<int>();
   mytree->Branch ("TruthPDGID", &m_truthPDGID);
-  m_truthReco = new std::vector<char>();
-  mytree->Branch ("TruthReco", &m_truthReco);
+  m_truthRecoIndex = new std::vector<int>();
+  mytree->Branch ("TruthRecoIndex", &m_truthRecoIndex);
 
-
+  //Reco tracks
   m_trackPt = new std::vector<float>();
   mytree->Branch ("TrackPt", &m_trackPt);
+  m_trackTruthIndex = new std::vector<int>();
+  mytree->Branch ("TrackTruthIndex", &m_trackTruthIndex);
 
   ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt", "Reco_eff_vs_track_pt", 200, 0, 10) ));
 
@@ -83,14 +89,12 @@ StatusCode BasicPerf :: execute ()
   m_truthE->clear();
   m_truthQoverP->clear();
   m_truthPDGID->clear();
+  m_truthRecoIndex->clear();
   m_trackPt->clear();
-
-  char particle_is_reconstructed;
-
+  m_trackTruthIndex->clear();
+  
   // loop over the particles in the container
-  for (const xAOD::TruthParticle *part : *truthParts) {
-
-    particle_is_reconstructed = 0;
+  for (const xAOD::TruthParticle *part : *truthParts) {    
 
     //select fiducial truth particles
     if (part->pt() < 100.0) continue;
@@ -108,30 +112,49 @@ StatusCode BasicPerf :: execute ()
 
     //retrieve reco track matched to this particle (first one considered, TODO: improve!)
     ElementLink< xAOD::TruthParticleContainer > truthLink;
+    int recoTrackIndex=-1;
+    int trackIndex=-1;
     for (const xAOD::TrackParticle *trpart : *trackParts) {
+      trackIndex++;
       float probMatch = trpart->auxdataConst<float>("truthMatchProbability");
       if (probMatch < 0.5) continue; //not a good match
       if ((trpart)->isAvailable< ElementLink< xAOD::TruthParticleContainer > > ("truthParticleLink")){
 	truthLink = (trpart)->auxdata< ElementLink< xAOD::TruthParticleContainer>  >("truthParticleLink");
-	if(truthLink.isValid()){
+	if(truthLink.isValid()) {
 	  if ( (*truthLink) == part ) {
 	    ANA_MSG_VERBOSE( "Matching particle found. Barcode: " << (*truthLink)->barcode() << ", reco,truth pT (MeV) = " <<  trpart->pt() << ", " << (*truthLink)->pt());
-	    particle_is_reconstructed = 1;
+	    recoTrackIndex = trackIndex;
 	  }
-	} else {
-	  //ANA_MSG_VERBOSE( "Matching track with no truth information found." );
 	}
       }
     }
 
-    hist("Reco_eff_vs_track_pt")->Fill(part->pt()/1000., particle_is_reconstructed);
-    m_truthReco->push_back(particle_is_reconstructed);
+    m_truthRecoIndex->push_back(recoTrackIndex);
+    hist("Reco_eff_vs_track_pt")->Fill(part->pt()/1000., recoTrackIndex >=0 ? 1.0 : 0.0);
 
   } // end for loop over truth particles
 
-  for (const xAOD::TrackParticle *track_part : *trackParts) {
 
+  int truthMatchIndex=-2; //-2 = not matched; -1 = matched, no particle found; >=0 link to position in truth particle branches  
+  for (const xAOD::TrackParticle *track_part : *trackParts) {
     m_trackPt-> push_back (track_part->pt ());
+
+    //check truth link    
+    float probMatch = track_part->auxdataConst<float>("truthMatchProbability");
+    if (probMatch >= 0.5) {
+      truthMatchIndex=-1;
+      if ((track_part)->isAvailable< ElementLink< xAOD::TruthParticleContainer > > ("truthParticleLink")){
+	ElementLink< xAOD::TruthParticleContainer > truthLink = (track_part)->auxdata< ElementLink< xAOD::TruthParticleContainer>  >("truthParticleLink");
+	if(truthLink.isValid()) {
+	  //Find index of stored truth particle
+	  //for (truthP: m_truthParticles) //...	
+	  truthMatchIndex = 0; //for now just put 0 always, to flag it's matched with a link. @TODO: fix with proper indexing if needed
+	} else {
+	  ANA_MSG_VERBOSE( "Matching track with no truth information found." );
+	}      
+      } //check truth link
+    } //truth-matched track
+    m_trackTruthIndex->push_back(truthMatchIndex);
 
   } // end for loop over track particles
 
