@@ -59,6 +59,8 @@ StatusCode BasicPerf :: initialize ()
   mytree->Branch ("TrackTruthIndex", &m_trackTruthIndex);
 
   ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt", "Reco_eff_vs_track_pt", 200, 0, 10) ));
+  ANA_CHECK (book ( TH2F ("TruthRecoIndex_and_TruthPt", "TruthRecoIndex_and_TruthPt", 50, -10, 90, 40, 0, 2000) ) );
+  ANA_CHECK (book ( TH1F("num_matched_truth_particles_vs_truth_pt","num_matched_truth_particles_vs_truth_pt",40, 0, 2000) ) );
 
   return StatusCode::SUCCESS;
 }
@@ -92,7 +94,10 @@ StatusCode BasicPerf :: execute ()
   m_truthRecoIndex->clear();
   m_trackPt->clear();
   m_trackTruthIndex->clear();
-  
+
+
+  std::vector< const xAOD::TruthParticle* > vec_of_truth_pointers;
+
   // loop over the particles in the container
   for (const xAOD::TruthParticle *part : *truthParts) {    
 
@@ -109,6 +114,8 @@ StatusCode BasicPerf :: execute ()
     m_truthPt-> push_back (part->pt ());
     m_truthE->  push_back (part->e ());
     m_truthPDGID->push_back (part->auxdata<int>("pdgId"));
+
+    vec_of_truth_pointers.push_back( (part) );
 
     //retrieve reco track matched to this particle (first one considered, TODO: improve!)
     ElementLink< xAOD::TruthParticleContainer > truthLink;
@@ -132,6 +139,8 @@ StatusCode BasicPerf :: execute ()
     m_truthRecoIndex->push_back(recoTrackIndex);
     hist("Reco_eff_vs_track_pt")->Fill(part->pt()/1000., recoTrackIndex >=0 ? 1.0 : 0.0);
 
+    hist("TruthRecoIndex_and_TruthPt")->Fill(recoTrackIndex, part->pt());
+
   } // end for loop over truth particles
 
 
@@ -149,6 +158,12 @@ StatusCode BasicPerf :: execute ()
 	  //Find index of stored truth particle
 	  //for (truthP: m_truthParticles) //...	
 	  truthMatchIndex = 0; //for now just put 0 always, to flag it's matched with a link. @TODO: fix with proper indexing if needed
+	  std::vector<const xAOD::TruthParticle*>::iterator partitr;
+	  for(partitr = vec_of_truth_pointers.begin(); partitr < vec_of_truth_pointers.end(); partitr++){
+	    if((*truthLink) == (*partitr)){
+	      hist("num_matched_truth_particles_vs_truth_pt")->Fill( (*partitr)->pt());
+	    }
+	  }
 	} else {
 	  ANA_MSG_VERBOSE( "Matching track with no truth information found." );
 	}      
