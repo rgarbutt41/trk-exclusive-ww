@@ -46,8 +46,8 @@ private:
   //Reconstructed particles
   std::vector<float> *m_trackPt = nullptr;
   std::vector<int> *m_trackTruthIndex = nullptr;
+  std::vector<float> *m_TruthMatchProb = nullptr;
 
-  TProfile* p_Reco_eff_vs_track_pt; //!
 
 };
 

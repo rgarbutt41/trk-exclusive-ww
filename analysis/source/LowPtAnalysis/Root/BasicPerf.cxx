@@ -57,10 +57,14 @@ StatusCode BasicPerf :: initialize ()
   mytree->Branch ("TrackPt", &m_trackPt);
   m_trackTruthIndex = new std::vector<int>();
   mytree->Branch ("TrackTruthIndex", &m_trackTruthIndex);
+  m_TruthMatchProb = new std::vector<float>();
+  mytree->Branch ("TruthMatchProb", &m_TruthMatchProb);
 
   ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt", "Reco_eff_vs_track_pt", 200, 0, 10) ));
   ANA_CHECK (book ( TH2F ("TruthRecoIndex_and_TruthPt", "TruthRecoIndex_and_TruthPt", 50, -10, 90, 40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("num_matched_truth_particles_vs_truth_pt","num_matched_truth_particles_vs_truth_pt",40, 0, 2000) ) );
+  ANA_CHECK (book ( TH1F("num_matched_track_particles_vs_track_pt","num_matched_track_particles_vs_track_pt",40, 0, 2000) ) );
+  ANA_CHECK (book ( TH1F("num_unmatched_track_particles_vs_track_pt","num_unmatched_track_particles_vs_track_pt",40, 0, 2000) ) );
 
   return StatusCode::SUCCESS;
 }
@@ -94,7 +98,7 @@ StatusCode BasicPerf :: execute ()
   m_truthRecoIndex->clear();
   m_trackPt->clear();
   m_trackTruthIndex->clear();
-
+  m_TruthMatchProb->clear();
 
   std::vector< const xAOD::TruthParticle* > vec_of_truth_pointers;
 
@@ -150,6 +154,7 @@ StatusCode BasicPerf :: execute ()
 
     //check truth link    
     float probMatch = track_part->auxdataConst<float>("truthMatchProbability");
+    m_TruthMatchProb->push_back(probMatch);
     if (probMatch >= 0.5) {
       truthMatchIndex=-1;
       if ((track_part)->isAvailable< ElementLink< xAOD::TruthParticleContainer > > ("truthParticleLink")){
@@ -162,6 +167,7 @@ StatusCode BasicPerf :: execute ()
 	  for(partitr = vec_of_truth_pointers.begin(); partitr < vec_of_truth_pointers.end(); partitr++){
 	    if((*truthLink) == (*partitr)){
 	      hist("num_matched_truth_particles_vs_truth_pt")->Fill( (*partitr)->pt());
+	      hist("num_matched_track_particles_vs_track_pt")->Fill( track_part->pt());
 	    }
 	  }
 	} else {
@@ -169,7 +175,12 @@ StatusCode BasicPerf :: execute ()
 	}      
       } //check truth link
     } //truth-matched track
+    else{
+      hist("num_unmatched_track_particles_vs_track_pt")->Fill( track_part->pt());
+    } //unmatched track
     m_trackTruthIndex->push_back(truthMatchIndex);
+
+
 
   } // end for loop over track particles
 
@@ -202,6 +213,9 @@ BasicPerf :: ~BasicPerf () {
   delete m_truthE;
   delete m_truthQoverP;
   delete m_truthPDGID;
+  delete m_truthRecoIndex;
 
   delete m_trackPt;
+  delete m_TruthMatchProb;
+  delete m_trackTruthIndex;
 }

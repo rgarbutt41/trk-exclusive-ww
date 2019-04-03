@@ -1,0 +1,11 @@
+#!/bin/bash
+#SBATCH --output=slurm-%j.out
+#SBATCH --error=slurm-%j.err
+#SBATCH --account=atlas
+#SBATCH --qos=shared
+#SBATCH --tasks-per-node=1
+#SBATCH --constraint=haswell
+#SBATCH --time=12:30:00
+##SBATCH --mem=10000
+#SBATCH --image=custom:pdsf-sl64:v4 --export=NONE
+shifter --module=cvmfs /bin/bash coriBatchShell_ExclusiveRDOs_INCL_reco_test.sh
