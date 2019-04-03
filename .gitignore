@@ -1,6 +1,9 @@
-trk-exclusive-ww-athena
+trk-exclusive-ww
 *~
 analysis/build
 analysis/run
+low-pt-tracking/build
+low-pt-tracking/athena
+low-pt-tracking/run
 *slurm*
 #*#
