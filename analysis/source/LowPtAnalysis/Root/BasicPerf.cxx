@@ -66,8 +66,11 @@ StatusCode BasicPerf :: initialize ()
   ANA_CHECK (book ( TH1F("num_matched_track_particles_vs_track_pt","num_matched_track_particles_vs_track_pt",40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("num_unmatched_track_particles_vs_track_pt","num_unmatched_track_particles_vs_track_pt",40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("num_unmatched_truth_particles_vs_truth_pt","num_unmatched_truth_particles_vs_truth_pt",40, 0, 2000) ) );
-  ANA_CHECK (book ( TH1F("num_reco_tracks_vs_actualints","num_reco_tracks_vs_actualints",100, 0, 100) ) );
-  ANA_CHECK (book ( TH1F("num_reco_tracks_vs_avgints","num_reco_tracks_vs_avgints",100, 0, 100) ) );
+  //ANA_CHECK (book ( TH1F("num_reco_tracks_vs_actualints","num_reco_tracks_vs_actualints",100, 0, 100) ) );
+  //ANA_CHECK (book ( TH1F("num_reco_tracks_vs_avgints","num_reco_tracks_vs_avgints",100, 0, 100) ) );
+  ANA_CHECK (book ( TProfile("num_reco_tracks_vs_actualints","num_reco_tracks_vs_actualints",100, 0, 100) ) );
+  ANA_CHECK (book ( TProfile("num_reco_tracks_vs_avgints","num_reco_tracks_vs_avgints",100, 0, 100) ) ); 
+  ANA_CHECK (book ( TProfile("num_reco_tracks_vs_num_truth_parts","num_reco_tracks_vs_num_truth_parts",50, 0, 5000) ) );
 
   return StatusCode::SUCCESS;
 }
@@ -89,6 +92,10 @@ StatusCode BasicPerf :: execute ()
   const xAOD::TrackParticleContainer* trackParts = 0;
   ANA_CHECK (evtStore()->retrieve( trackParts, "InDetTrackParticles"));
   ANA_MSG_DEBUG ("execute(): number of track particles = " << trackParts->size());
+
+  hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing(), trackParts->size() );
+  hist("num_reco_tracks_vs_actualints")->Fill(ei->averageInteractionsPerCrossing(), trackParts->size() );
+  hist("num_reco_tracks_vs_num_truth_parts")->Fill(truthParts->size(), trackParts->size() );
 
   m_truthEta->clear();
   m_truthPhi->clear();
@@ -155,8 +162,8 @@ StatusCode BasicPerf :: execute ()
   for (const xAOD::TrackParticle *track_part : *trackParts) {
     m_trackPt-> push_back (track_part->pt ());
 
-    hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing());
-    hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing());
+    //hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing());
+    //hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing());
 
     //check truth link    
     float probMatch = track_part->auxdataConst<float>("truthMatchProbability");
