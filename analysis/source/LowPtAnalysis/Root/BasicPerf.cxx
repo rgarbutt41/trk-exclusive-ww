@@ -65,11 +65,12 @@ StatusCode BasicPerf :: initialize ()
   ANA_CHECK (book ( TH1F("num_matched_truth_particles_vs_truth_pt","num_matched_truth_particles_vs_truth_pt",40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("num_matched_track_particles_vs_track_pt","num_matched_track_particles_vs_track_pt",40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("num_unmatched_track_particles_vs_track_pt","num_unmatched_track_particles_vs_track_pt",40, 0, 2000) ) );
+  ANA_CHECK (book ( TH1F("num_unmatched_truth_particles_vs_truth_pt","num_unmatched_truth_particles_vs_truth_pt",40, 0, 2000) ) );
+  ANA_CHECK (book ( TH1F("num_reco_tracks_vs_actualints","num_reco_tracks_vs_actualints",100, 0, 100) ) );
+  ANA_CHECK (book ( TH1F("num_reco_tracks_vs_avgints","num_reco_tracks_vs_avgints",100, 0, 100) ) );
 
   return StatusCode::SUCCESS;
 }
-
-
 
 StatusCode BasicPerf :: execute ()
 {
@@ -148,9 +149,14 @@ StatusCode BasicPerf :: execute ()
   } // end for loop over truth particles
 
 
+  std::vector<int> vec_of_matched_truth_indices(vec_of_truth_pointers.size(), 0); //vector of 0s and 1s: one for each truth particle in the event.  If 0, the truth particle is unmatched; if 1, it is matched
+  
   int truthMatchIndex=-2; //-2 = not matched; -1 = matched, no particle found; >=0 link to position in truth particle branches  
   for (const xAOD::TrackParticle *track_part : *trackParts) {
     m_trackPt-> push_back (track_part->pt ());
+
+    hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing());
+    hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing());
 
     //check truth link    
     float probMatch = track_part->auxdataConst<float>("truthMatchProbability");
@@ -168,6 +174,7 @@ StatusCode BasicPerf :: execute ()
 	    if((*truthLink) == (*partitr)){
 	      hist("num_matched_truth_particles_vs_truth_pt")->Fill( (*partitr)->pt());
 	      hist("num_matched_track_particles_vs_track_pt")->Fill( track_part->pt());
+	      vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) = 1; //this partitr is matched!
 	    }
 	  }
 	} else {
@@ -180,9 +187,16 @@ StatusCode BasicPerf :: execute ()
     } //unmatched track
     m_trackTruthIndex->push_back(truthMatchIndex);
 
-
-
   } // end for loop over track particles
+
+
+  std::vector<const xAOD::TruthParticle*>::iterator partitr;
+  for(partitr = vec_of_truth_pointers.begin(); partitr < vec_of_truth_pointers.end(); partitr++){
+    if( vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) == 0 ){ //this truth particle is unmatched
+      hist("num_unmatched_truth_particles_vs_truth_pt")->Fill( (*partitr)->pt());
+    }
+  }
+  
 
   // Fill the event into the tree:
   tree ("analysis")->Fill ();
