@@ -134,16 +134,19 @@ StatusCode TruthAnalysis :: execute ()
   // and select fiducial leptons and tracks
   for (const xAOD::TruthParticle *part : *truthParts) {    
     //select fiducial truth particles
+    ANA_MSG_VERBOSE ("Particle PDG " << part->auxdata<int>("pdgId") << ", pT=" << part->pt() << ", eta=" << part->eta() << ", charge=" << part->charge() << ", status=" << part->auxdata<int>("status") << ", barcode=" << part->auxdata<int>("barcode"));
     if (part->pt() < std::min(tracks_min_pt,lep2_min_pt)) continue;
     if (part->abseta() > std::max(tracks_max_eta,lep_max_eta)) continue;
     if (part->charge() == 0) continue;
     if (part->auxdata<int>("status") != 1) continue;
     if (part->auxdata<int>("barcode") > 200000) continue;
+    ANA_MSG_VERBOSE("Pass pre-fiducial cuts");
 
     int pdgid = part->auxdata<int>("pdgId");
     if ( (abs(pdgid) == 11) or (abs(pdgid)==13) ) {
       if ((part->pt() > lep2_min_pt) and
 	  (part->abseta() < lep_max_eta) ) {      
+	ANA_MSG_VERBOSE ("Store as lepton");
 	m_lep_pt->push_back(part->pt());
 	m_lep_eta->push_back(part->eta());
 	m_lep_phi->push_back(part->phi());
@@ -155,7 +158,8 @@ StatusCode TruthAnalysis :: execute ()
 
     if (part->pt() < tracks_min_pt) continue;
     if (part->abseta() > tracks_max_eta) continue;
-
+    ANA_MSG_VERBOSE("Store as track");
+    
     //apply parametrized tracking efficiency, if requested
     //TODO..
 
@@ -169,15 +173,19 @@ StatusCode TruthAnalysis :: execute ()
   } // end for loop over truth particles
 
   // Now evaluate event-level selections  
+  ANA_MSG_VERBOSE("Checking event selections");
+  ANA_MSG_DEBUG("NLep = " << m_lep_pt->size() << ", NTracks = " << m_trk_pt->size());
   hist("num_fiducial_leptons")->Fill(m_lep_pt->size());
   if (m_lep_pt->size() != 2) {saveTree(); return StatusCode::SUCCESS;}
   if (m_lep_charge->at(0)*m_lep_charge->at(1) != -1) {saveTree(); return StatusCode::SUCCESS;}
   if (abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_lep_ocof);
+  ANA_MSG_VERBOSE("Pass cut_lep_ocof");
 
   if (std::min(m_lep_pt->at(0), m_lep_pt->at(1)) < lep2_min_pt) {saveTree(); return StatusCode::SUCCESS;}
   if (std::max(m_lep_pt->at(0), m_lep_pt->at(1)) < lep1_min_pt) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_lep_minpt);
+  ANA_MSG_VERBOSE("Pass cut_lep_minpt");
 
   TLorentzVector lep1, lep2;
   int index_lep1=0;
@@ -194,14 +202,18 @@ StatusCode TruthAnalysis :: execute ()
   hist("dilep_m")->Fill(m_dilep_m);
   if (m_dilep_m < dilep_min_mass) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_m_ll);
+  ANA_MSG_VERBOSE("Pass cut_m_ll");
+
 
   hist("dilep_pt")->Fill(m_dilep_pt);
   if (m_dilep_pt < dilep_min_pt) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_pt_ll);
+  ANA_MSG_VERBOSE("Pass cut_pt_ll");
 
   hist("num_fiducial_tracks")->Fill(m_trk_pt->size());
   if (m_trk_pt->size() > tracks_max_n) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_exclusive);
+  ANA_MSG_VERBOSE("Pass cut_exclusive");
 
   //Plots after all selections
   hist("sr_dilep_pt")->Fill(m_dilep_pt);

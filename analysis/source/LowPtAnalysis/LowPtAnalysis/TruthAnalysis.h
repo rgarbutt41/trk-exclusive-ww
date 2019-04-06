@@ -36,7 +36,7 @@ public:
   };
 
   const float MeV=1.0; //default units: MeV
-  const float GeV=10e3*MeV; 
+  const float GeV=1e3*MeV; 
 
 private:
   // selections
