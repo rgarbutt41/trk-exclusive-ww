@@ -5,5 +5,6 @@
 // dictionaries for.
 
 #include <LowPtAnalysis/BasicPerf.h>
+#include <LowPtAnalysis/TruthAnalysis.h>
 
 #endif
