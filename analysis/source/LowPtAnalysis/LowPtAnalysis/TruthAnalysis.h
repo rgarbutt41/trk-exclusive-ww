@@ -3,9 +3,11 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 
+#include <vector>
+
 #include <TTree.h>
 #include <TH1F.h>
-#include <vector>
+#include <TRandom3.h>
 
 
 /**
@@ -50,6 +52,7 @@ private:
   float tracks_max_n;
   std::string input_trk_eff_file;
   bool filter_by_selections;
+  unsigned int random_seed;
 
   // efficiency
   TH1F *h_trk_eff_pt;
@@ -79,6 +82,9 @@ private:
   void saveTree();
   //Helper for cutflow
   void passCut(int cut);
+
+  //iternal random generator
+  TRandom3 *m_rnd;
 
 };
 

@@ -52,7 +52,7 @@ elif (options.debug == 2):
 
 # Tweak settings, if necessary
 #alg.setProperty("input_trk_eff_file", "/global/homes/s/spgriso/code/AtlasExclWW/tracking/trk-exclusive-ww/analysis/data/trk_eff_pt.root")
-#alg.input_trk_eff_file = "/global/homes/s/spgriso/code/AtlasExclWW/tracking/trk-exclusive-ww/analysis/data/trk_eff_pt.root"
+alg.input_trk_eff_file = "/global/homes/s/spgriso/code/AtlasExclWW/tracking/trk-exclusive-ww/analysis/data/trk_eff_pt.root"
 
 # Add our algorithm to the job
 job.algsAdd( alg )

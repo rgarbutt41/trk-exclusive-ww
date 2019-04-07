@@ -19,6 +19,26 @@ TruthAnalysis :: TruthAnalysis (const std::string& name,
   // declare all properties for your algorithm.  Note that things like
   // resetting statistics variables or booking histograms should
   // rather go into the initialize() function.
+
+  // Properties
+  declareProperty("lep1_min_pt", lep1_min_pt = 25*GeV);
+  declareProperty("lep2_min_pt", lep2_min_pt = 20*GeV);
+  declareProperty("lep_max_eta", lep_max_eta = 2.5);
+  declareProperty("dilep_min_pt", dilep_min_pt = 30.0*GeV);
+  declareProperty("dilep_min_mass", dilep_min_mass = 20.0*GeV);
+  declareProperty("tracks_min_pt", tracks_min_pt = 400*MeV,
+		  "minimum reconstructible pT");
+  declareProperty("tracks_max_eta", tracks_max_eta = 2.5,
+		  "maximum reconstructible eta");
+  declareProperty("tracks_max_n", tracks_max_n = 0,
+		  "exclusivity selection");
+  declareProperty("input_trk_eff_file", input_trk_eff_file = "",
+		  "tracking efficiency input. if empty, use hard-coded numbers");
+  declareProperty("filter_by_selections", filter_by_selections = false,
+		  "if true, only events passing selections are stored in the output");
+  declareProperty("random_seed", random_seed=29873,
+		  "Random seed for tracking efficiency");
+
 }
 
 
@@ -32,17 +52,8 @@ StatusCode TruthAnalysis :: initialize ()
 
   ANA_MSG_INFO ("Initializing");
 
-  // Properties
-  declareProperty("lep1_min_pt", lep1_min_pt = 25*GeV);
-  declareProperty("lep2_min_pt", lep2_min_pt = 20*GeV);
-  declareProperty("lep_max_eta", lep_max_eta = 2.5);
-  declareProperty("dilep_min_pt", dilep_min_pt = 30.0*GeV);
-  declareProperty("dilep_min_mass", dilep_min_mass = 20.0*GeV);
-  declareProperty("tracks_min_pt", tracks_min_pt = 400*MeV); //minimum reconstructible pT
-  declareProperty("tracks_max_eta", tracks_max_eta = 2.5); //maximum reconstructible eta
-  declareProperty("tracks_max_n", tracks_max_n = 0); //exclusivity selection
-  declareProperty("input_trk_eff_file", input_trk_eff_file = ""); //if empty, use hard-coded numbers
-  declareProperty("filter_by_selections", filter_by_selections = false); //if true, only events passing selections are stored in the output
+  // Random generator
+  m_rnd = new TRandom3(random_seed);
 
   // Output tree/histograms
   ANA_CHECK (book (TTree ("analysis", "Truth analysis ntuple")));
@@ -86,24 +97,33 @@ StatusCode TruthAnalysis :: initialize ()
   ANA_CHECK (book ( TH1F ("sr_dilep_pt", "p_{T} (e#mu) after all selections (GeV);p_{T}(e#mu) [GeV];Events/5 GeV", 60, 0, 300.) ));
 
   h_trk_eff_pt = nullptr;
+  //retrieve tracking efficiency, if needed
+  if (not input_trk_eff_file.empty()) {
+    TFile *f_trk_eff = TFile::Open(input_trk_eff_file.c_str());
+    h_trk_eff_pt = dynamic_cast<TH1F*>(f_trk_eff->Get("h_trk_eff_pt"));
+    if (h_trk_eff_pt == nullptr) {
+      ANA_MSG_ERROR("Error loading tracking efficiency (h_trk_eff_pt) from:" << input_trk_eff_file);
+      return StatusCode::FAILURE;
+    }
+    ANA_MSG_INFO("Loaded tracking efficiency from " << input_trk_eff_file);
+  }
+
+  //print properties values
+  ANA_MSG_INFO("Properties values:");
+  ANA_MSG_INFO("lep1_min_pt = " << lep1_min_pt);
+  ANA_MSG_INFO("lep2_min_pt = " << lep2_min_pt);
+  ANA_MSG_INFO("lep_max_eta = " << lep_max_eta);
+  ANA_MSG_INFO("dilep_min_pt = " << dilep_min_pt);
+  ANA_MSG_INFO("tracks_min_pt = " << tracks_min_pt);
+  ANA_MSG_INFO("tracks_max_eta = " << tracks_max_eta);
+  ANA_MSG_INFO("filter_by_selections = " << filter_by_selections);
+  ANA_MSG_INFO("input_trk_eff_file = " << input_trk_eff_file);
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode TruthAnalysis :: execute ()
 {
-  //retrieve tracking efficiency, if needed
-  if (h_trk_eff_pt == nullptr) {
-    if (not input_trk_eff_file.empty()) {
-      TFile *f_trk_eff = TFile::Open(input_trk_eff_file.c_str());
-      h_trk_eff_pt = dynamic_cast<TH1F*>(f_trk_eff->Get("h_trk_eff_pt"));
-      if (h_trk_eff_pt == nullptr) {
-	ANA_MSG_ERROR("Error loading tracking efficiency (h_trk_eff_pt) from:" << input_trk_eff_file);
-	return StatusCode::FAILURE;
-      }
-    }
-  }
-
   //reset variables
   m_dilep_pt = -1.0;
   m_dilep_m = -1.0;
@@ -158,12 +178,24 @@ StatusCode TruthAnalysis :: execute ()
 
     if (part->pt() < tracks_min_pt) continue;
     if (part->abseta() > tracks_max_eta) continue;
-    ANA_MSG_VERBOSE("Store as track");
+    ANA_MSG_VERBOSE("Candidate track");
     
     //apply parametrized tracking efficiency, if requested
-    //TODO..
+    if (h_trk_eff_pt != nullptr) {
+      int ibin = h_trk_eff_pt->FindBin(part->pt());
+      float trk_eff = 0.0; //default if underflow
+      if (ibin > 0) {
+	//use last bin if overflow
+	if (ibin > h_trk_eff_pt->GetNbinsX())
+	  ibin = h_trk_eff_pt->GetNbinsX();
+	trk_eff = h_trk_eff_pt->GetBinContent(ibin);      
+      }    
+      if (m_rnd->Rndm() > trk_eff)
+	continue;
+    }
 
     //store basic kinematic and particle info
+    ANA_MSG_VERBOSE("Store track");
     m_trk_pt->push_back(part->pt());
     m_trk_eta->push_back(part->eta());
     m_trk_phi->push_back(part->phi());
