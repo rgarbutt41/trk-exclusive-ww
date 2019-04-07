@@ -37,6 +37,16 @@ public:
     ncuts
   };
 
+  const std::vector<std::string> cuts_labels = {
+    "All",
+    "Trigger",
+    "OCOF",
+    "lep_pT",
+    "m(ll)",
+    "pT(ll)",
+    "Excl."
+  };
+
   const float MeV=1.0; //default units: MeV
   const float GeV=1e3*MeV; 
 

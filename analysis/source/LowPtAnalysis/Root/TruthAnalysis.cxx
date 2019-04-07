@@ -96,8 +96,13 @@ StatusCode TruthAnalysis :: initialize ()
   ANA_CHECK (book ( TH1F ("num_fiducial_tracks", "Number of fiducial tracks", 50, 0, 50) ));
   ANA_CHECK (book ( TH1F ("sr_dilep_pt", "p_{T} (e#mu) after all selections (GeV);p_{T}(e#mu) [GeV];Events/5 GeV", 60, 0, 300.) ));
 
-  h_trk_eff_pt = nullptr;
+  //set bin labels for cutflow
+  for (int i=1; i<=ncuts;i++) {
+    hist("cutflow")->GetXaxis()->SetBinLabel(i, cuts_labels[i].c_str());
+  }
+
   //retrieve tracking efficiency, if needed
+  h_trk_eff_pt = nullptr;
   if (not input_trk_eff_file.empty()) {
     TFile *f_trk_eff = TFile::Open(input_trk_eff_file.c_str());
     h_trk_eff_pt = dynamic_cast<TH1F*>(f_trk_eff->Get("h_trk_eff_pt"));
@@ -231,13 +236,13 @@ StatusCode TruthAnalysis :: execute ()
   m_dilep_m = (lep1+lep2).M();
   m_dilep_pt = (lep1+lep2).Pt();
 
-  hist("dilep_m")->Fill(m_dilep_m);
+  hist("dilep_m")->Fill(m_dilep_m/GeV);
   if (m_dilep_m < dilep_min_mass) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_m_ll);
   ANA_MSG_VERBOSE("Pass cut_m_ll");
 
 
-  hist("dilep_pt")->Fill(m_dilep_pt);
+  hist("dilep_pt")->Fill(m_dilep_pt/GeV);
   if (m_dilep_pt < dilep_min_pt) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_pt_ll);
   ANA_MSG_VERBOSE("Pass cut_pt_ll");
@@ -248,7 +253,7 @@ StatusCode TruthAnalysis :: execute ()
   ANA_MSG_VERBOSE("Pass cut_exclusive");
 
   //Plots after all selections
-  hist("sr_dilep_pt")->Fill(m_dilep_pt);
+  hist("sr_dilep_pt")->Fill(m_dilep_pt/GeV);
 
   // Fill the event into the tree
   saveTree();
