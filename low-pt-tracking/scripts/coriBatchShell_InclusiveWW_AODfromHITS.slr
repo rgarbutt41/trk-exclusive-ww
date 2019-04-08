@@ -10,4 +10,4 @@
 #SBATCH --time=04:00:00
 ##SBATCH --image=centos:centos7 --export=NONE
 #SBATCH --image=custom:pdsf-sl64:v4 --export=NONE
-shifter --module=cvmfs /bin/bash coriBatchShell_InclusiveWW_AODfromHITS_single.sh
+shifter --module=cvmfs /bin/bash coriBatchShell_InclusiveWW_AODfromHITS_patrick38_withflag.sh

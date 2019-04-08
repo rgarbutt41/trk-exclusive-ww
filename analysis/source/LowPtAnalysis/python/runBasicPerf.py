@@ -32,7 +32,7 @@ sh.printContent()
 # Create an EventLoop job.
 job = ROOT.EL.Job()
 job.sampleHandler( sh )
-job.options().setDouble( ROOT.EL.Job.optMaxEvents, 500 )
+job.options().setDouble( ROOT.EL.Job.optMaxEvents, 15000 )
 job.outputAdd (ROOT.EL.OutputStream ('ANALYSIS'))
 
 
