@@ -75,8 +75,19 @@ StatusCode BasicPerf :: initialize ()
   ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt","Frac_reco_track_with_lowmatchprob_vs_track_pt",40, 0, 2000) ) );
   ANA_CHECK (book ( TProfile("Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt","Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt",40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("Num_reco_track_with_lowmatchprob_vs_track_pt","Num_reco_track_with_lowmatchprob_vs_track_pt",40, 0, 2000) ) );
-  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_missingtruth_vs_track_pt","Num_reco_track_with_goodprob_and_missingtruth_vs_track_pt",40, 0, 2000) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_vs_track_pt","Num_reco_track_with_goodprob_vs_track_pt",40, 0, 2000) ) );
 
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_missingtruth_vs_track_pt","Num_reco_track_with_goodprob_and_missingtruth_vs_track_pt",40, 0, 2000) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_missingtruth_vs_abs_d0","Num_reco_track_with_goodprob_and_missingtruth_vs_abs_d0",100, 0, 20) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_missingtruth_vs_abs_d0_zoom","Num_reco_track_with_goodprob_and_missingtruth_vs_abs_d0_zoom",100, 0, 2) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_missingtruth_vs_abs_z0","Num_reco_track_with_goodprob_and_missingtruth_vs_abs_z0",300, 0, 300) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_missingtruth_vs_numSiHits","Num_reco_track_with_goodprob_and_missingtruth_vs_numSiHits",20, 0, 20) ) );
+
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_foundtruth_vs_track_pt","Num_reco_track_with_goodprob_and_foundtruth_vs_track_pt",40, 0, 2000) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_foundtruth_vs_abs_d0","Num_reco_track_with_goodprob_and_foundtruth_vs_abs_d0",100, 0, 20) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_foundtruth_vs_abs_d0_zoom","Num_reco_track_with_goodprob_and_foundtruth_vs_abs_d0_zoom",100, 0, 2) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_foundtruth_vs_abs_z0","Num_reco_track_with_goodprob_and_foundtruth_vs_abs_z0",300, 0, 300) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_foundtruth_vs_numSiHits","Num_reco_track_with_goodprob_and_foundtruth_vs_numSiHits",20, 0, 20) ) );
 
   return StatusCode::SUCCESS;
 }
@@ -203,6 +214,13 @@ StatusCode BasicPerf :: execute ()
 	      hist("num_matched_truth_particles_vs_truth_pt")->Fill( (*partitr)->pt());
 	      hist("num_matched_track_particles_vs_track_pt")->Fill( track_part->pt());
 	      vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) = 1; //this partitr is matched!
+
+	      hist("Num_reco_track_with_goodprob_and_foundtruth_vs_track_pt")->Fill( track_part->pt() );
+	      hist("Num_reco_track_with_goodprob_and_foundtruth_vs_abs_d0")->Fill( std::abs( track_part->auxdataConst<float>("d0") ) );
+	      hist("Num_reco_track_with_goodprob_and_foundtruth_vs_abs_d0_zoom")->Fill( std::abs( track_part->auxdataConst<float>("d0") ) );
+	      hist("Num_reco_track_with_goodprob_and_foundtruth_vs_abs_z0")->Fill( std::abs( track_part->auxdataConst<float>("z0") ) );
+	      hist("Num_reco_track_with_goodprob_and_foundtruth_vs_numSiHits")->Fill( track_part->auxdataConst<unsigned char>("numberOfPixelHits") + track_part->auxdataConst<unsigned char>("numberOfSCTHits") );
+
 	      if((*truthLink)->barcode() == 0){
 		truth_barcode_is_zero++;
 	      }
@@ -222,9 +240,14 @@ StatusCode BasicPerf :: execute ()
     m_trackTruthIndex->push_back(truthMatchIndex);
 
     if(probMatch >= 0.5){
+      hist("Num_reco_track_with_goodprob_vs_track_pt")->Fill( track_part->pt() );	
       if(truth_barcode_is_zero > 0.1 || truth_link_not_valid > 0.1 || no_truth_link_available > 0.1){
 	hist("Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt")->Fill( track_part->pt() , 1.0);
 	hist("Num_reco_track_with_goodprob_and_missingtruth_vs_track_pt")->Fill( track_part->pt() );
+	hist("Num_reco_track_with_goodprob_and_missingtruth_vs_abs_d0")->Fill( std::abs( track_part->auxdataConst<float>("d0") ) );
+	hist("Num_reco_track_with_goodprob_and_missingtruth_vs_abs_d0_zoom")->Fill( std::abs( track_part->auxdataConst<float>("d0") ) );
+	hist("Num_reco_track_with_goodprob_and_missingtruth_vs_abs_z0")->Fill( std::abs( track_part->auxdataConst<float>("z0") ) );
+	hist("Num_reco_track_with_goodprob_and_missingtruth_vs_numSiHits")->Fill( track_part->auxdataConst<unsigned char>("numberOfPixelHits") + track_part->auxdataConst<unsigned char>("numberOfSCTHits") );
       } else{
 	hist("Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt")->Fill( track_part->pt() , 0.0);	
       }
