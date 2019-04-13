@@ -98,7 +98,7 @@ StatusCode TruthAnalysis :: initialize ()
 
   //set bin labels for cutflow
   for (int i=1; i<=ncuts;i++) {
-    hist("cutflow")->GetXaxis()->SetBinLabel(i, cuts_labels[i].c_str());
+    hist("cutflow")->GetXaxis()->SetBinLabel(i, cuts_labels[i-1].c_str());
   }
 
   //retrieve tracking efficiency, if needed
