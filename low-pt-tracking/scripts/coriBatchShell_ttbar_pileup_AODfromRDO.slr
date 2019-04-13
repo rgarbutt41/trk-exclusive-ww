@@ -1,6 +1,6 @@
 #!/bin/bash
 #### Submit as e.g. 
-#### sbatch --array 1-10 coriBatchShell_InclusiveWW_AODfromHITS.slr
+#### sbatch --array 1-20 coriBatchShell_ttbar_pileup_AODfromRDO.slr
 #SBATCH --output=slurm-%j.out
 #SBATCH --error=slurm-%j.err
 #SBATCH --account=atlas
@@ -10,4 +10,4 @@
 #SBATCH --time=04:00:00
 ##SBATCH --image=centos:centos7 --export=NONE
 #SBATCH --image=custom:pdsf-sl64:v4 --export=NONE
-shifter --module=cvmfs /bin/bash coriBatchShell_InclusiveWW_AODfromHITS_patrick38_withflag.sh
+shifter --module=cvmfs /bin/bash coriBatchShell_ttbar_pileup_AODfromRDO_withflag.sh

@@ -72,6 +72,23 @@ StatusCode BasicPerf :: initialize ()
   ANA_CHECK (book ( TProfile("num_reco_tracks_vs_avgints","num_reco_tracks_vs_avgints",100, 0, 100) ) ); 
   ANA_CHECK (book ( TProfile("num_reco_tracks_vs_num_truth_parts","num_reco_tracks_vs_num_truth_parts",50, 0, 5000) ) );
 
+  ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt","Frac_reco_track_with_lowmatchprob_vs_track_pt",40, 0, 2000) ) );
+  ANA_CHECK (book ( TProfile("Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt","Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt",40, 0, 2000) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_lowmatchprob_vs_track_pt","Num_reco_track_with_lowmatchprob_vs_track_pt",40, 0, 2000) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_vs_track_pt","Num_reco_track_with_goodprob_vs_track_pt",40, 0, 2000) ) );
+
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_missingtruth_vs_track_pt","Num_reco_track_with_goodprob_and_missingtruth_vs_track_pt",40, 0, 2000) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_missingtruth_vs_abs_d0","Num_reco_track_with_goodprob_and_missingtruth_vs_abs_d0",100, 0, 20) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_missingtruth_vs_abs_d0_zoom","Num_reco_track_with_goodprob_and_missingtruth_vs_abs_d0_zoom",100, 0, 2) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_missingtruth_vs_abs_z0","Num_reco_track_with_goodprob_and_missingtruth_vs_abs_z0",300, 0, 300) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_missingtruth_vs_numSiHits","Num_reco_track_with_goodprob_and_missingtruth_vs_numSiHits",20, 0, 20) ) );
+
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_foundtruth_vs_track_pt","Num_reco_track_with_goodprob_and_foundtruth_vs_track_pt",40, 0, 2000) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_foundtruth_vs_abs_d0","Num_reco_track_with_goodprob_and_foundtruth_vs_abs_d0",100, 0, 20) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_foundtruth_vs_abs_d0_zoom","Num_reco_track_with_goodprob_and_foundtruth_vs_abs_d0_zoom",100, 0, 2) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_foundtruth_vs_abs_z0","Num_reco_track_with_goodprob_and_foundtruth_vs_abs_z0",300, 0, 300) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_foundtruth_vs_numSiHits","Num_reco_track_with_goodprob_and_foundtruth_vs_numSiHits",20, 0, 20) ) );
+
   return StatusCode::SUCCESS;
 }
 
@@ -129,6 +146,7 @@ StatusCode BasicPerf :: execute ()
 
     vec_of_truth_pointers.push_back( (part) );
 
+    /*
     //retrieve reco track matched to this particle (first one considered, TODO: improve!)
     ElementLink< xAOD::TruthParticleContainer > truthLink;
     int recoTrackIndex=-1;
@@ -152,21 +170,35 @@ StatusCode BasicPerf :: execute ()
     hist("Reco_eff_vs_track_pt")->Fill(part->pt()/1000., recoTrackIndex >=0 ? 1.0 : 0.0);
 
     hist("TruthRecoIndex_and_TruthPt")->Fill(recoTrackIndex, part->pt());
+    */
+    //Edit: Now I loop over good truth particles in the track particle. Kept in the above loop in case I want to restore it later
 
   } // end for loop over truth particles
+
+
 
 
   std::vector<int> vec_of_matched_truth_indices(vec_of_truth_pointers.size(), 0); //vector of 0s and 1s: one for each truth particle in the event.  If 0, the truth particle is unmatched; if 1, it is matched
   
   int truthMatchIndex=-2; //-2 = not matched; -1 = matched, no particle found; >=0 link to position in truth particle branches  
-  for (const xAOD::TrackParticle *track_part : *trackParts) {
-    m_trackPt-> push_back (track_part->pt ());
 
-    //hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing());
-    //hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing());
+  //start loop over track particles
+  for (const xAOD::TrackParticle *track_part : *trackParts) {
+
+    int no_truth_link_available = 0;
+    int truth_link_not_valid = 0;
+    int truth_barcode_is_zero = 0;
+
+    m_trackPt-> push_back (track_part->pt ());
 
     //check truth link    
     float probMatch = track_part->auxdataConst<float>("truthMatchProbability");
+
+    hist("Frac_reco_track_with_lowmatchprob_vs_track_pt")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
+    if(probMatch < 0.5){
+      hist("Num_reco_track_with_lowmatchprob_vs_track_pt")->Fill( track_part->pt() );
+    }
+
     m_TruthMatchProb->push_back(probMatch);
     if (probMatch >= 0.5) {
       truthMatchIndex=-1;
@@ -182,11 +214,24 @@ StatusCode BasicPerf :: execute ()
 	      hist("num_matched_truth_particles_vs_truth_pt")->Fill( (*partitr)->pt());
 	      hist("num_matched_track_particles_vs_track_pt")->Fill( track_part->pt());
 	      vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) = 1; //this partitr is matched!
+
+	      hist("Num_reco_track_with_goodprob_and_foundtruth_vs_track_pt")->Fill( track_part->pt() );
+	      hist("Num_reco_track_with_goodprob_and_foundtruth_vs_abs_d0")->Fill( std::abs( track_part->auxdataConst<float>("d0") ) );
+	      hist("Num_reco_track_with_goodprob_and_foundtruth_vs_abs_d0_zoom")->Fill( std::abs( track_part->auxdataConst<float>("d0") ) );
+	      hist("Num_reco_track_with_goodprob_and_foundtruth_vs_abs_z0")->Fill( std::abs( track_part->auxdataConst<float>("z0") ) );
+	      hist("Num_reco_track_with_goodprob_and_foundtruth_vs_numSiHits")->Fill( track_part->auxdataConst<unsigned char>("numberOfPixelHits") + track_part->auxdataConst<unsigned char>("numberOfSCTHits") );
+
+	      if((*truthLink)->barcode() == 0){
+		truth_barcode_is_zero++;
+	      }
 	    }
 	  }
 	} else {
 	  ANA_MSG_VERBOSE( "Matching track with no truth information found." );
-	}      
+	  truth_link_not_valid++;
+	} //truthlink.isvalid check
+      } else{
+	no_truth_link_available++;
       } //check truth link
     } //truth-matched track
     else{
@@ -194,11 +239,28 @@ StatusCode BasicPerf :: execute ()
     } //unmatched track
     m_trackTruthIndex->push_back(truthMatchIndex);
 
+    if(probMatch >= 0.5){
+      hist("Num_reco_track_with_goodprob_vs_track_pt")->Fill( track_part->pt() );	
+      if(truth_barcode_is_zero > 0.1 || truth_link_not_valid > 0.1 || no_truth_link_available > 0.1){
+	hist("Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt")->Fill( track_part->pt() , 1.0);
+	hist("Num_reco_track_with_goodprob_and_missingtruth_vs_track_pt")->Fill( track_part->pt() );
+	hist("Num_reco_track_with_goodprob_and_missingtruth_vs_abs_d0")->Fill( std::abs( track_part->auxdataConst<float>("d0") ) );
+	hist("Num_reco_track_with_goodprob_and_missingtruth_vs_abs_d0_zoom")->Fill( std::abs( track_part->auxdataConst<float>("d0") ) );
+	hist("Num_reco_track_with_goodprob_and_missingtruth_vs_abs_z0")->Fill( std::abs( track_part->auxdataConst<float>("z0") ) );
+	hist("Num_reco_track_with_goodprob_and_missingtruth_vs_numSiHits")->Fill( track_part->auxdataConst<unsigned char>("numberOfPixelHits") + track_part->auxdataConst<unsigned char>("numberOfSCTHits") );
+      } else{
+	hist("Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt")->Fill( track_part->pt() , 0.0);	
+      }
+    }
+
   } // end for loop over track particles
 
 
   std::vector<const xAOD::TruthParticle*>::iterator partitr;
   for(partitr = vec_of_truth_pointers.begin(); partitr < vec_of_truth_pointers.end(); partitr++){
+
+    hist("Reco_eff_vs_track_pt")->Fill((*partitr)->pt()/1000., vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
+
     if( vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) == 0 ){ //this truth particle is unmatched
       hist("num_unmatched_truth_particles_vs_truth_pt")->Fill( (*partitr)->pt());
     }

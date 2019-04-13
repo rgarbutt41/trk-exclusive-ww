@@ -25,7 +25,7 @@ if ! [ -z $2 ]; then
  SUBDIR=$2
 fi
 
-SAMPLE="/project/projectdirs/atlas/adimitri/Samples_exclusiveWW/mc16_13TeV.361600.PowhegPy8EG_CT10nloME_AZNLOCTEQ6L1_WWlvlv.simul.HITS.e4616_s3126/HITS.13536993._000010.pool.root.1"
+SAMPLE="/global/project/projectdirs/atlas/adimitri/Samples_exclusiveWW/mc16_13TeV.361600.PowhegPy8EG_CT10nloME_AZNLOCTEQ6L1_WWlvlv.simul.HITS.e4616_s3126/HITS.13536993._000010.pool.root.1"
 myMaxEvents=100 #define initial number of events
 mySkipEvents=0 #define initial number of events to skip
 
