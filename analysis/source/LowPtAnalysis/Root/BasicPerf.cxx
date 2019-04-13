@@ -29,12 +29,19 @@ StatusCode BasicPerf :: initialize ()
 
   ANA_MSG_INFO ("in initialize");
 
+  m_muBinning.push_back(std::make_pair(0.0, 10.0));
+  m_muBinning.push_back(std::make_pair(10.0, 25.0));
+  m_muBinning.push_back(std::make_pair(25.0, 40.0));
+  m_muBinning.push_back(std::make_pair(40.0, 60.0));
+  m_muBinning.push_back(std::make_pair(60.0, 999.0));
+
   ANA_CHECK (book (TTree ("analysis", "My analysis ntuple")));
   TTree* mytree = tree ("analysis");
 
   //Event-level
   mytree->Branch ("RunNumber", &m_runNumber);
   mytree->Branch ("EventNumber", &m_eventNumber);
+  mytree->Branch ("Mu", &m_mu);
 
   //Truth particles
   m_truthEta = new std::vector<float>();
@@ -89,6 +96,16 @@ StatusCode BasicPerf :: initialize ()
   ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_foundtruth_vs_abs_z0","Num_reco_track_with_goodprob_and_foundtruth_vs_abs_z0",300, 0, 300) ) );
   ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_foundtruth_vs_numSiHits","Num_reco_track_with_goodprob_and_foundtruth_vs_numSiHits",20, 0, 20) ) );
 
+  //mu-binned histograms
+  for (auto muBin : m_muBinning) {
+    std::string hName = "Frac_reco_track_with_lowmatchprob_vs_track_pt_mu_";
+    hName += getStrMuRange(muBin.first, muBin.second);
+    ANA_CHECK (book( TProfile(hName.c_str(), hName.c_str(), 40, 0, 2000.) ));
+    hName = "Reco_eff_vs_track_pt_mu_";
+    hName += getStrMuRange(muBin.first, muBin.second);    
+    ANA_CHECK (book( TProfile(hName.c_str(), hName.c_str(), 40, 0, 2000.) ));    
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -99,6 +116,7 @@ StatusCode BasicPerf :: execute ()
   ANA_CHECK (evtStore()->retrieve (ei, "EventInfo"));
   m_runNumber = ei->runNumber ();
   m_eventNumber = ei->eventNumber ();
+  m_mu = ei->actualInteractionsPerCrossing();
 
   // get truth particle container of interest
   const xAOD::TruthParticleContainer* truthParts = 0;
@@ -195,6 +213,14 @@ StatusCode BasicPerf :: execute ()
     float probMatch = track_part->auxdataConst<float>("truthMatchProbability");
 
     hist("Frac_reco_track_with_lowmatchprob_vs_track_pt")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
+    int muBinIdx=getMuBin(ei->actualInteractionsPerCrossing());
+    if (muBinIdx >= 0) {
+      auto muBin = m_muBinning[muBinIdx];
+      std::string hName = "Frac_reco_track_with_lowmatchprob_vs_track_pt_mu_";
+      hName += getStrMuRange(muBin.first, muBin.second);
+      hist(hName.c_str())->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0 );
+    }
+
     if(probMatch < 0.5){
       hist("Num_reco_track_with_lowmatchprob_vs_track_pt")->Fill( track_part->pt() );
     }
@@ -260,6 +286,13 @@ StatusCode BasicPerf :: execute ()
   for(partitr = vec_of_truth_pointers.begin(); partitr < vec_of_truth_pointers.end(); partitr++){
 
     hist("Reco_eff_vs_track_pt")->Fill((*partitr)->pt()/1000., vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
+    int muBinIdx=getMuBin(ei->actualInteractionsPerCrossing());
+    if (muBinIdx >= 0) {
+      auto muBin = m_muBinning[muBinIdx];
+      std::string hName = "Reco_eff_vs_track_pt_mu_";
+      hName += getStrMuRange(muBin.first, muBin.second);
+      hist(hName.c_str())->Fill((*partitr)->pt()/1000., vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
+    }
 
     if( vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) == 0 ){ //this truth particle is unmatched
       hist("num_unmatched_truth_particles_vs_truth_pt")->Fill( (*partitr)->pt());
@@ -301,4 +334,26 @@ BasicPerf :: ~BasicPerf () {
   delete m_trackPt;
   delete m_TruthMatchProb;
   delete m_trackTruthIndex;
+}
+
+std::string BasicPerf :: getStrMuRange(float low, float high)
+{
+  std::string hName;
+  hName += std::to_string(static_cast<int>(low));
+  hName += "_";
+  hName += std::to_string(static_cast<int>(high));
+  return hName;
+}
+
+int BasicPerf::getMuBin(float mu)
+{
+  int muBinIdx = -1;
+  for (size_t tmp_muBinIdx = 0; tmp_muBinIdx < m_muBinning.size(); ++tmp_muBinIdx) {
+    if ( (mu >= m_muBinning[tmp_muBinIdx].first) and 
+	 (mu < m_muBinning[tmp_muBinIdx].second) ) {
+      muBinIdx = tmp_muBinIdx;
+      break;
+    }
+  }
+  return muBinIdx;
 }
