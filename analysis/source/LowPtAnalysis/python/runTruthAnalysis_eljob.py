@@ -53,6 +53,8 @@ elif (options.debug == 2):
 # Tweak settings, if necessary
 #alg.setProperty("input_trk_eff_file", "/global/homes/s/spgriso/code/AtlasExclWW/tracking/trk-exclusive-ww/analysis/data/trk_eff_pt.root")
 alg.input_trk_eff_file = "/global/homes/s/spgriso/code/AtlasExclWW/tracking/trk-exclusive-ww/analysis/data/trk_eff_pt.root"
+alg.filter_by_selections=True
+alg.tracks_min_pt=100.0 # low-pT tracking
 
 # Add our algorithm to the job
 job.algsAdd( alg )
