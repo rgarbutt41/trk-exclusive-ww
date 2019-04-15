@@ -43,10 +43,17 @@ private:
   std::vector<int> *m_truthPDGID = nullptr;
   std::vector<int> *m_truthRecoIndex = nullptr;
 
-  //Reconstructed particles
+  //Reconstructed particles (see https://gitlab.cern.ch/atlas/athena/blob/21.2/Event/xAOD/xAODTracking/xAODTracking/TrackingPrimitives.h)
   std::vector<float> *m_trackPt = nullptr;
   std::vector<int> *m_trackTruthIndex = nullptr;
   std::vector<float> *m_TruthMatchProb = nullptr;
+  std::vector<int> *m_trackProperties = nullptr;
+  std::vector<int> *m_trackPatternRecoInfo = nullptr;
+  std::vector<int> *m_trackParticleHypothesis = nullptr;
+  std::vector<float> *m_trackz0 = nullptr;
+  std::vector<float> *m_trackd0 = nullptr;
+  std::vector<int> *m_trackNSiHits = nullptr;
+  std::vector<int> *m_trackMatchID = nullptr;
 
 
 };
