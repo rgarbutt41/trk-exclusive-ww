@@ -13,7 +13,12 @@ float lumi = 150e3; //pb^-1
 float exclWW_xsec = 8.5e-3*0.319; //pb; fixed x-sec, sample gives 1.49e-2 x-sec, wrong!
 float inclWW_xsec = 10.636; //pb
 float exclWW_SD_DD_corr = 3.39; ///< correction factor for exclusive WW SD/DD contributions
+std::string label="Min. track p_{T} = 100 MeV";
 
+void plot_TruthAnalysis_SBStudy_Hist(TH1F *h_excl, TH1F *h_incl,TH1F *h_excl_cutflow, TH1F *h_incl_cutflow);
+
+
+// Plot pT(e-mu) for single configuration
 void plot_TruthAnalysis_SBStudy(std::string p_f_exclWW, std::string p_f_inclWW)
 {
  
@@ -26,6 +31,53 @@ void plot_TruthAnalysis_SBStudy(std::string p_f_exclWW, std::string p_f_inclWW)
   TH1F *h_incl_cutflow = (TH1F*) f_incl->Get("cutflow");
   TH1F *h_excl_cutflow = (TH1F*) f_excl->Get("cutflow");
 
+  plot_TruthAnalysis_SBStudy_Hist(h_excl, h_incl, h_excl_cutflow, h_incl_cutflow);
+
+};
+
+// Plot pT(e-mu) mixing up two configurations
+void plot_TruthAnalysis_Run2(std::string p_f_exclWW_500, std::string p_f_inclWW_500,
+			     std::string p_f_exclWW_400, std::string p_f_inclWW_400)
+{
+  label = "Run 2 min. track p_{T}";
+  
+  TFile *f_incl_500 = TFile::Open(p_f_inclWW_500.c_str());
+  TFile *f_excl_500 = TFile::Open(p_f_exclWW_500.c_str());
+
+  TH1F *h_incl_500 = (TH1F*) f_incl_500->Get("sr_dilep_pt");
+  TH1F *h_excl_500 = (TH1F*) f_excl_500->Get("sr_dilep_pt");
+
+  TH1F *h_incl_cutflow_500 = (TH1F*) f_incl_500->Get("cutflow");
+  TH1F *h_excl_cutflow_500 = (TH1F*) f_excl_500->Get("cutflow");
+
+  TFile *f_incl_400 = TFile::Open(p_f_inclWW_400.c_str());
+  TFile *f_excl_400 = TFile::Open(p_f_exclWW_400.c_str());
+
+  TH1F *h_incl_400 = (TH1F*) f_incl_400->Get("sr_dilep_pt");
+  TH1F *h_excl_400 = (TH1F*) f_excl_400->Get("sr_dilep_pt");
+
+  TH1F *h_incl_cutflow_400 = (TH1F*) f_incl_400->Get("cutflow");
+  TH1F *h_excl_cutflow_400 = (TH1F*) f_excl_400->Get("cutflow");
+
+  const float mix_weight = 1.0; //ratio of luminosities
+
+  TH1F *h_incl = (TH1F*)h_incl_500->Clone();
+  h_incl->Add(h_incl_400, mix_weight); //same weight
+  TH1F *h_excl = (TH1F*)h_excl_500->Clone();
+  h_excl->Add(h_excl_400, mix_weight); //same weight
+
+  TH1F *h_incl_cutflow = (TH1F*)h_incl_cutflow_500->Clone();
+  h_incl_cutflow->Add(h_incl_cutflow_400, mix_weight); //same weight
+  TH1F *h_excl_cutflow = (TH1F*)h_excl_cutflow_500->Clone();
+  h_excl_cutflow->Add(h_excl_cutflow_400, mix_weight); //same weight
+
+  plot_TruthAnalysis_SBStudy_Hist(h_excl, h_incl, h_excl_cutflow, h_incl_cutflow);
+}
+
+// Work-horse function to make the plot
+void plot_TruthAnalysis_SBStudy_Hist(TH1F *h_excl, TH1F *h_incl,
+				     TH1F *h_excl_cutflow, TH1F *h_incl_cutflow)
+{   
   float y_raw_incl = h_incl->GetEntries();
   float y_raw_excl = h_excl->GetEntries();
 
@@ -100,7 +152,7 @@ void plot_TruthAnalysis_SBStudy(std::string p_f_exclWW, std::string p_f_inclWW)
   TLatex tex;  
   tex.DrawLatexNDC(0.55, 0.65, "Truth-level study");
   tex.DrawLatexNDC(0.55, 0.59, "#sqrt{s} = 13 TeV, L = 150 fb^{-1}");      
-  tex.DrawLatexNDC(0.55, 0.52, "Min. track p_{T} = 100 MeV");
+  tex.DrawLatexNDC(0.55, 0.52, label.c_str());
   l->Draw();
   c->Modified();
   c->SaveAs("sr_pt_emu.png");
