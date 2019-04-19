@@ -13,8 +13,8 @@ ASetupStr='Athena,21.0.53,here'
 # OUTDIR -> Base output directory
 # SUBDIR -> optional sub-directory
 
-BASEDIR="/global/homes/a/adimitri/exclusiveWW/Tracking/run_pdfsBatch/"
-OUTDIR="/project/projectdirs/atlas/adimitri/Samples_exclusiveWW/InclusiveWW_361600_fromHITS_noPileUp/"
+BASEDIR="/global/homes/a/adimitri/exclusiveWW/Tracking/run_pdfsBatch"
+OUTDIR="/global/project/projectdirs/atlas/adimitri/Samples_exclusiveWW/InclusiveWW_361600_fromHITS_noPileUp"
 SUBDIR="reco_AOD_ver1"
 
 if ! [ -z $1 ]; then
@@ -63,7 +63,7 @@ printenv
 echo "---- END OF ENVIRONMENT ----"
 echo ""
 
-CPYDIR=$BASEDIR/$SUBDIR
+CPYDIR=$OUTDIR/$SUBDIR
 echo "Output: ${CPYDIR}"
 mkdir -pv ${CPYDIR}
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Submit as e.g. 
-# sbatch --array 1-10 pdsfBatchShell_InclusiveWW_AODfromHITS.slr
+# sbatch --array=1-10 pdsfBatchShell_InclusiveWW_AODfromHITS.slr
 #SBATCH --output=slurm-%j.out
 #SBATCH --error=slurm-%j.err
 #SBATCH --account=atlas

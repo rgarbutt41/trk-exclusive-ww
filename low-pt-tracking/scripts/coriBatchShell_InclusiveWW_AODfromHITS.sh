@@ -13,8 +13,8 @@ ASetupStr='Athena,21.0.53,here'
 # OUTDIR -> Base output directory
 # SUBDIR -> optional sub-directory
 
-BASEDIR="/global/homes/a/adimitri/exclusiveWW/Tracking/run_coriBatch/"
-OUTDIR="/project/projectdirs/atlas/adimitri/Samples_exclusiveWW/InclusiveWW_361600_fromHITS_noPileUp/"
+BASEDIR="/global/homes/a/adimitri/exclusiveWW/Tracking/run_coriBatch"
+OUTDIR="/global/project/projectdirs/atlas/adimitri/Samples_exclusiveWW/InclusiveWW_361600_fromHITS_noPileUp"
 SUBDIR="reco_AOD_ver2"
 
 if ! [ -z $1 ]; then
@@ -48,10 +48,10 @@ echo "Starting batch job. Processing sample: $SAMPLE"
 #Setup ATLAS software on PDSF
 shopt -s expand_aliases
 source /global/project/projectdirs/atlas/scripts/setupATLAS.sh
-setupATLAS
+setupATLAS -c slc6+batch
 
-echo "Setting up ATLAS software $ASetupStr in $BASEDIR/"
-cd $BASEDIR/
+echo "Setting up ATLAS software $ASetupStr in $BASEDIR"
+cd $BASEDIR
 echo asetup ${ASetupStr}
 asetup ${ASetupStr}
 export FRONTIER_SERVER="(serverurl=http://atlasfrontier-ai.cern.ch:8000/atlr)(serverurl=http://lcgft-atlas.gridpp.rl.ac.uk:3128/frontierATLAS)"
@@ -61,7 +61,7 @@ printenv
 echo "---- END OF ENVIRONMENT ----"
 echo ""
 
-CPYDIR=$BASEDIR/$SUBDIR
+CPYDIR=$OUTDIR/$SUBDIR
 echo "Output: ${CPYDIR}"
 mkdir -pv ${CPYDIR}
 
