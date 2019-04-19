@@ -2,6 +2,7 @@
 
 Git repository for analysis code for low-pt tracking studies for Exclusive WW analysis
 
+
 # Code structure
 
 Inside `trk-exclusive-ww` is the full code:
@@ -9,7 +10,6 @@ Inside `trk-exclusive-ww` is the full code:
   with `run` folder where you can run reconstruction scripts, a set of useful scripts for launching reconstruction are available in the `scripts` folder
 - `analysis` is the subdirector for performance analysis work
   with the actual analysis code is in `source`, compile in `build` and run in `run`
-- `exclusivity` for macros for exclusivity studies
 
 
 # Low-pt tracking Athena code setup
@@ -73,6 +73,11 @@ Note that having `asetup` preceding the `source` commmand allows the file to be 
 the next time you setup the release with `asetup --restore`.
 Otherwise you need to remember to source this file every time you log in and setup the release.
 
+## Code structure
+
+The analysis code is in `source` which consists from:
+- `LowPtAnalysis` for low pt studies
+- `Exclusivity` for exclusivity studies macros
 
 ## Running instructions
 
@@ -99,9 +104,5 @@ Right now the code just accesses an AOD from Simone's directory and makes a very
 
 The retrieved AOD is: `/global/projecta/projectdirs/atlas/spgriso/code/trk-exclusive-ww-3/run/AOD.pool.root`
 
-
-# Exclusivity studies
-
-The code for now only contains macros.
 
 
