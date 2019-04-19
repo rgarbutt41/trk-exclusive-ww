@@ -7,7 +7,7 @@
 #SBATCH --qos=shared
 #SBATCH --tasks-per-node=1
 #SBATCH --constraint=haswell
-#SBATCH --time=04:00:00
+#SBATCH --time=02:00:00
 ####SBATCH --image=centos:centos7 --export=NONE
 ####SBATCH --image=custom:pdsf-sl64:v4 --export=NONE
 #SBATCH --image=zlmarshall/atlas-grid-slc6:20190416 --export=NONE

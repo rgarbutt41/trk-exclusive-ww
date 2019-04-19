@@ -15,7 +15,7 @@ ASetupStr='Athena,21.0.53,here'
 
 BASEDIR="/global/homes/a/adimitri/exclusiveWW/Tracking/run_coriBatch"
 OUTDIR="/global/project/projectdirs/atlas/adimitri/Samples_exclusiveWW/InclusiveWW_361600_fromHITS_noPileUp"
-SUBDIR="reco_AOD_ver2"
+SUBDIR="reco_AOD_ver5"
 
 if ! [ -z $1 ]; then
  BASEDIR=$1
@@ -25,13 +25,14 @@ if ! [ -z $2 ]; then
  SUBDIR=$2
 fi
 
-SAMPLE="/global/project/projectdirs/atlas/adimitri/Samples_exclusiveWW/mc16_13TeV.361600.PowhegPy8EG_CT10nloME_AZNLOCTEQ6L1_WWlvlv.simul.HITS.e4616_s3126/HITS.13536993._000010.pool.root.1"
+SAMPLE="/global/project/projectdirs/atlas/adimitri/Samples_exclusiveWW/mc16_13TeV.361600.PowhegPy8EG_CT10nloME_AZNLOCTEQ6L1_WWlvlv.simul.HITS.e4616_s3126/HITS.13536993._000040.pool.root.1"
 myMaxEvents=100 #define initial number of events
 mySkipEvents=0 #define initial number of events to skip
 
 if ! [ -z "${SLURM_ARRAY_TASK_ID}" ] ; then
     #Split input file into 100 events chunks
     mySkipEvents=$(((SLURM_ARRAY_TASK_ID-1)*100))
+    SUBDIR="${SUBDIR}_Job${SLURM_ARRAY_TASK_ID}"
 fi
 echo "=============================="
 echo "sample = $SAMPLE"
@@ -48,10 +49,12 @@ echo "Starting batch job. Processing sample: $SAMPLE"
 #Setup ATLAS software on PDSF
 shopt -s expand_aliases
 source /global/project/projectdirs/atlas/scripts/setupATLAS.sh
-setupATLAS -c slc6+batch
+setupATLAS #-c slc6+batch
 
 echo "Setting up ATLAS software $ASetupStr in $BASEDIR"
 cd $BASEDIR
+mkdir -pv $SUBDIR
+cd $SUBDIR
 echo asetup ${ASetupStr}
 asetup ${ASetupStr}
 export FRONTIER_SERVER="(serverurl=http://atlasfrontier-ai.cern.ch:8000/atlr)(serverurl=http://lcgft-atlas.gridpp.rl.ac.uk:3128/frontierATLAS)"
@@ -68,9 +71,10 @@ mkdir -pv ${CPYDIR}
 WRKDIR=$PWD
 echo "Work dir: ${PWD}"
 
-cd $CPYDIR
+#cd $CPYDIR
 
 pwd
+echo "Executing the job:"
 
 # Setup job settings and run it 
 Reco_tf.py \
@@ -94,6 +98,8 @@ Reco_tf.py \
 --jobNumber 361600 \
 --DataRunNumber 361600 \
 >& log.RecoTf
+
+echo "Job done."
 
 ##compress log file
 gzip $WRKDIR/log.*
