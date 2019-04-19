@@ -1,10 +1,20 @@
 # Introduction
 
-Git repo for analysis code for low-pt tracking studies for Exclusive WW analysis
+Git repository for analysis code for low-pt tracking studies for Exclusive WW analysis
 
-Patrick's fork of athena must be checked-out!!  You can do this in your clone of TrkExclusiveWW, but make sure you include your athena folder in .gitignore (if that doesn't automatically happen).  Instructions are as follows to do a sparse checkout:
+# Code structure
+
+Inside `trk-exclusive-ww` is the full code:
+- `low-pt-tracking` for tracking code inside athena
+  with `run` folder where you can run reconstruction scripts, a set of useful scripts for launching reconstruction are available in the `scripts` folder
+- `analysis` is the subdirector for performance analysis work
+  with the actual analysis code is in `source`, compile in `build` and run in `run`
+- `exclusivity` for macros for exclusivity studies
+
 
 # Low-pt tracking Athena code setup
+
+Patrick's fork of athena must be checked-out!!  You can do this in your clone of TrkExclusiveWW, but make sure you include your athena folder in .gitignore (if that doesn't automatically happen).  Instructions are as follows to do a sparse checkout:
 
 ## First-time setup instructions
 
@@ -43,15 +53,6 @@ Current working releases:
 | ------- | ----------- |
 | 21.0.77 | standard reconstruction release for ATLMCPROD-6852 |
 
-
-# Code structure
-
-After you've setup the code as above:
-Inside `trk-exclusive-ww` is the full code:
-- `low-pt-tracking` for tracking code inside athena
-  with `run` folder where you can run reconstruction scripts, a set of useful scripts for launching reconstruction are available in the `scripts` folder
-- `analysis` is the subdirector for doing performance analysis work
-  with the actual analysis code is in `source`, compile in `build` and run in `run
 
 # Setup performance analysis code
 
@@ -97,5 +98,10 @@ source x86_64-slc6-gcc62-opt/setup.sh
 Right now the code just accesses an AOD from Simone's directory and makes a very simple NTuple with some event and Tau information
 
 The retrieved AOD is: `/global/projecta/projectdirs/atlas/spgriso/code/trk-exclusive-ww-3/run/AOD.pool.root`
+
+
+# Exclusivity studies
+
+The code for now only contains macros.
 
 
