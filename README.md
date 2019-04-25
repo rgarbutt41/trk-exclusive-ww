@@ -28,6 +28,7 @@ git checkout 21.0-trk-lowpt-highpu
 git atlas addpkg InDetRecExample
 git atlas addpkg SiSPSeededTrackFinder
 git atlas addpkg SiSpacePointsSeedTool_xk
+git atlas addpkg InDetRecToolInterfaces
 cd ..
 mkdir build
 cd build
