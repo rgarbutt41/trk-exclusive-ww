@@ -67,7 +67,8 @@ CPYDIR=$OUTDIR/$SUBDIR
 echo "Output: ${CPYDIR}"
 mkdir -pv ${CPYDIR}
 
-WRKDIR="$TMPDIR/$SUBDIR-$((1 + RANDOM % 1000))"
+RANDOM_TRAILER=`cat /dev/urandom | tr -cd 'a-f0-9' | head -c 4`
+WRKDIR="$SCRATCH/$SUBDIR-${RANDOM_TRAILER}"
 mkdir -pv $WRKDIR
 cd $WRKDIR
 echo "Work dir: ${PWD}"

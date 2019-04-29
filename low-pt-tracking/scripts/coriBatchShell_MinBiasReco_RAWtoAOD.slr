@@ -8,5 +8,5 @@
 #SBATCH --tasks-per-node=1
 #SBATCH --constraint=haswell
 #SBATCH --time=06:00:00
-#SBATCH --image=zlmarshall/atlas-grid-slc6:20190416
+#SBATCH --image=zlmarshall/atlas-grid-slc6:20190416 --export=NONE
 shifter --module=cvmfs /bin/bash coriBatchShell_MinBiasReco_RAWtoAOD.sh
