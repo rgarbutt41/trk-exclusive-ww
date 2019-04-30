@@ -15,7 +15,7 @@ ASetupStr='Athena,21.0.77,here'
 
 BASEDIR="/global/homes/s/spgriso/code/AtlasExclWW/trk-exclusive-ww/low-pt-tracking/build"
 OUTDIR="/global/projecta/projectdirs/atlas/spgriso/data/ExclWW/data/private-AOD/"
-SUBDIR="mc16_13TeV.410471.ttbar_allhad.minbias-reco.v1"
+SUBDIR="mc16_13TeV.410471.ttbar_allhad.minbias-reco.v2"
 
 if ! [ -z $1 ]; then
  BASEDIR=$1
@@ -32,7 +32,6 @@ mySkipEvents=0 #define initial number of events to skip
 if ! [ -z "${SLURM_ARRAY_TASK_ID}" ] ; then
     #Split input file into 50 events chunks
     mySkipEvents=$(((SLURM_ARRAY_TASK_ID-1)*50))
-    SUBDIR="${SUBDIR}_Job${SLURM_ARRAY_TASK_ID}"
 fi
 echo "=============================="
 echo "sample = $SAMPLE"
@@ -114,6 +113,10 @@ ls -lh $WRKDIR/
 echo ""
 echo "Now copying to ${CPYDIR}"
 mv $WRKDIR/*root* $CPYDIR/
+for pippo in $WRKDIR/log.*; do
+  newName=`echo $pippo | sed 's/gz$/'${SLURM_ARRAY_TASK_ID}'.gz/g'`
+  mv $pippo $newName
+done
 mv $WRKDIR/log.* $CPYDIR/
 echo ""
 echo "Content of destination: $CPYDIR"
