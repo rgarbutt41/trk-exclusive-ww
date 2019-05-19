@@ -1,0 +1,12 @@
+#!/bin/bash
+#### Submit as e.g. 
+#### sbatch --array=1-20 coriBatchShell_LowPtRoIReco_RAWtoAOD.slr
+#SBATCH --output=slurm-%j.out
+#SBATCH --error=slurm-%j.err
+#SBATCH --account=atlas
+#SBATCH --qos=shared
+#SBATCH --tasks-per-node=1
+#SBATCH --constraint=haswell
+#SBATCH --time=06:00:00
+#SBATCH --image=zlmarshall/atlas-grid-slc6:20190416 --export=NONE
+shifter --module=cvmfs /bin/bash coriBatchShell_LowPtRoIReco_RAWtoAOD.sh
