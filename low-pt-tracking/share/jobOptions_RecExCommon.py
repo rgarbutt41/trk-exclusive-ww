@@ -156,7 +156,7 @@ InDetFlags.doTruth.set_Value_and_Lock (globalflags.DataSource == 'geant4' and gl
 
 # --- low-pT tracking for exclusive WW
 #InDetFlags.doLowPt.set_Value_and_Lock(True)
-InDetFlags.doLowPtEWW.set_Value_and_Lock(True)
+InDetFlags.doLowPtRoI.set_Value_and_Lock(True)
 
 # --- enable brem recovery
 # InDetFlags.doBremRecovery.set_Value_and_Lock                       (doBremRecovery)

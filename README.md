@@ -52,8 +52,12 @@ Current working releases:
 
 | Release | Description |
 | ------- | ----------- |
+| 21.0.97 | Synchronized for development with recent release |
 | 21.0.77 | standard reconstruction release for ATLMCPROD-6852 |
 
+e.g. asetup Athena,21.0.97,slc6,here
+
+Note: when changing release rememeber to re-run cmake and clean-up the build folder first
 
 # Setup performance analysis code
 
