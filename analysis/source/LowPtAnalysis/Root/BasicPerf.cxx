@@ -160,13 +160,13 @@ StatusCode BasicPerf :: execute ()
   ANA_MSG_DEBUG ("execute(): number of track particles = " << trackParts->size());
 
   // get low-pT track particle container of interest
-  const xAOD::TrackParticleContainer* LowPtEWWContainer = 0;
-  ANA_CHECK (evtStore()->retrieve( LowPtEWWContainer, "LowPtEWWTrackParticles"));
-  ANA_MSG_DEBUG ("execute(): number of LowPt track particles = " << LowPtEWWContainer->size());
+  const xAOD::TrackParticleContainer* LowPtRoIContainer = 0;
+  ANA_CHECK (evtStore()->retrieve( LowPtRoIContainer, "LowPtRoITrackParticles"));
+  ANA_MSG_DEBUG ("execute(): number of LowPt track particles = " << LowPtRoIContainer->size());
 
-  hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing(), trackParts->size()+LowPtEWWContainer->size() );
-  hist("num_reco_tracks_vs_actualints")->Fill(ei->averageInteractionsPerCrossing(), trackParts->size()+LowPtEWWContainer->size() );
-  hist("num_reco_tracks_vs_num_truth_parts")->Fill(truthParts->size(), trackParts->size()+LowPtEWWContainer->size() );
+  hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing(), trackParts->size()+LowPtRoIContainer->size() );
+  hist("num_reco_tracks_vs_actualints")->Fill(ei->averageInteractionsPerCrossing(), trackParts->size()+LowPtRoIContainer->size() );
+  hist("num_reco_tracks_vs_num_truth_parts")->Fill(truthParts->size(), trackParts->size()+LowPtRoIContainer->size() );
 
   m_truthEta->clear();
   m_truthPhi->clear();
@@ -262,7 +262,7 @@ StatusCode BasicPerf :: execute ()
   //start loop over track particles (both containers)
   for (int i=0; i<2; i++) {
     auto container = trackParts;
-    if (i == 1) container = LowPtEWWContainer;
+    if (i == 1) container = LowPtRoIContainer;
     for (const xAOD::TrackParticle *track_part : *container) {
 
       int track_is_matched = 0;
