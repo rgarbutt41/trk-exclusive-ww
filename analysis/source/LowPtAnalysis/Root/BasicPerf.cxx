@@ -95,7 +95,7 @@ StatusCode BasicPerf :: initialize ()
   ANA_CHECK (book ( TProfile("num_reco_tracks_vs_avgints","num_reco_tracks_vs_avgints",100, 0, 100) ) ); 
   ANA_CHECK (book ( TProfile("num_reco_tracks_vs_num_truth_parts","num_reco_tracks_vs_num_truth_parts",50, 0, 5000) ) );
 
-  ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt","Frac_reco_track_with_lowmatchprob_vs_track_pt",40, 0, 20000.) ) );
+  ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt","Frac_reco_track_with_lowmatchprob_vs_track_pt",200, 0, 10000.) ) );
   ANA_CHECK (book ( TProfile("Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt","Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt",40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("Num_reco_track_with_lowmatchprob_vs_track_pt","Num_reco_track_with_lowmatchprob_vs_track_pt",40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_vs_track_pt","Num_reco_track_with_goodprob_vs_track_pt",40, 0, 2000) ) );
@@ -213,12 +213,18 @@ StatusCode BasicPerf :: execute ()
     m_truthE->  push_back (part->e ());
     m_truthPDGID->push_back (part->auxdata<int>("pdgId"));
 
-    vec_of_truth_pointers.push_back( (part) );
+//    vec_of_truth_pointers.push_back( (part) );
     //if( std::abs(part->auxdata<int>("pdgId")) == 11 ) vec_of_electron_pointers.push_back( (part) );
     //if( std::abs(part->auxdata<int>("pdgId")) == 13 ) vec_of_muon_pointers.push_back( (part) );
 
     if( std::abs(part->auxdata<int>("pdgId")) == 11 ) num_electrons++;
     if( std::abs(part->auxdata<int>("pdgId")) == 13 ) num_muons++;
+    ANA_MSG_VERBOSE( "Particle Pt " << part->pt() << " electrons " << num_electrons << " muons " << num_muons);
+
+    if (num_electrons < 2 && num_muons < 2) continue;
+    ANA_MSG_VERBOSE( "PASS Particle Pt " << part->pt() << " electrons " << num_electrons << " muons " << num_muons);
+
+    vec_of_truth_pointers.push_back( (part) );
 
     /*
     //retrieve reco track matched to this particle (first one considered, TODO: improve!)
