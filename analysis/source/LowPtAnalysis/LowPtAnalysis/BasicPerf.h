@@ -40,6 +40,7 @@ private:
   std::vector<float> *m_truthEta = nullptr;
   std::vector<float> *m_truthPhi = nullptr;
   std::vector<float> *m_truthPt = nullptr;
+  std::vector<float> *m_truthPt_lep = nullptr;
   std::vector<float> *m_truthE = nullptr;
   std::vector<float> *m_truthQoverP = nullptr;
   std::vector<int> *m_truthPDGID = nullptr;

@@ -6,6 +6,8 @@
 #include <xAODTruth/TruthParticleContainer.h>
 #include <xAODTruth/xAODTruthHelpers.h>
 #include <xAODTracking/TrackParticleContainer.h>
+#include <xAODEgamma/ElectronContainer.h>
+#include <xAODMuon/MuonContainer.h>
 
 #include <xAODTracking/Vertex.h>
 #include <xAODTracking/VertexContainer.h>
@@ -64,6 +66,8 @@ StatusCode BasicPerf :: initialize ()
   mytree->Branch ("TruthPhi", &m_truthPhi);
   m_truthPt = new std::vector<float>();
   mytree->Branch ("TruthPt", &m_truthPt);
+  m_truthPt_lep = new std::vector<float>();
+  mytree->Branch ("TruthPtLep", &m_truthPt_lep);
   m_truthE = new std::vector<float>();
   mytree->Branch ("TruthE", &m_truthE);
   m_truthQoverP = new std::vector<float>();
@@ -200,6 +204,7 @@ StatusCode BasicPerf :: execute ()
   m_truthEta->clear();
   m_truthPhi->clear();
   m_truthPt->clear();
+  m_truthPt_lep->clear();
   m_truthE->clear();
   m_truthQoverP->clear();
   m_truthPDGID->clear();
@@ -258,26 +263,19 @@ StatusCode BasicPerf :: execute ()
     m_truthE->  push_back (part->e ());
     m_truthPDGID->push_back (part->auxdata<int>("pdgId"));
 
-//    vec_of_truth_pointers.push_back( (part) );
+    vec_of_truth_pointers.push_back( (part) );
     //if( std::abs(part->auxdata<int>("pdgId")) == 11 ) vec_of_electron_pointers.push_back( (part) );
     //if( std::abs(part->auxdata<int>("pdgId")) == 13 ) vec_of_muon_pointers.push_back( (part) );
 
-    if( std::abs(part->auxdata<int>("pdgId")) == 11 ){
-      ///ElementLink< xAOD::TruthVertex >  vertlink = (part)->auxdata<  ElementLink< xAOD::TruthVertex>  >("ProdVtxLink");
-      //std::cout<<vertlink->z()<<std::endl;
-      num_electrons++;
-      std::cout<<"electron with z = "<<part->pt()<<std::endl;
+    if( std::abs(part->auxdata<int>("pdgId")) == 11 ) {
+	num_electrons++;
+	m_truthPt_lep-> push_back (part->pt());
     }
-    if( std::abs(part->auxdata<int>("pdgId")) == 13 ){
-      num_muons++;
-      std::cout<<"muon with z = "<<part->pt()<<std::endl;
+    if( std::abs(part->auxdata<int>("pdgId")) == 13 ) {
+	num_muons++;
+	m_truthPt_lep-> push_back (part->pt());
     }
     ANA_MSG_VERBOSE( "Particle Pt " << part->pt() << " electrons " << num_electrons << " muons " << num_muons);
-
-    if (num_electrons < 2 && num_muons < 2) continue;
-    ANA_MSG_VERBOSE( "PASS Particle Pt " << part->pt() << " electrons " << num_electrons << " muons " << num_muons);
-
-    vec_of_truth_pointers.push_back( (part) );
 
     /*
     //retrieve reco track matched to this particle (first one considered, TODO: improve!)
@@ -307,6 +305,14 @@ StatusCode BasicPerf :: execute ()
     //Edit: Now I loop over good truth particles in the track particle. Kept in the above loop in case I want to restore it later
 
   } // end for loop over truth particles
+
+  if ( num_electrons+num_muons < 2 ) return StatusCode::SUCCESS;
+
+  std::sort(m_truthPt_lep->begin(),m_truthPt_lep->end());
+  if ( m_truthPt_lep->at(m_truthPt_lep->size()-1) < 27000. && m_truthPt_lep->at(m_truthPt_lep->size()-2) < 20000.) return StatusCode::SUCCESS;
+  for (unsigned int i=0; i<m_truthPt_lep->size(); i++) {ANA_MSG_VERBOSE(m_truthPt_lep->at(i) << " all");}
+  ANA_MSG_VERBOSE( "Number of particles " << vec_of_truth_pointers.size() << " electrons " << num_electrons << " muons " << num_muons);
+  
 
 
   std::vector< const xAOD::TrackParticle* > vec_of_electrontrack_pointers;
@@ -521,6 +527,7 @@ BasicPerf :: ~BasicPerf () {
   delete m_truthEta;
   delete m_truthPhi;
   delete m_truthPt;
+  delete m_truthPt_lep;
   delete m_truthE;
   delete m_truthQoverP;
   delete m_truthPDGID;

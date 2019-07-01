@@ -5,7 +5,7 @@ atlas_subdir (LowPtAnalysis)
 atlas_add_library (LowPtAnalysisLib
   LowPtAnalysis/*.h Root/*.cxx
   PUBLIC_HEADERS LowPtAnalysis
-  LINK_LIBRARIES AnaAlgorithmLib xAODEventInfo xAODTau xAODMuon xAODEgamma xAODTruth xAODTracking)
+  LINK_LIBRARIES AnaAlgorithmLib xAODEventInfo xAODTau xAODTruth xAODTracking xAODEgamma xAODMuon)
 
 if (XAOD_STANDALONE)
  # Add the dictionary (for AnalysisBase only):
