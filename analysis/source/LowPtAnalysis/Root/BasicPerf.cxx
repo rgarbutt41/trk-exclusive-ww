@@ -7,6 +7,20 @@
 #include <xAODTruth/xAODTruthHelpers.h>
 #include <xAODTracking/TrackParticleContainer.h>
 
+#include <xAODTracking/Vertex.h>
+#include <xAODTracking/VertexContainer.h>
+#include <xAODTracking/VertexAuxContainer.h>
+
+#include <xAODTruth/TruthVertex.h>
+#include <xAODTruth/TruthVertexContainer.h>
+#include <xAODTruth/TruthVertexAuxContainer.h>
+
+#include <xAODEgamma/ElectronContainer.h>
+#include <xAODEgamma/ElectronAuxContainer.h>
+
+#include "xAODMuon/MuonContainer.h"
+#include "xAODMuon/MuonAuxContainer.h"
+
 BasicPerf :: BasicPerf (const std::string& name,
                                   ISvcLocator *pSvcLocator)
     : EL::AnaAlgorithm (name, pSvcLocator)
@@ -164,6 +178,21 @@ StatusCode BasicPerf :: execute ()
   ANA_CHECK (evtStore()->retrieve( LowPtRoIContainer, "LowPtRoITrackParticles"));
   ANA_MSG_DEBUG ("execute(): number of LowPt track particles = " << LowPtRoIContainer->size());
 
+  // get low-pT RoI vertices
+  const xAOD::VertexContainer* LowPtRoIVertices = 0;
+  ANA_CHECK (evtStore()->retrieve( LowPtRoIVertices, "LowPtRoIVertexContainer"));
+  ANA_MSG_DEBUG ("execute(): number of LowPt vertices = " << LowPtRoIVertices->size());
+  
+  // get electrons
+  const xAOD::ElectronContainer* electrons = 0;
+  ANA_CHECK (evtStore()->retrieve( electrons, "Electrons"));
+  ANA_MSG_DEBUG ("execute(): number of electrons = " << electrons->size());
+  
+  // get muons
+  const xAOD::MuonContainer* muons = 0;
+  ANA_CHECK (evtStore()->retrieve( muons, "Muons"));
+  ANA_MSG_DEBUG ("execute(): number of muons = " << muons->size());
+
   hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing(), trackParts->size()+LowPtRoIContainer->size() );
   hist("num_reco_tracks_vs_actualints")->Fill(ei->averageInteractionsPerCrossing(), trackParts->size()+LowPtRoIContainer->size() );
   hist("num_reco_tracks_vs_num_truth_parts")->Fill(truthParts->size(), trackParts->size()+LowPtRoIContainer->size() );
@@ -196,6 +225,22 @@ StatusCode BasicPerf :: execute ()
   //std::vector< const xAOD::TruthParticle* > vec_of_electron_pointers;
   //std::vector< const xAOD::TruthParticle* > vec_of_muon_pointers;
 
+  std::cout<<"NEW EVENT!!!!!"<<std::endl;
+
+  for (const xAOD::Vertex *vert : *LowPtRoIVertices) {
+    std::cout<<"low pt roi vertex here: "<<vert->z()<<std::endl;
+  }    
+
+  for (const xAOD::Electron *el : *electrons) {
+    const xAOD::TrackParticle* tp = (el)->trackParticle();
+    std::cout<<"electron with pt: "<<el->pt()<<" and phi: "<<el->phi()<<" at: "<<tp->z0()<<std::endl;
+  }    
+
+  for (const xAOD::Muon *mu : *muons) {
+    const xAOD::TrackParticle *mutrk = (mu)->primaryTrackParticle();
+    std::cout<<"muon with pt: "<<mu->pt()<<" and phi: "<<mu->phi()<<" at: "<<mutrk->z0()<<std::endl;
+  }    
+
   // loop over the particles in the container
   for (const xAOD::TruthParticle *part : *truthParts) {    
 
@@ -217,8 +262,16 @@ StatusCode BasicPerf :: execute ()
     //if( std::abs(part->auxdata<int>("pdgId")) == 11 ) vec_of_electron_pointers.push_back( (part) );
     //if( std::abs(part->auxdata<int>("pdgId")) == 13 ) vec_of_muon_pointers.push_back( (part) );
 
-    if( std::abs(part->auxdata<int>("pdgId")) == 11 ) num_electrons++;
-    if( std::abs(part->auxdata<int>("pdgId")) == 13 ) num_muons++;
+    if( std::abs(part->auxdata<int>("pdgId")) == 11 ){
+      ///ElementLink< xAOD::TruthVertex >  vertlink = (part)->auxdata<  ElementLink< xAOD::TruthVertex>  >("ProdVtxLink");
+      //std::cout<<vertlink->z()<<std::endl;
+      num_electrons++;
+      std::cout<<"electron with z = "<<part->pt()<<std::endl;
+    }
+    if( std::abs(part->auxdata<int>("pdgId")) == 13 ){
+      num_muons++;
+      std::cout<<"muon with z = "<<part->pt()<<std::endl;
+    }
     ANA_MSG_VERBOSE( "Particle Pt " << part->pt() << " electrons " << num_electrons << " muons " << num_muons);
 
     if (num_electrons < 2 && num_muons < 2) continue;
