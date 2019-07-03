@@ -287,7 +287,6 @@ StatusCode BasicPerf :: execute ()
 	num_muons++;
 	m_truthPt_lep-> push_back (part->pt());
     }
-    ANA_MSG_VERBOSE( "Particle Pt " << part->pt() << " electrons " << num_electrons << " muons " << num_muons);
 
     /*
     //retrieve reco track matched to this particle (first one considered, TODO: improve!)
@@ -325,8 +324,6 @@ StatusCode BasicPerf :: execute ()
   //for (unsigned int i=0; i<m_truthPt_lep->size(); i++) {ANA_MSG_VERBOSE(m_truthPt_lep->at(i) << " all");}
 
   ANA_MSG_VERBOSE( "Number of particles " << vec_of_truth_pointers.size() << " electrons " << num_electrons << " muons " << num_muons);
-  
-
 
   std::vector< const xAOD::TrackParticle* > vec_of_electrontrack_pointers;
   std::vector< const xAOD::TrackParticle* > vec_of_muontrack_pointers;
