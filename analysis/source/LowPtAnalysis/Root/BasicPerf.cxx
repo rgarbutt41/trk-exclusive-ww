@@ -230,20 +230,20 @@ StatusCode BasicPerf :: execute ()
   //std::vector< const xAOD::TruthParticle* > vec_of_electron_pointers;
   //std::vector< const xAOD::TruthParticle* > vec_of_muon_pointers;
 
-  std::cout<<"NEW EVENT!!!!!"<<std::endl;
+  ANA_MSG_VERBOSE( "NEW EVENT!!!!!" );
 
   for (const xAOD::Vertex *vert : *LowPtRoIVertices) {
-    std::cout<<"low pt roi vertex here: "<<vert->z()<<std::endl;
+    ANA_MSG_VERBOSE( "low pt roi vertex here: " << vert->z() );
   }    
 
   for (const xAOD::Electron *el : *electrons) {
     const xAOD::TrackParticle* tp = (el)->trackParticle();
-    std::cout<<"electron with pt: "<<el->pt()<<" and phi: "<<el->phi()<<" at: "<<tp->z0()<<std::endl;
+    ANA_MSG_VERBOSE( "electron with pt: " << el->pt() << " and phi: " << el->phi() << " at: " << tp->z0() );
   }    
 
   for (const xAOD::Muon *mu : *muons) {
     const xAOD::TrackParticle *mutrk = (mu)->primaryTrackParticle();
-    std::cout<<"muon with pt: "<<mu->pt()<<" and phi: "<<mu->phi()<<" at: "<<mutrk->z0()<<std::endl;
+    ANA_MSG_VERBOSE( "muon with pt: " << mu->pt() << " and phi: " << mu->phi() << " at: " << mutrk->z0() );
   }    
 
   // loop over the particles in the container
@@ -275,7 +275,6 @@ StatusCode BasicPerf :: execute ()
 	num_muons++;
 	m_truthPt_lep-> push_back (part->pt());
     }
-    ANA_MSG_VERBOSE( "Particle Pt " << part->pt() << " electrons " << num_electrons << " muons " << num_muons);
 
     /*
     //retrieve reco track matched to this particle (first one considered, TODO: improve!)
@@ -309,9 +308,9 @@ StatusCode BasicPerf :: execute ()
   if ( num_electrons+num_muons < 2 ) return StatusCode::SUCCESS;
 
   std::sort(m_truthPt_lep->begin(),m_truthPt_lep->end());
-  if ( m_truthPt_lep->at(m_truthPt_lep->size()-1) < 27000. && m_truthPt_lep->at(m_truthPt_lep->size()-2) < 20000.) return StatusCode::SUCCESS;
+  if ( m_truthPt_lep->at(m_truthPt_lep->size()-1) < 27000. || m_truthPt_lep->at(m_truthPt_lep->size()-2) < 20000.) return StatusCode::SUCCESS;
   for (unsigned int i=0; i<m_truthPt_lep->size(); i++) {ANA_MSG_VERBOSE(m_truthPt_lep->at(i) << " all");}
-  ANA_MSG_VERBOSE( "Number of particles " << vec_of_truth_pointers.size() << " electrons " << num_electrons << " muons " << num_muons);
+  ANA_MSG_VERBOSE( "Number of particles after selection" << vec_of_truth_pointers.size() << " electrons " << num_electrons << " muons " << num_muons);
   
 
 
