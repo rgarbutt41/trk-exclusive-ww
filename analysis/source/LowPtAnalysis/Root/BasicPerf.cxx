@@ -9,6 +9,20 @@
 #include <xAODEgamma/ElectronContainer.h>
 #include <xAODMuon/MuonContainer.h>
 
+#include <xAODTracking/Vertex.h>
+#include <xAODTracking/VertexContainer.h>
+#include <xAODTracking/VertexAuxContainer.h>
+
+#include <xAODTruth/TruthVertex.h>
+#include <xAODTruth/TruthVertexContainer.h>
+#include <xAODTruth/TruthVertexAuxContainer.h>
+
+#include <xAODEgamma/ElectronContainer.h>
+#include <xAODEgamma/ElectronAuxContainer.h>
+
+#include "xAODMuon/MuonContainer.h"
+#include "xAODMuon/MuonAuxContainer.h"
+
 BasicPerf :: BasicPerf (const std::string& name,
                                   ISvcLocator *pSvcLocator)
     : EL::AnaAlgorithm (name, pSvcLocator)
@@ -168,6 +182,21 @@ StatusCode BasicPerf :: execute ()
   ANA_CHECK (evtStore()->retrieve( LowPtRoIContainer, "LowPtRoITrackParticles"));
   ANA_MSG_DEBUG ("execute(): number of LowPt track particles = " << LowPtRoIContainer->size());
 
+  // get low-pT RoI vertices
+  const xAOD::VertexContainer* LowPtRoIVertices = 0;
+  ANA_CHECK (evtStore()->retrieve( LowPtRoIVertices, "LowPtRoIVertexContainer"));
+  ANA_MSG_DEBUG ("execute(): number of LowPt vertices = " << LowPtRoIVertices->size());
+  
+  // get electrons
+  const xAOD::ElectronContainer* electrons = 0;
+  ANA_CHECK (evtStore()->retrieve( electrons, "Electrons"));
+  ANA_MSG_DEBUG ("execute(): number of electrons = " << electrons->size());
+  
+  // get muons
+  const xAOD::MuonContainer* muons = 0;
+  ANA_CHECK (evtStore()->retrieve( muons, "Muons"));
+  ANA_MSG_DEBUG ("execute(): number of muons = " << muons->size());
+
   hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing(), trackParts->size()+LowPtRoIContainer->size() );
   hist("num_reco_tracks_vs_actualints")->Fill(ei->averageInteractionsPerCrossing(), trackParts->size()+LowPtRoIContainer->size() );
   hist("num_reco_tracks_vs_num_truth_parts")->Fill(truthParts->size(), trackParts->size()+LowPtRoIContainer->size() );
@@ -200,6 +229,22 @@ StatusCode BasicPerf :: execute ()
   std::vector< const xAOD::TruthParticle* > vec_of_truth_pointers;
   //std::vector< const xAOD::TruthParticle* > vec_of_electron_pointers;
   //std::vector< const xAOD::TruthParticle* > vec_of_muon_pointers;
+
+  std::cout<<"NEW EVENT!!!!!"<<std::endl;
+
+  for (const xAOD::Vertex *vert : *LowPtRoIVertices) {
+    std::cout<<"low pt roi vertex here: "<<vert->z()<<std::endl;
+  }    
+
+  for (const xAOD::Electron *el : *electrons) {
+    const xAOD::TrackParticle* tp = (el)->trackParticle();
+    std::cout<<"electron with pt: "<<el->pt()<<" and phi: "<<el->phi()<<" at: "<<tp->z0()<<std::endl;
+  }    
+
+  for (const xAOD::Muon *mu : *muons) {
+    const xAOD::TrackParticle *mutrk = (mu)->primaryTrackParticle();
+    std::cout<<"muon with pt: "<<mu->pt()<<" and phi: "<<mu->phi()<<" at: "<<mutrk->z0()<<std::endl;
+  }    
 
   // loop over the particles in the container
   for (const xAOD::TruthParticle *part : *truthParts) {    
