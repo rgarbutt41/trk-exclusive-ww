@@ -10,6 +10,9 @@ parser.add_option( '-s', '--submission-dir', dest = 'submission_dir',
 parser.add_option( '-i', '--input-dir', dest = 'input_dir',
                    action = 'store', type = 'string', default = '/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/trk-exclusive-ww-athena/run/Mar19_arraytest_1',
                    help = 'Input directory with xAOD files' )
+parser.add_option('-n', '--nevents', dest = 'nevents',
+                  action = 'store', type='int', default=-1,
+                  help = "Set maximum number of events")
 parser.add_option('-d', '--debug', dest = 'debug',
                   action = 'store', type='int', default=0,
                   help = "Enable DEBUG printout: 0=INFO, 1=DEBUG, 2=VERBOSE")
@@ -32,7 +35,10 @@ sh.printContent()
 # Create an EventLoop job.
 job = ROOT.EL.Job()
 job.sampleHandler( sh )
-job.options().setDouble( ROOT.EL.Job.optMaxEvents, 15000 )
+if (options.nevents >= 0):
+    job.options().setDouble( ROOT.EL.Job.optMaxEvents, options.nevents )
+# enable athena access mode for xAOD produced without derivation framework (slower)
+job.options().setString( ROOT.EL.Job.optXaodAccessMode, ROOT.EL.Job.optXaodAccessMode_athena ); 
 job.outputAdd (ROOT.EL.OutputStream ('ANALYSIS'))
 
 
