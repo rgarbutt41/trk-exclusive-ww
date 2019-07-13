@@ -24,17 +24,13 @@ public:
 
 private:
   // Configuration, and any other types of variables go here.
-  //float m_cutValue;
-  //TTree *m_myTree;
-  //TH1 *m_myHist;
   std::vector< std::pair<float,float> > m_muBinning;
 
-  /// output variables for the current event
-  /// \{
+  /** output variables for the current event
+   * \@{ */
   unsigned int m_runNumber = 0; ///< Run number
   unsigned long long m_eventNumber = 0; ///< Event number
   unsigned int m_mu = 0; ///< actual average interactions per bunch crossing
-  /// Jet 4-momentum variables
 
   //Truth particles
   std::vector<float> *m_truthEta = nullptr;
@@ -57,6 +53,8 @@ private:
   std::vector<float> *m_trackd0 = nullptr;
   std::vector<int> *m_trackNSiHits = nullptr;
   std::vector<int> *m_trackMatchID = nullptr;
+
+  /** \@} */
 
   //Helper functions
   std::string getStrMuRange(float low, float high);

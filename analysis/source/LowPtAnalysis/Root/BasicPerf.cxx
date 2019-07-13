@@ -184,18 +184,24 @@ StatusCode BasicPerf :: execute ()
 
   // get low-pT RoI vertices
   const xAOD::VertexContainer* LowPtRoIVertices = 0;
-  ANA_CHECK (evtStore()->retrieve( LowPtRoIVertices, "LowPtRoIVertexContainer"));
-  ANA_MSG_DEBUG ("execute(): number of LowPt vertices = " << LowPtRoIVertices->size());
+  if (evtStore()->contains<xAOD::VertexContainer>("LowPtRoIVertexContainer")) {
+      ANA_CHECK (evtStore()->retrieve( LowPtRoIVertices, "LowPtRoIVertexContainer"));
+      ANA_MSG_DEBUG ("execute(): number of LowPt vertices = " << LowPtRoIVertices->size());
+  }
   
   // get electrons
   const xAOD::ElectronContainer* electrons = 0;
-  ANA_CHECK (evtStore()->retrieve( electrons, "Electrons"));
-  ANA_MSG_DEBUG ("execute(): number of electrons = " << electrons->size());
+  if (evtStore()->contains<xAOD::ElectronContainer>("Electrons")) {
+    ANA_CHECK (evtStore()->retrieve( electrons, "Electrons"));
+    ANA_MSG_DEBUG ("execute(): number of electrons = " << electrons->size());
+  }
   
   // get muons
   const xAOD::MuonContainer* muons = 0;
-  ANA_CHECK (evtStore()->retrieve( muons, "Muons"));
-  ANA_MSG_DEBUG ("execute(): number of muons = " << muons->size());
+  if (evtStore()->contains<xAOD::MuonContainer>("Muons")) {
+    ANA_CHECK (evtStore()->retrieve( muons, "Muons"));
+    ANA_MSG_DEBUG ("execute(): number of muons = " << muons->size());
+  }
 
   hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing(), trackParts->size()+LowPtRoIContainer->size() );
   hist("num_reco_tracks_vs_actualints")->Fill(ei->averageInteractionsPerCrossing(), trackParts->size()+LowPtRoIContainer->size() );
@@ -236,49 +242,54 @@ StatusCode BasicPerf :: execute ()
   //std::vector< const xAOD::TruthParticle* > vec_of_electron_pointers;
   //std::vector< const xAOD::TruthParticle* > vec_of_muon_pointers;
 
-  std::cout<<"NEW EVENT!!!!!"<<std::endl;
+  ATH_MSG_DEBUG("NEW EVENT!!!!!");
 
-  for (const xAOD::Vertex *vert : *LowPtRoIVertices) {
-    std::cout<<"low pt roi vertex here: "<<vert->z()<<" lead z "<<vert->auxdata<double>("perigee_z0_lead")<<" sublead z "<<vert->auxdata<double>("perigee_z0_sublead")<<std::endl;
-  }    
+  if (LowPtRoIVertices) {
+    for (const xAOD::Vertex *vert : *LowPtRoIVertices) {
+      std::cout<<"low pt roi vertex here: "<<vert->z()<<" lead z "<<vert->auxdata<double>("perigee_z0_lead")<<" sublead z "<<vert->auxdata<double>("perigee_z0_sublead")<<std::endl;
+    }    
+  }
 
-  
-  for (const xAOD::Electron *el : *electrons) {
-    if(el->pt() < 12000. || std::abs(el->eta()) > 2.5 ) continue;
-    //if( el->pt() > 20000. ) goodElectrons.push_back(el);
-    if( el->pt() > 12000. ) goodElectrons.push_back(el);
-    /*std::cout<<"electron with pt: "<<el->pt()<<" and phi: "<<el->phi()<<std::endl;
-    if( (el)->isAvailable< std::vector < ElementLink < xAOD::TrackParticleContainer > > > ("trackParticleLinks") ){
-      std::vector< ElementLink < xAOD::TrackParticleContainer > > electrontrackLinks = (el)->auxdata< std::vector< ElementLink < xAOD::TrackParticleContainer > > >("trackParticleLinks");
-
-      for(unsigned int ell = 0; ell < electrontrackLinks.size(); ell++){
+  if(electrons){
+    for (const xAOD::Electron *el : *electrons) {
+      if(el->pt() < 12000. || std::abs(el->eta()) > 2.5 ) continue;
+      //if( el->pt() > 20000. ) goodElectrons.push_back(el);
+      if( el->pt() > 12000. ) goodElectrons.push_back(el);
+      /*std::cout<<"electron with pt: "<<el->pt()<<" and phi: "<<el->phi()<<std::endl;
+	if( (el)->isAvailable< std::vector < ElementLink < xAOD::TrackParticleContainer > > > ("trackParticleLinks") ){
+	std::vector< ElementLink < xAOD::TrackParticleContainer > > electrontrackLinks = (el)->auxdata< std::vector< ElementLink < xAOD::TrackParticleContainer > > >("trackParticleLinks");
+	
+	for(unsigned int ell = 0; ell < electrontrackLinks.size(); ell++){
 	if(electrontrackLinks.at(ell).isValid()) {
-	  if( (*electrontrackLinks.at(ell))->isAvailable< ElementLink < xAOD::TrackParticleContainer > > ("originalTrackParticle") ){
-	    ElementLink < xAOD::TrackParticleContainer > originlink = (*electrontrackLinks.at(ell))->auxdata< ElementLink < xAOD::TrackParticleContainer >  >("originalTrackParticle");
-
-	    if(originlink.isValid()){
-	      std::cout<<"         at: "<<(*originlink)->z0()<<" with d0: "<<(*originlink)->d0()<<" track pt : "<<(*originlink)->pt()<<" eta: "<<(*originlink)->eta()<<" phi: "<<(*originlink)->phi()<<std::endl;
-	    }
-	  }
+	if( (*electrontrackLinks.at(ell))->isAvailable< ElementLink < xAOD::TrackParticleContainer > > ("originalTrackParticle") ){
+	ElementLink < xAOD::TrackParticleContainer > originlink = (*electrontrackLinks.at(ell))->auxdata< ElementLink < xAOD::TrackParticleContainer >  >("originalTrackParticle");
+	
+	if(originlink.isValid()){
+	std::cout<<"         at: "<<(*originlink)->z0()<<" with d0: "<<(*originlink)->d0()<<" track pt : "<<(*originlink)->pt()<<" eta: "<<(*originlink)->eta()<<" phi: "<<(*originlink)->phi()<<std::endl;
 	}
-      }
-    }*/
-  }    
+	}
+	}
+	}
+	}*/
+    }    
+  }
 
-  for (const xAOD::Muon *mu : *muons) {
-    if(mu->pt() < 12000. || std::abs(mu->eta()) > 2.5 ) continue;
-    //if( mu->pt() > 20000. ) goodMuons.push_back(mu);
-    if( mu->pt() > 12000. ) goodMuons.push_back(mu);
-    /*std::cout<<"muon with pt: "<<mu->pt()<<" and phi: "<<mu->phi()<<std::endl;
-    if( (mu)->isAvailable< ElementLink< xAOD::TrackParticleContainer > > ("inDetTrackParticleLink") ){
-      ElementLink< xAOD::TrackParticleContainer > muontrackLink = (mu)->auxdata< ElementLink< xAOD::TrackParticleContainer >  >("inDetTrackParticleLink");
-      if(muontrackLink.isValid()) {
+  if(muons){
+    for (const xAOD::Muon *mu : *muons) {
+      if(mu->pt() < 12000. || std::abs(mu->eta()) > 2.5 ) continue;
+      //if( mu->pt() > 20000. ) goodMuons.push_back(mu);
+      if( mu->pt() > 12000. ) goodMuons.push_back(mu);
+      /*std::cout<<"muon with pt: "<<mu->pt()<<" and phi: "<<mu->phi()<<std::endl;
+	if( (mu)->isAvailable< ElementLink< xAOD::TrackParticleContainer > > ("inDetTrackParticleLink") ){
+	ElementLink< xAOD::TrackParticleContainer > muontrackLink = (mu)->auxdata< ElementLink< xAOD::TrackParticleContainer >  >("inDetTrackParticleLink");
+	if(muontrackLink.isValid()) {
 	std::cout<<"         at: "<<(*muontrackLink)->z0()<<" with d0: "<<(*muontrackLink)->d0()<<" track pt : "<<(*muontrackLink)->pt()<<" eta: "<<(*muontrackLink)->eta()<<" phi: "<<(*muontrackLink)->phi()<<std::endl;
 	
-      }
-      }*/
+	}
+	}*/
+    }
   }
-  
+
   std::vector<float> mumu_rois;
   std::vector<float> emu_rois;
   std::vector<float> ee_rois;
@@ -355,6 +366,27 @@ StatusCode BasicPerf :: execute ()
     std::cout<<"indetrackpart with pt: "<<trkpart->pt()<<" and phi: "<<trkpart->phi()<<" at: "<<trkpart->z0()<<std::endl;
   }
   
+  /*
+  if (LowPtRoIVertices) {
+    for (const xAOD::Vertex *vert : *LowPtRoIVertices) {
+      ATH_MSG_DEBUG("low pt roi vertex here: "<<vert->z());
+    }
+  }    
+
+  if (electrons) {
+    for (const xAOD::Electron *el : *electrons) {
+      const xAOD::TrackParticle* tp = (el)->trackParticle();
+      ATH_MSG_VERBOSE("electron with pt: "<<el->pt()<<" and phi: "<<el->phi()<<" at: "<<tp->z0());
+    }    
+  }
+
+  if (muons) {
+    for (const xAOD::Muon *mu : *muons) {
+      const xAOD::TrackParticle *mutrk = (mu)->primaryTrackParticle();
+      ATH_MSG_VERBOSE("muon with pt: "<<mu->pt()<<" and phi: "<<mu->phi()<<" at: "<<mutrk->z0());
+    }
+  }
+  */
 
   // loop over the particles in the container
   for (const xAOD::TruthParticle *part : *truthParts) {    
@@ -385,7 +417,6 @@ StatusCode BasicPerf :: execute ()
 	num_muons++;
 	m_truthPt_lep-> push_back (part->pt());
     }
-    ANA_MSG_VERBOSE( "Particle Pt " << part->pt() << " electrons " << num_electrons << " muons " << num_muons);
 
     /*
     //retrieve reco track matched to this particle (first one considered, TODO: improve!)
@@ -416,14 +447,13 @@ StatusCode BasicPerf :: execute ()
 
   } // end for loop over truth particles
 
-  if ( num_electrons+num_muons < 2 ) return StatusCode::SUCCESS;
+  //apply event-based fiducial selection, if any
+  //if ( num_electrons+num_muons < 2 ) return StatusCode::SUCCESS;
+  //std::sort(m_truthPt_lep->begin(),m_truthPt_lep->end());
+  //if ( m_truthPt_lep->at(m_truthPt_lep->size()-1) < 27000. && m_truthPt_lep->at(m_truthPt_lep->size()-2) < 20000.) return StatusCode::SUCCESS;
+  //for (unsigned int i=0; i<m_truthPt_lep->size(); i++) {ANA_MSG_VERBOSE(m_truthPt_lep->at(i) << " all");}
 
-  std::sort(m_truthPt_lep->begin(),m_truthPt_lep->end());
-  if ( m_truthPt_lep->at(m_truthPt_lep->size()-1) < 27000. && m_truthPt_lep->at(m_truthPt_lep->size()-2) < 20000.) return StatusCode::SUCCESS;
-  for (unsigned int i=0; i<m_truthPt_lep->size(); i++) {ANA_MSG_VERBOSE(m_truthPt_lep->at(i) << " all");}
   ANA_MSG_VERBOSE( "Number of particles " << vec_of_truth_pointers.size() << " electrons " << num_electrons << " muons " << num_muons);
-  
-
 
   std::vector< const xAOD::TrackParticle* > vec_of_electrontrack_pointers;
   std::vector< const xAOD::TrackParticle* > vec_of_muontrack_pointers;
@@ -435,10 +465,13 @@ StatusCode BasicPerf :: execute ()
   int truthMatchIndex=-2; //-2 = not matched; -1 = matched, no particle found; >=0 link to position in truth particle branches  
 
   //start loop over track particles (both containers)
+  int overallIndex=-1;
   for (int i=0; i<2; i++) {
     auto container = trackParts;
     if (i == 1) container = LowPtRoIContainer;
     for (const xAOD::TrackParticle *track_part : *container) {
+
+      overallIndex++;
 
       int track_is_matched = 0;
       int track_matched_id = 0;
@@ -456,14 +489,15 @@ StatusCode BasicPerf :: execute ()
       m_trackProperties->push_back( track_part->auxdataConst<unsigned char>("trackProperties") );
       m_trackPatternRecoInfo->push_back( track_part->auxdataConst<unsigned long>("patternRecoInfo") );
       m_trackParticleHypothesis->push_back( track_part->auxdataConst<unsigned char>("particleHypothesis") ); //1 = electron, 2 = muon
-      m_trackz0-> push_back( track_part->auxdataConst<float>("z0") );    
-      m_trackd0-> push_back( track_part->auxdataConst<float>("d0") );    
+      m_trackz0-> push_back( track_part->z0() );    
+      m_trackd0-> push_back( track_part->d0() );    
       m_trackNSiHits-> push_back( track_part->auxdataConst<unsigned char>("numberOfPixelHits") + track_part->auxdataConst<unsigned char>("numberOfSCTHits") );
       
-      vec_of_track_z0s.push_back(track_part->auxdataConst<float>("z0"));
+      vec_of_track_z0s.push_back(track_part->z0());
       
       //check truth link    
       float probMatch = track_part->auxdataConst<float>("truthMatchProbability");
+      ATH_MSG_VERBOSE(overallIndex << ": prob = " << probMatch);
       
       hist("Frac_reco_track_with_lowmatchprob_vs_track_pt")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
       int muBinIdx=getMuBin(ei->actualInteractionsPerCrossing());

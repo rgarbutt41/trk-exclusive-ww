@@ -15,8 +15,10 @@ from RecExConfig.RecAlgsFlags import recAlgs
 # Event related parameters and input files
 #--------------------------------------------------------------
 
-# Incl WW
+# Exclusive dilepton
 #athenaCommonFlags.FilesInput = ["/global/project/projectdirs/atlas/adimitri/Samples_exclusiveWW/mc16_13TeV.363754.Herwig7EvtGen_BudnevQED_ggTOmumu_45M100_LeptonFilter.recon.RDO.e7175_e5984_s3126_r10201/RDO.16716257._000003.pool.root.1"]
+# Inclusive WW no PileUp
+#athenaCommonFlags.FilesInput = ["/global/project/projectdirs/atlas/adimitri/Samples_exclusiveWW/InclusiveWW_361600_fromHITS_noPileUp/file.RDO.2.pool.root"]
 # ttbar FP-Truth
 athenaCommonFlags.FilesInput = ["/global/projecta/projectdirs/atlas/spgriso/data/ExclWW/data/RDO/mc16_13TeV.410471.PhPy8EG_A14_ttbar_hdamp258p75_allhad.recon.RDO.e6337_s3126_r11193/RDO.16844823._000053.pool.root.1"]
 
