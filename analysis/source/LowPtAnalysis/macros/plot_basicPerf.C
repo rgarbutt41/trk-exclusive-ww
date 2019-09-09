@@ -61,6 +61,46 @@ void plot_fakerate(TString inputHistFile) {
   c->SaveAs("fakerate.png");
 }
 
+
+void plot_avgNfake(TString inputHistFile) {
+
+  //TFile *f_mu0 = TFile::Open("fakes-inclWW-lowpt-01/hist-Inclusive_withflag_AODs.root");  
+  TFile *f = TFile::Open(inputHistFile.Data());
+
+  TProfile *h_avgN = (TProfile*)f->Get("AverageN_reco_tracks_lowmatchprob_vs_track_pt");  
+
+  gStyle->SetOptStat(0);
+  gStyle->SetFrameBorderMode(0);
+  gStyle->SetPadTopMargin(0.05);
+  gStyle->SetOptTitle(0);
+  gStyle->SetTitleXOffset(1.4);
+  gStyle->SetTitleYOffset(1.4);
+  gStyle->SetTextSize(0.05);
+  gStyle->SetLabelSize(0.05, "x");
+  gStyle->SetTitleSize(0.05, "x");  
+  gStyle->SetLabelSize(0.05, "y");
+  gStyle->SetTitleSize(0.05, "y");
+  gStyle->SetEndErrorSize(0.);
+  TCanvas *c = new TCanvas();
+  TLegend *l = new TLegend (0.7, 0.75, 0.9, 0.95);
+
+  h_avgN->SetXTitle("p_{T} (MeV)");
+  h_avgN->SetYTitle("Average N fake tracks");  
+  h_avgN->SetLineWidth(3);
+  h_avgN->SetLineColor(kRed+2);
+  h_avgN->SetLineStyle(0);
+  h_avgN->SetLineStyle(0);    
+
+  h_avgN->Draw("PE");
+  h_avgN->GetXaxis()->SetRangeUser(100., 500.); //focus on low-pT
+  h_avgN->GetYaxis()->SetRangeUser(0.0, 0.35); //focus on low-pT  
+
+  l->AddEntry(h_avgN, "any #mu");
+  l->Draw();
+
+  c->SaveAs("avgNfake.png");
+}
+
 void plot_efficiency(TString inputHistFile) {
 
   //TFile *f_mu0 = TFile::Open("fakes-inclWW-lowpt-01/hist-Inclusive_withflag_AODs.root");  
@@ -125,4 +165,5 @@ void plot_efficiency(TString inputHistFile) {
 void plot_basicPerf(TString inputHistFile) {
   plot_efficiency(inputHistFile);
   plot_fakerate(inputHistFile);
+  plot_avgNfake(inputHistFile);
 }

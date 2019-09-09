@@ -118,6 +118,7 @@ StatusCode BasicPerf :: initialize ()
   ANA_CHECK (book ( TProfile("num_reco_tracks_vs_num_truth_parts","num_reco_tracks_vs_num_truth_parts",50, 0, 5000) ) );
 
   ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt","Frac_reco_track_with_lowmatchprob_vs_track_pt",200, 0, 10000.) ) );
+  ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt_nearHS","Frac_reco_track_with_lowmatchprob_vs_track_pt_nearHS",200, 0, 10000.) ) );
   ANA_CHECK (book ( TProfile("Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt","Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt",40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("AverageN_reco_tracks_lowmatchprob_vs_track_pt","AverageN_reco_tracks_lowmatchprob_vs_track_pt",200, 0, 10000.) ) );
   ANA_CHECK (book ( TH1F("AverageN_reco_tracks_goodprob_vs_track_pt","AverageN_reco_tracks_goodprob_vs_track_pt",200, 0, 10000.) ) );
@@ -527,6 +528,9 @@ for (const xAOD::TruthVertex *vxt : *truthVertex) {
       ATH_MSG_VERBOSE(overallIndex << ": prob = " << probMatch);
       
       hist("Frac_reco_track_with_lowmatchprob_vs_track_pt")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
+      if( std::abs( track_part->auxdataConst<float>("z0") - theHSvertex) < 1.5 ){
+	hist("Frac_reco_track_with_lowmatchprob_vs_track_pt_nearHS")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
+      }
       int muBinIdx=getMuBin(ei->actualInteractionsPerCrossing());
       if (muBinIdx >= 0) {
 	auto muBin = m_muBinning[muBinIdx];
