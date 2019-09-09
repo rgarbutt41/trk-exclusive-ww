@@ -250,6 +250,12 @@ StatusCode BasicPerf :: execute ()
   //int num_electrons_withtrack = 0;
   //int num_muons_withtrack = 0;
 
+  std::vector<const xAOD::TrackParticle*> goodElectronsTracks;
+  std::vector<const xAOD::TrackParticle*> goodMuonsTracks;
+
+  std::vector<const xAOD::Electron*> goodElectrons;
+  std::vector<const xAOD::Muon*> goodMuons;
+
   std::vector< const xAOD::TruthParticle* > vec_of_truth_pointers;
   //std::vector< const xAOD::TruthParticle* > vec_of_electron_pointers;
   //std::vector< const xAOD::TruthParticle* > vec_of_muon_pointers;
@@ -257,6 +263,129 @@ StatusCode BasicPerf :: execute ()
   Nevent++;
   ATH_MSG_DEBUG("NEW EVENT!!!!!");
 
+  if (LowPtRoIVertices) {
+    for (const xAOD::Vertex *vert : *LowPtRoIVertices) {
+      std::cout<<"low pt roi vertex here: "<<vert->z()<<" lead z "<<vert->auxdata<double>("perigee_z0_lead")<<" sublead z "<<vert->auxdata<double>("perigee_z0_sublead")<<std::endl;
+    }    
+  }
+
+  if(electrons){
+    for (const xAOD::Electron *el : *electrons) {
+      if(el->pt() < 12000. || std::abs(el->eta()) > 2.5 ) continue;
+      //if( el->pt() > 20000. ) goodElectrons.push_back(el);
+      if( el->pt() > 12000. ) goodElectrons.push_back(el);
+      /*std::cout<<"electron with pt: "<<el->pt()<<" and phi: "<<el->phi()<<std::endl;
+	if( (el)->isAvailable< std::vector < ElementLink < xAOD::TrackParticleContainer > > > ("trackParticleLinks") ){
+	std::vector< ElementLink < xAOD::TrackParticleContainer > > electrontrackLinks = (el)->auxdata< std::vector< ElementLink < xAOD::TrackParticleContainer > > >("trackParticleLinks");
+	
+	for(unsigned int ell = 0; ell < electrontrackLinks.size(); ell++){
+	if(electrontrackLinks.at(ell).isValid()) {
+	if( (*electrontrackLinks.at(ell))->isAvailable< ElementLink < xAOD::TrackParticleContainer > > ("originalTrackParticle") ){
+	ElementLink < xAOD::TrackParticleContainer > originlink = (*electrontrackLinks.at(ell))->auxdata< ElementLink < xAOD::TrackParticleContainer >  >("originalTrackParticle");
+	
+	if(originlink.isValid()){
+	std::cout<<"         at: "<<(*originlink)->z0()<<" with d0: "<<(*originlink)->d0()<<" track pt : "<<(*originlink)->pt()<<" eta: "<<(*originlink)->eta()<<" phi: "<<(*originlink)->phi()<<std::endl;
+	}
+	}
+	}
+	}
+	}*/
+    }    
+  }
+
+  if(muons){
+    for (const xAOD::Muon *mu : *muons) {
+      if(mu->pt() < 12000. || std::abs(mu->eta()) > 2.5 ) continue;
+      //if( mu->pt() > 20000. ) goodMuons.push_back(mu);
+      if( mu->pt() > 12000. ) goodMuons.push_back(mu);
+      /*std::cout<<"muon with pt: "<<mu->pt()<<" and phi: "<<mu->phi()<<std::endl;
+	if( (mu)->isAvailable< ElementLink< xAOD::TrackParticleContainer > > ("inDetTrackParticleLink") ){
+	ElementLink< xAOD::TrackParticleContainer > muontrackLink = (mu)->auxdata< ElementLink< xAOD::TrackParticleContainer >  >("inDetTrackParticleLink");
+	if(muontrackLink.isValid()) {
+	std::cout<<"         at: "<<(*muontrackLink)->z0()<<" with d0: "<<(*muontrackLink)->d0()<<" track pt : "<<(*muontrackLink)->pt()<<" eta: "<<(*muontrackLink)->eta()<<" phi: "<<(*muontrackLink)->phi()<<std::endl;
+	
+	}
+	}*/
+    }
+  }
+
+  std::vector<float> mumu_rois;
+  std::vector<float> emu_rois;
+  std::vector<float> ee_rois;
+  
+  for(unsigned int i = 0; i < goodMuons.size(); i++){
+    for(unsigned int j = 0; j < goodMuons.size(); j++){
+      if( i < j){
+	
+	if( (goodMuons.at(i)->pt()/1000. > 12. && goodMuons.at(j)->pt()/1000. > 15.) || (goodMuons.at(i)->pt()/1000. > 15. && goodMuons.at(j)->pt()/1000. > 12.) ){
+
+	  const xAOD::TrackParticle* tpi = goodMuons.at(i)->primaryTrackParticle();
+	  const xAOD::TrackParticle* tpj = goodMuons.at(j)->primaryTrackParticle();
+
+	  if(std::abs( tpi->z0() - tpj->z0() ) < 1.0 ){
+
+	    mumu_rois.push_back( (tpi->z0() + tpj->z0())/2. );
+
+	    std::cout<<"mumu roi "<<(tpi->z0() + tpj->z0())/2.<<" mu pt1 "<<goodMuons.at(i)->pt()/1000.<<" mu pt2 "<<goodMuons.at(j)->pt()/1000.<<std::endl;
+
+	  }
+	}
+      }
+    }
+  }
+  
+  for(unsigned int i = 0; i < goodMuons.size(); i++){
+    for(unsigned int j = 0; j < goodElectrons.size(); j++){
+      if( i < j){
+	
+	if( (goodMuons.at(i)->pt()/1000. > 12. && goodElectrons.at(j)->pt()/1000. > 15.) || (goodMuons.at(i)->pt()/1000. > 15. && goodElectrons.at(j)->pt()/1000. > 12.) ){
+	  
+	  const xAOD::TrackParticle* tpi = goodMuons.at(i)->primaryTrackParticle();
+	  const xAOD::TrackParticle* tpj = goodElectrons.at(j)->trackParticle();
+	  
+	  if(std::abs( tpi->z0() - tpj->z0() ) < 1.0 ){
+	    
+	    emu_rois.push_back( (tpi->z0() + tpj->z0())/2. );
+	    
+	    std::cout<<"emu roi "<<(tpi->z0() + tpj->z0())/2.<<" mu pt "<<goodMuons.at(i)->pt()/1000.<<" e pt "<<goodElectrons.at(j)->pt()/1000.<<std::endl;
+	    
+	  }
+	}
+      }
+    }
+  }
+
+
+  for(unsigned int i = 0; i < goodElectrons.size(); i++){
+    for(unsigned int j = 0; j < goodElectrons.size(); j++){
+      if( i < j ){
+	
+	if( (goodElectrons.at(i)->pt()/1000. > 12. && goodElectrons.at(j)->pt()/1000. > 15.) || (goodElectrons.at(i)->pt()/1000. > 15. && goodElectrons.at(j)->pt()/1000. > 12.) ){
+
+	  const xAOD::TrackParticle* tpi = goodElectrons.at(i)->trackParticle();
+	  const xAOD::TrackParticle* tpj = goodElectrons.at(j)->trackParticle();
+	  
+	  if(std::abs( tpi->z0() - tpj->z0() ) < 1.0 ){
+
+	    ee_rois.push_back( (tpi->z0() + tpj->z0())/2. );
+
+	    std::cout<<"ee roi "<<(tpi->z0() + tpj->z0())/2.<<" e pt1 "<<goodElectrons.at(i)->pt()/1000.<<" e pt2 "<<goodElectrons.at(j)->pt()/1000.<<std::endl;
+
+	  }
+	}
+      }
+    }
+  }
+
+
+
+  
+  for (const xAOD::TrackParticle *trkpart : *trackParts) {
+    if(trkpart->pt()<10000.) continue;
+    std::cout<<"indetrackpart with pt: "<<trkpart->pt()<<" and phi: "<<trkpart->phi()<<" at: "<<trkpart->z0()<<std::endl;
+  }
+  
+  /*
   if (LowPtRoIVertices) {
     for (const xAOD::Vertex *vert : *LowPtRoIVertices) {
       ATH_MSG_DEBUG("low pt roi vertex here: "<<vert->z());
@@ -276,6 +405,7 @@ StatusCode BasicPerf :: execute ()
       ATH_MSG_VERBOSE("muon with pt: "<<mu->pt()<<" and phi: "<<mu->phi()<<" at: "<<mutrk->z0());
     }
   }
+  */
 
   // loop over the particles in the container
   for (const xAOD::TruthParticle *part : *truthParts) {    
