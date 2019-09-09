@@ -77,6 +77,9 @@ StatusCode BasicPerf :: initialize ()
   m_truthRecoIndex = new std::vector<int>();
   mytree->Branch ("TruthRecoIndex", &m_truthRecoIndex);
 
+  m_truthVertex = new std::vector<float>();
+  mytree->Branch ("TruthVertex", &m_truthVertex);
+
   //Reco tracks (see https://gitlab.cern.ch/atlas/athena/blob/21.2/Event/xAOD/xAODTracking/xAODTracking/TrackingPrimitives.h)
   m_trackPt = new std::vector<float>();
   mytree->Branch ("TrackPt", &m_trackPt);
@@ -115,6 +118,8 @@ StatusCode BasicPerf :: initialize ()
 
   ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt","Frac_reco_track_with_lowmatchprob_vs_track_pt",200, 0, 10000.) ) );
   ANA_CHECK (book ( TProfile("Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt","Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt",40, 0, 2000) ) );
+  ANA_CHECK (book ( TH1F("AverageN_reco_tracks_lowmatchprob_vs_track_pt","AverageN_reco_tracks_lowmatchprob_vs_track_pt",200, 0, 10000.) ) );
+  ANA_CHECK (book ( TH1F("AverageN_reco_tracks_goodprob_vs_track_pt","AverageN_reco_tracks_goodprob_vs_track_pt",200, 0, 10000.) ) );
   ANA_CHECK (book ( TH1F("Num_reco_track_with_lowmatchprob_vs_track_pt","Num_reco_track_with_lowmatchprob_vs_track_pt",40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_vs_track_pt","Num_reco_track_with_goodprob_vs_track_pt",40, 0, 2000) ) );
 
@@ -129,6 +134,12 @@ StatusCode BasicPerf :: initialize ()
   ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_foundtruth_vs_abs_d0_zoom","Num_reco_track_with_goodprob_and_foundtruth_vs_abs_d0_zoom",100, 0, 2) ) );
   ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_foundtruth_vs_abs_z0","Num_reco_track_with_goodprob_and_foundtruth_vs_abs_z0",300, 0, 300) ) );
   ANA_CHECK (book ( TH1F("Num_reco_track_with_goodprob_and_foundtruth_vs_numSiHits","Num_reco_track_with_goodprob_and_foundtruth_vs_numSiHits",20, 0, 20) ) );
+
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_lowmatchprob_vs_abs_d0_zoom","Num_reco_track_with_lowmatchprob_vs_abs_d0_zoom",100, 0, 2) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_lowmatchprob_vs_numSiHits","Num_reco_track_with_lowmatchprob_vs_numSiHits",20, 0, 20) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodmatchprob_vs_abs_d0_zoom","Num_reco_track_with_goodmatchprob_vs_abs_d0_zoom",100, 0, 2) ) );
+  ANA_CHECK (book ( TH1F("Num_reco_track_with_goodmatchprob_vs_numSiHits","Num_reco_track_with_goodmatchprob_vs_numSiHits",20, 0, 20) ) );
+
 
   //These two are filled as followed: if the particleHypothesis of a track is an electron (muon), the histogram will be filled.  If the track is truth-matched to an electron, the 1 bin is filled.  If the track is truth-matched to something else, or doesn't have a matched truth particle, the 0 bin is filled.  Charge matters.
   ANA_CHECK (book ( TH1F("Correctly_matched_electron_track","Correctly_matched_electron_track",2, 0, 2) ) );
@@ -154,6 +165,8 @@ StatusCode BasicPerf :: initialize ()
     hName += getStrMuRange(muBin.first, muBin.second);    
     ANA_CHECK (book( TProfile(hName.c_str(), hName.c_str(), 100, 0, 5000.) ));    
   }
+
+  Nevent=0;
 
   return StatusCode::SUCCESS;
 }
@@ -188,7 +201,12 @@ StatusCode BasicPerf :: execute ()
       ANA_CHECK (evtStore()->retrieve( LowPtRoIVertices, "LowPtRoIVertexContainer"));
       ANA_MSG_DEBUG ("execute(): number of LowPt vertices = " << LowPtRoIVertices->size());
   }
-  
+ 
+  // get truth vertex container of interest
+  const xAOD::TruthVertexContainer* truthVertex = 0;
+  ANA_CHECK (evtStore()->retrieve( truthVertex, "TruthVertices"));
+  ANA_MSG_DEBUG ("execute(): number of truth vertex = " << truthVertex->size());
+ 
   // get electrons
   const xAOD::ElectronContainer* electrons = 0;
   if (evtStore()->contains<xAOD::ElectronContainer>("Electrons")) {
@@ -204,7 +222,7 @@ StatusCode BasicPerf :: execute ()
   }
 
   hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing(), trackParts->size()+LowPtRoIContainer->size() );
-  hist("num_reco_tracks_vs_actualints")->Fill(ei->averageInteractionsPerCrossing(), trackParts->size()+LowPtRoIContainer->size() );
+  hist("num_reco_tracks_vs_avgints")->Fill(ei->averageInteractionsPerCrossing(), trackParts->size()+LowPtRoIContainer->size() );
   hist("num_reco_tracks_vs_num_truth_parts")->Fill(truthParts->size(), trackParts->size()+LowPtRoIContainer->size() );
 
   m_truthEta->clear();
@@ -225,17 +243,18 @@ StatusCode BasicPerf :: execute ()
   m_trackd0->clear();
   m_trackNSiHits->clear();
   m_trackMatchID->clear();
+  m_truthVertex->clear();
 
   int num_electrons = 0;
   int num_muons = 0;
   //int num_electrons_withtrack = 0;
   //int num_muons_withtrack = 0;
 
-
   std::vector< const xAOD::TruthParticle* > vec_of_truth_pointers;
   //std::vector< const xAOD::TruthParticle* > vec_of_electron_pointers;
   //std::vector< const xAOD::TruthParticle* > vec_of_muon_pointers;
 
+  Nevent++;
   ATH_MSG_DEBUG("NEW EVENT!!!!!");
 
   if (LowPtRoIVertices) {
@@ -317,13 +336,18 @@ StatusCode BasicPerf :: execute ()
 
   } // end for loop over truth particles
 
+for (const xAOD::TruthVertex *vxt : *truthVertex) { 
+  m_truthVertex->push_back (vxt->z());
+//std::cout<<vxt->z()<<" "<<vxt->id()<<" "<<vxt->barcode()<<std::endl;
+}
+
   //apply event-based fiducial selection, if any
   //if ( num_electrons+num_muons < 2 ) return StatusCode::SUCCESS;
   //std::sort(m_truthPt_lep->begin(),m_truthPt_lep->end());
-  //if ( m_truthPt_lep->at(m_truthPt_lep->size()-1) < 27000. && m_truthPt_lep->at(m_truthPt_lep->size()-2) < 20000.) return StatusCode::SUCCESS;
+  //if ( m_truthPt_lep->at(m_truthPt_lep->size()-1) < 27000. || m_truthPt_lep->at(m_truthPt_lep->size()-2) < 20000.) return StatusCode::SUCCESS;
   //for (unsigned int i=0; i<m_truthPt_lep->size(); i++) {ANA_MSG_VERBOSE(m_truthPt_lep->at(i) << " all");}
 
-  ANA_MSG_VERBOSE( "Number of particles " << vec_of_truth_pointers.size() << " electrons " << num_electrons << " muons " << num_muons);
+  //ANA_MSG_VERBOSE( "Number of particles after fiducial selection " << vec_of_truth_pointers.size() << " electrons " << num_electrons << " muons " << num_muons);
 
   std::vector< const xAOD::TrackParticle* > vec_of_electrontrack_pointers;
   std::vector< const xAOD::TrackParticle* > vec_of_muontrack_pointers;
@@ -354,7 +378,6 @@ StatusCode BasicPerf :: execute ()
       if(track_part->charge() < 0) trackhypo = -1*trackhypo;
       int trackhypo_isright = 0; //becomes 1 if the track is matched to the right charge/type of lepton at truth level
       
-      
       m_trackPt-> push_back (track_part->pt ());
       m_trackProperties->push_back( track_part->auxdataConst<unsigned char>("trackProperties") );
       m_trackPatternRecoInfo->push_back( track_part->auxdataConst<unsigned long>("patternRecoInfo") );
@@ -380,6 +403,9 @@ StatusCode BasicPerf :: execute ()
       
       if(probMatch < 0.5){
 	hist("Num_reco_track_with_lowmatchprob_vs_track_pt")->Fill( track_part->pt() );
+	if ( (m_truthVertex->at(0)-1)<track_part->z0() && (m_truthVertex->at(0)+1)>track_part->z0() ) hist("AverageN_reco_tracks_lowmatchprob_vs_track_pt")->Fill( track_part->pt() );
+	if ( (m_truthVertex->at(0)-1)<track_part->z0() && (m_truthVertex->at(0)+1)>track_part->z0() && track_part->pt()<500 ) hist("Num_reco_track_with_lowmatchprob_vs_abs_d0_zoom")->Fill( std::abs( track_part->auxdataConst<float>("d0") ) );
+        if ( (m_truthVertex->at(0)-1)<track_part->z0() && (m_truthVertex->at(0)+1)>track_part->z0() && track_part->pt()<500 ) hist("Num_reco_track_with_lowmatchprob_vs_numSiHits")->Fill( track_part->auxdataConst<unsigned char>("numberOfPixelHits") + track_part->auxdataConst<unsigned char>("numberOfSCTHits") );
       }
       
       m_TruthMatchProb->push_back(probMatch);
@@ -438,7 +464,10 @@ StatusCode BasicPerf :: execute ()
       m_trackTruthIndex->push_back(truthMatchIndex);
       
       if(probMatch >= 0.5){
-	hist("Num_reco_track_with_goodprob_vs_track_pt")->Fill( track_part->pt() );	
+	hist("Num_reco_track_with_goodprob_vs_track_pt")->Fill( track_part->pt() );
+        if ( (m_truthVertex->at(0)-1)<track_part->z0() && (m_truthVertex->at(0)+1)>track_part->z0() ) hist("AverageN_reco_tracks_goodprob_vs_track_pt")->Fill( track_part->pt() );
+	if ( (m_truthVertex->at(0)-1)<track_part->z0() && (m_truthVertex->at(0)+1)>track_part->z0() && track_part->pt()<500 ) hist("Num_reco_track_with_goodmatchprob_vs_abs_d0_zoom")->Fill( std::abs( track_part->auxdataConst<float>("d0") ) );
+	if ( (m_truthVertex->at(0)-1)<track_part->z0() && (m_truthVertex->at(0)+1)>track_part->z0() && track_part->pt()<500 ) hist("Num_reco_track_with_goodmatchprob_vs_numSiHits")->Fill( track_part->auxdataConst<unsigned char>("numberOfPixelHits") + track_part->auxdataConst<unsigned char>("numberOfSCTHits") );
 	if(truth_barcode_is_zero > 0.1 || truth_link_not_valid > 0.1 || no_truth_link_available > 0.1){
 	  hist("Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt")->Fill( track_part->pt() , 1.0);
 	  hist("Num_reco_track_with_goodprob_and_missingtruth_vs_track_pt")->Fill( track_part->pt() );
@@ -460,7 +489,6 @@ StatusCode BasicPerf :: execute ()
       } else{
 	m_trackMatchID->push_back (0);      
       }
-      
       
     } // end for loop over track particles
   }
@@ -533,6 +561,11 @@ StatusCode BasicPerf :: finalize ()
   // Most of the time you want to do your post-processing on the
   // submission node after all your histogram outputs have been
   // merged.
+
+  hist("AverageN_reco_tracks_lowmatchprob_vs_track_pt")->Scale(1./Nevent);
+  hist("AverageN_reco_tracks_goodprob_vs_track_pt")->Scale(1./Nevent);
+  ANA_MSG_VERBOSE( "Total number of events is " << Nevent );
+
   return StatusCode::SUCCESS;
 }
 
@@ -546,6 +579,8 @@ BasicPerf :: ~BasicPerf () {
   delete m_truthQoverP;
   delete m_truthPDGID;
   delete m_truthRecoIndex;
+
+  delete m_truthVertex;
 
   delete m_trackPt;
   delete m_TruthMatchProb;

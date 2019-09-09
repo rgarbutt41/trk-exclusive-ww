@@ -54,6 +54,11 @@ private:
   std::vector<int> *m_trackNSiHits = nullptr;
   std::vector<int> *m_trackMatchID = nullptr;
 
+  std::vector<float> *m_truthVertex = nullptr;
+
+  //Number of Events
+  int Nevent;
+
   /** \@} */
 
   //Helper functions
