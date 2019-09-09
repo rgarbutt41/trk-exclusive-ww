@@ -105,6 +105,7 @@ StatusCode BasicPerf :: initialize ()
 
 
   ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt", "Reco_eff_vs_track_pt", 200, 0, 10000.0) ));
+  ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt_nearHS", "Reco_eff_vs_track_pt_nearHS", 200, 0, 10000.0) ));
   ANA_CHECK (book ( TH2F ("TruthRecoIndex_and_TruthPt", "TruthRecoIndex_and_TruthPt", 50, -10, 90, 40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("num_matched_truth_particles_vs_truth_pt","num_matched_truth_particles_vs_truth_pt",40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("num_matched_track_particles_vs_track_pt","num_matched_track_particles_vs_track_pt",40, 0, 2000) ) );
@@ -263,9 +264,12 @@ StatusCode BasicPerf :: execute ()
   Nevent++;
   ATH_MSG_DEBUG("NEW EVENT!!!!!");
 
+  float theHSvertex = -999.0;
+
   if (LowPtRoIVertices) {
     for (const xAOD::Vertex *vert : *LowPtRoIVertices) {
-      std::cout<<"low pt roi vertex here: "<<vert->z()<<" lead z "<<vert->auxdata<double>("perigee_z0_lead")<<" sublead z "<<vert->auxdata<double>("perigee_z0_sublead")<<std::endl;
+      ATH_MSG_DEBUG("low pt roi vertex here: "<<vert->z()<<" lead z "<<vert->auxdata<double>("perigee_z0_lead")<<" sublead z "<<vert->auxdata<double>("perigee_z0_sublead"));
+      theHSvertex = vert->z();
     }    
   }
 
@@ -326,7 +330,7 @@ StatusCode BasicPerf :: execute ()
 
 	    mumu_rois.push_back( (tpi->z0() + tpj->z0())/2. );
 
-	    std::cout<<"mumu roi "<<(tpi->z0() + tpj->z0())/2.<<" mu pt1 "<<goodMuons.at(i)->pt()/1000.<<" mu pt2 "<<goodMuons.at(j)->pt()/1000.<<std::endl;
+	    ATH_MSG_DEBUG("mumu roi "<<(tpi->z0() + tpj->z0())/2.<<" mu pt1 "<<goodMuons.at(i)->pt()/1000.<<" mu pt2 "<<goodMuons.at(j)->pt()/1000.);
 
 	  }
 	}
@@ -347,7 +351,7 @@ StatusCode BasicPerf :: execute ()
 	    
 	    emu_rois.push_back( (tpi->z0() + tpj->z0())/2. );
 	    
-	    std::cout<<"emu roi "<<(tpi->z0() + tpj->z0())/2.<<" mu pt "<<goodMuons.at(i)->pt()/1000.<<" e pt "<<goodElectrons.at(j)->pt()/1000.<<std::endl;
+	    ATH_MSG_DEBUG("emu roi "<<(tpi->z0() + tpj->z0())/2.<<" mu pt "<<goodMuons.at(i)->pt()/1000.<<" e pt "<<goodElectrons.at(j)->pt()/1000.);
 	    
 	  }
 	}
@@ -369,7 +373,7 @@ StatusCode BasicPerf :: execute ()
 
 	    ee_rois.push_back( (tpi->z0() + tpj->z0())/2. );
 
-	    std::cout<<"ee roi "<<(tpi->z0() + tpj->z0())/2.<<" e pt1 "<<goodElectrons.at(i)->pt()/1000.<<" e pt2 "<<goodElectrons.at(j)->pt()/1000.<<std::endl;
+	    ATH_MSG_DEBUG("ee roi "<<(tpi->z0() + tpj->z0())/2.<<" e pt1 "<<goodElectrons.at(i)->pt()/1000.<<" e pt2 "<<goodElectrons.at(j)->pt()/1000.);
 
 	  }
 	}
@@ -382,7 +386,7 @@ StatusCode BasicPerf :: execute ()
   
   for (const xAOD::TrackParticle *trkpart : *trackParts) {
     if(trkpart->pt()<10000.) continue;
-    std::cout<<"indetrackpart with pt: "<<trkpart->pt()<<" and phi: "<<trkpart->phi()<<" at: "<<trkpart->z0()<<std::endl;
+    ATH_MSG_DEBUG("indetrackpart with pt: "<<trkpart->pt()<<" and phi: "<<trkpart->phi()<<" at: "<<trkpart->z0());
   }
   
   /*
@@ -628,6 +632,9 @@ for (const xAOD::TruthVertex *vxt : *truthVertex) {
   for(partitr = vec_of_truth_pointers.begin(); partitr < vec_of_truth_pointers.end(); partitr++){
 
     hist("Reco_eff_vs_track_pt")->Fill((*partitr)->pt(), vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
+    if( std::abs( (*partitr)->auxdataConst<float>("z0") - theHSvertex) < 1.5 ){
+      hist("Reco_eff_vs_track_pt_nearHS")->Fill((*partitr)->pt(), vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
+    }
     int muBinIdx=getMuBin(ei->actualInteractionsPerCrossing());
     if (muBinIdx >= 0) {
       auto muBin = m_muBinning[muBinIdx];
