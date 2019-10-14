@@ -2,6 +2,8 @@
 #include <LowPtAnalysis/BasicPerf.h>
 
 #include <xAODEventInfo/EventInfo.h>
+#include "xAODTruth/TruthEvent.h"
+#include "xAODTruth/TruthEventContainer.h"
 
 #include <xAODTruth/TruthParticleContainer.h>
 #include <xAODTruth/xAODTruthHelpers.h>
@@ -106,6 +108,7 @@ StatusCode BasicPerf :: initialize ()
 
   ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt", "Reco_eff_vs_track_pt", 200, 0, 10000.0) ));
   ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt_nearHS", "Reco_eff_vs_track_pt_nearHS", 200, 0, 10000.0) ));
+  ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt_nearHS_andsmalld0", "Reco_eff_vs_track_pt_nearHS_andsmalld0", 200, 0, 10000.0) ));
   ANA_CHECK (book ( TH2F ("TruthRecoIndex_and_TruthPt", "TruthRecoIndex_and_TruthPt", 50, -10, 90, 40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("num_matched_truth_particles_vs_truth_pt","num_matched_truth_particles_vs_truth_pt",40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("num_matched_track_particles_vs_track_pt","num_matched_track_particles_vs_track_pt",40, 0, 2000) ) );
@@ -119,6 +122,7 @@ StatusCode BasicPerf :: initialize ()
 
   ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt","Frac_reco_track_with_lowmatchprob_vs_track_pt",200, 0, 10000.) ) );
   ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt_nearHS","Frac_reco_track_with_lowmatchprob_vs_track_pt_nearHS",200, 0, 10000.) ) );
+  ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt_nearHS_andsmalld0","Frac_reco_track_with_lowmatchprob_vs_track_pt_nearHS_andsmalld0",200, 0, 10000.) ) );
   ANA_CHECK (book ( TProfile("Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt","Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt",40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("AverageN_reco_tracks_lowmatchprob_vs_track_pt","AverageN_reco_tracks_lowmatchprob_vs_track_pt",200, 0, 10000.) ) );
   ANA_CHECK (book ( TH1F("AverageN_reco_tracks_goodprob_vs_track_pt","AverageN_reco_tracks_goodprob_vs_track_pt",200, 0, 10000.) ) );
@@ -193,22 +197,37 @@ StatusCode BasicPerf :: execute ()
   ANA_MSG_DEBUG ("execute(): number of track particles = " << trackParts->size());
 
   // get low-pT track particle container of interest
+  bool lowptstuffishere = 0;
   const xAOD::TrackParticleContainer* LowPtRoIContainer = 0;
-  ANA_CHECK (evtStore()->retrieve( LowPtRoIContainer, "LowPtRoITrackParticles"));
-  ANA_MSG_DEBUG ("execute(): number of LowPt track particles = " << LowPtRoIContainer->size());
-
-  // get low-pT RoI vertices
   const xAOD::VertexContainer* LowPtRoIVertices = 0;
-  if (evtStore()->contains<xAOD::VertexContainer>("LowPtRoIVertexContainer")) {
+  if (evtStore()->contains<xAOD::TrackParticleContainer>("LowPtRoITrackParticles") && evtStore()->contains<xAOD::VertexContainer>("LowPtRoIVertexContainer")) {
+    lowptstuffishere = 1;
+    //const xAOD::TrackParticleContainer* LowPtRoIContainer = 0;
+    //const xAOD::VertexContainer* LowPtRoIVertices = 0;    
+    ANA_CHECK (evtStore()->retrieve( LowPtRoIContainer, "LowPtRoITrackParticles"));
+    ANA_MSG_DEBUG ("execute(): number of LowPt track particles = " << LowPtRoIContainer->size());
+    
+    // get low-pT RoI vertices
+    if (evtStore()->contains<xAOD::VertexContainer>("LowPtRoIVertexContainer")) {
       ANA_CHECK (evtStore()->retrieve( LowPtRoIVertices, "LowPtRoIVertexContainer"));
       ANA_MSG_DEBUG ("execute(): number of LowPt vertices = " << LowPtRoIVertices->size());
+    }
   }
- 
+
   // get truth vertex container of interest
   const xAOD::TruthVertexContainer* truthVertex = 0;
   ANA_CHECK (evtStore()->retrieve( truthVertex, "TruthVertices"));
   ANA_MSG_DEBUG ("execute(): number of truth vertex = " << truthVertex->size());
  
+  //retrieve truth collection
+  const xAOD::TruthEventContainer* truthEvents = 0;
+  bool thereistruthevt = 0;
+  if ( evtStore()->contains<xAOD::TruthEventContainer>("TruthEvents") ) {
+    ANA_CHECK (evtStore()->retrieve( truthEvents, "TruthEvents"));
+    ANA_MSG_DEBUG ("execute(): number of TruthEvents = " << truthEvents->size());
+    thereistruthevt = 1;
+  }
+
   // get electrons
   const xAOD::ElectronContainer* electrons = 0;
   if (evtStore()->contains<xAOD::ElectronContainer>("Electrons")) {
@@ -223,9 +242,15 @@ StatusCode BasicPerf :: execute ()
     ANA_MSG_DEBUG ("execute(): number of muons = " << muons->size());
   }
 
+  if(lowptstuffishere){
   hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing(), trackParts->size()+LowPtRoIContainer->size() );
   hist("num_reco_tracks_vs_avgints")->Fill(ei->averageInteractionsPerCrossing(), trackParts->size()+LowPtRoIContainer->size() );
   hist("num_reco_tracks_vs_num_truth_parts")->Fill(truthParts->size(), trackParts->size()+LowPtRoIContainer->size() );
+  }
+  else{
+   hist("num_reco_tracks_vs_actualints")->Fill(ei->actualInteractionsPerCrossing(), trackParts->size());
+  hist("num_reco_tracks_vs_avgints")->Fill(ei->averageInteractionsPerCrossing(), trackParts->size());
+  hist("num_reco_tracks_vs_num_truth_parts")->Fill(truthParts->size(), trackParts->size() ); }
 
   m_truthEta->clear();
   m_truthPhi->clear();
@@ -267,13 +292,26 @@ StatusCode BasicPerf :: execute ()
 
   float theHSvertex = -999.0;
 
+  if(lowptstuffishere){
   if (LowPtRoIVertices) {
     for (const xAOD::Vertex *vert : *LowPtRoIVertices) {
       ATH_MSG_DEBUG("low pt roi vertex here: "<<vert->z()<<" lead z "<<vert->auxdata<double>("perigee_z0_lead")<<" sublead z "<<vert->auxdata<double>("perigee_z0_sublead"));
       theHSvertex = vert->z();
     }    
   }
+  }
 
+  if(thereistruthevt){
+    for (const xAOD::TruthEvent *evt : *truthEvents) {
+      const xAOD::TruthVertex *hs_pos = evt->signalProcessVertex();
+      if (hs_pos == nullptr) {
+	ATH_MSG_DEBUG("Invalid signal process vertex! Trying next TruthEvent.");
+	continue;
+      }
+      theHSvertex = hs_pos->z();
+    }
+  }
+  
   if(electrons){
     for (const xAOD::Electron *el : *electrons) {
       if(el->pt() < 12000. || std::abs(el->eta()) > 2.5 ) continue;
@@ -385,11 +423,11 @@ StatusCode BasicPerf :: execute ()
 
 
   
-  for (const xAOD::TrackParticle *trkpart : *trackParts) {
+  /*for (const xAOD::TrackParticle *trkpart : *trackParts) {
     if(trkpart->pt()<10000.) continue;
     ATH_MSG_DEBUG("indetrackpart with pt: "<<trkpart->pt()<<" and phi: "<<trkpart->phi()<<" at: "<<trkpart->z0());
   }
-  
+  */
   /*
   if (LowPtRoIVertices) {
     for (const xAOD::Vertex *vert : *LowPtRoIVertices) {
@@ -497,7 +535,8 @@ for (const xAOD::TruthVertex *vxt : *truthVertex) {
   int overallIndex=-1;
   for (int i=0; i<2; i++) {
     auto container = trackParts;
-    if (i == 1) container = LowPtRoIContainer;
+    if (i == 1 && lowptstuffishere) container = LowPtRoIContainer;
+    else if(i == 1 && !lowptstuffishere) continue;
     for (const xAOD::TrackParticle *track_part : *container) {
 
       overallIndex++;
@@ -530,6 +569,10 @@ for (const xAOD::TruthVertex *vxt : *truthVertex) {
       hist("Frac_reco_track_with_lowmatchprob_vs_track_pt")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
       if( std::abs( track_part->auxdataConst<float>("z0") - theHSvertex) < 1.5 ){
 	hist("Frac_reco_track_with_lowmatchprob_vs_track_pt_nearHS")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
+	if( std::abs( track_part->auxdataConst<float>("d0") ) < 1.0 ){
+	  hist("Frac_reco_track_with_lowmatchprob_vs_track_pt_nearHS_andsmalld0")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
+
+	}
       }
       int muBinIdx=getMuBin(ei->actualInteractionsPerCrossing());
       if (muBinIdx >= 0) {
@@ -638,6 +681,9 @@ for (const xAOD::TruthVertex *vxt : *truthVertex) {
     hist("Reco_eff_vs_track_pt")->Fill((*partitr)->pt(), vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
     if( std::abs( (*partitr)->auxdataConst<float>("z0") - theHSvertex) < 1.5 ){
       hist("Reco_eff_vs_track_pt_nearHS")->Fill((*partitr)->pt(), vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
+      if( std::abs( (*partitr)->auxdataConst<float>("d0") ) < 1.0 ){
+	hist("Reco_eff_vs_track_pt_nearHS_andsmalld0")->Fill((*partitr)->pt(), vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
+      }
     }
     int muBinIdx=getMuBin(ei->actualInteractionsPerCrossing());
     if (muBinIdx >= 0) {
@@ -703,7 +749,9 @@ StatusCode BasicPerf :: finalize ()
   // submission node after all your histogram outputs have been
   // merged.
 
-  hist("AverageN_reco_tracks_lowmatchprob_vs_track_pt")->Scale(1./Nevent);
+  //std::cout<<"NEVENTS "<<Nevent<<std::endl;
+
+  hist("AverageN_reco_tracks_lowmatchprob_vs_track_pt")->Scale(1./float(Nevent));
   hist("AverageN_reco_tracks_goodprob_vs_track_pt")->Scale(1./Nevent);
   ANA_MSG_VERBOSE( "Total number of events is " << Nevent );
 
