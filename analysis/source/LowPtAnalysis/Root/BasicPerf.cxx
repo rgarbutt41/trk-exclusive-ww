@@ -107,8 +107,18 @@ StatusCode BasicPerf :: initialize ()
 
 
   ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt", "Reco_eff_vs_track_pt", 200, 0, 10000.0) ));
-  ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt_nearHS", "Reco_eff_vs_track_pt_nearHS", 200, 0, 10000.0) ));
-  ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt_nearHS_andsmalld0", "Reco_eff_vs_track_pt_nearHS_andsmalld0", 200, 0, 10000.0) ));
+  ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt_1_5mmHS", "Reco_eff_vs_track_pt_1_5mmHS", 200, 0, 10000.0) ));
+  ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt_1_5mmHS_andd0under1", "Reco_eff_vs_track_pt_1_5mmHS_andd0under1", 200, 0, 10000.0) ));
+
+  ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt_1_5mmHS_andd0under1_eta0_5", "Reco_eff_vs_track_pt_1_5mmHS_andd0under1_eta0_5", 200, 0, 10000.0) ));
+  ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt_1_5mmHS_andd0under1_eta1_5", "Reco_eff_vs_track_pt_1_5mmHS_andd0under1_eta1_5", 200, 0, 10000.0) ));
+
+
+  ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt_0_5mmHS", "Reco_eff_vs_track_pt_0_5mmHS", 200, 0, 10000.0) ));
+  ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt_0_5mmHS_andd0under1", "Reco_eff_vs_track_pt_0_5mmHS_andd0under1", 200, 0, 10000.0) ));
+  ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt_1_0mmHS", "Reco_eff_vs_track_pt_1_0mmHS", 200, 0, 10000.0) ));
+  ANA_CHECK (book ( TProfile ("Reco_eff_vs_track_pt_1_0mmHS_andd0under1", "Reco_eff_vs_track_pt_1_0mmHS_andd0under1", 200, 0, 10000.0) ));
+
   ANA_CHECK (book ( TH2F ("TruthRecoIndex_and_TruthPt", "TruthRecoIndex_and_TruthPt", 50, -10, 90, 40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("num_matched_truth_particles_vs_truth_pt","num_matched_truth_particles_vs_truth_pt",40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("num_matched_track_particles_vs_track_pt","num_matched_track_particles_vs_track_pt",40, 0, 2000) ) );
@@ -121,8 +131,17 @@ StatusCode BasicPerf :: initialize ()
   ANA_CHECK (book ( TProfile("num_reco_tracks_vs_num_truth_parts","num_reco_tracks_vs_num_truth_parts",50, 0, 5000) ) );
 
   ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt","Frac_reco_track_with_lowmatchprob_vs_track_pt",200, 0, 10000.) ) );
-  ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt_nearHS","Frac_reco_track_with_lowmatchprob_vs_track_pt_nearHS",200, 0, 10000.) ) );
-  ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt_nearHS_andsmalld0","Frac_reco_track_with_lowmatchprob_vs_track_pt_nearHS_andsmalld0",200, 0, 10000.) ) );
+  ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt_1_5mmHS","Frac_reco_track_with_lowmatchprob_vs_track_pt_1_5mmHS",200, 0, 10000.) ) );
+  ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt_1_5mmHS_andd0under1","Frac_reco_track_with_lowmatchprob_vs_track_pt_1_5mmHS_andd0under1",200, 0, 10000.) ) );
+
+  ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt_1_5mmHS_andd0under1_eta0_5","Frac_reco_track_with_lowmatchprob_vs_track_pt_1_5mmHS_andd0under1_eta0_5",200, 0, 10000.) ) );
+  ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt_1_5mmHS_andd0under1_eta1_5","Frac_reco_track_with_lowmatchprob_vs_track_pt_1_5mmHS_andd0under1_eta1_5",200, 0, 10000.) ) );
+
+  ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt_0_5mmHS","Frac_reco_track_with_lowmatchprob_vs_track_pt_0_5mmHS",200, 0, 10000.) ) );
+  ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt_0_5mmHS_andd0under1","Frac_reco_track_with_lowmatchprob_vs_track_pt_0_5mmHS_andd0under1",200, 0, 10000.) ) );
+  ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt_1_0mmHS","Frac_reco_track_with_lowmatchprob_vs_track_pt_1_0mmHS",200, 0, 10000.) ) );
+  ANA_CHECK (book ( TProfile("Frac_reco_track_with_lowmatchprob_vs_track_pt_1_0mmHS_andd0under1","Frac_reco_track_with_lowmatchprob_vs_track_pt_1_0mmHS_andd0under1",200, 0, 10000.) ) );
+
   ANA_CHECK (book ( TProfile("Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt","Frac_reco_track_with_goodprob_and_missingtruth_vs_track_pt",40, 0, 2000) ) );
   ANA_CHECK (book ( TH1F("AverageN_reco_tracks_lowmatchprob_vs_track_pt","AverageN_reco_tracks_lowmatchprob_vs_track_pt",200, 0, 10000.) ) );
   ANA_CHECK (book ( TH1F("AverageN_reco_tracks_goodprob_vs_track_pt","AverageN_reco_tracks_goodprob_vs_track_pt",200, 0, 10000.) ) );
@@ -230,14 +249,18 @@ StatusCode BasicPerf :: execute ()
 
   // get electrons
   const xAOD::ElectronContainer* electrons = 0;
+  bool thereareelectrons = 0;
   if (evtStore()->contains<xAOD::ElectronContainer>("Electrons")) {
+    thereareelectrons=1;
     ANA_CHECK (evtStore()->retrieve( electrons, "Electrons"));
     ANA_MSG_DEBUG ("execute(): number of electrons = " << electrons->size());
   }
   
   // get muons
   const xAOD::MuonContainer* muons = 0;
-  if (evtStore()->contains<xAOD::MuonContainer>("Muons")) {
+  bool therearemuons = 0;
+ if (evtStore()->contains<xAOD::MuonContainer>("Muons")) {
+    therearemuons=1;
     ANA_CHECK (evtStore()->retrieve( muons, "Muons"));
     ANA_MSG_DEBUG ("execute(): number of muons = " << muons->size());
   }
@@ -312,7 +335,7 @@ StatusCode BasicPerf :: execute ()
     }
   }
   
-  if(electrons){
+  if(electrons && thereareelectrons){
     for (const xAOD::Electron *el : *electrons) {
       if(el->pt() < 12000. || std::abs(el->eta()) > 2.5 ) continue;
       //if( el->pt() > 20000. ) goodElectrons.push_back(el);
@@ -336,7 +359,7 @@ StatusCode BasicPerf :: execute ()
     }    
   }
 
-  if(muons){
+  if(muons && therearemuons){
     for (const xAOD::Muon *mu : *muons) {
       if(mu->pt() < 12000. || std::abs(mu->eta()) > 2.5 ) continue;
       //if( mu->pt() > 20000. ) goodMuons.push_back(mu);
@@ -568,10 +591,27 @@ for (const xAOD::TruthVertex *vxt : *truthVertex) {
       
       hist("Frac_reco_track_with_lowmatchprob_vs_track_pt")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
       if( std::abs( track_part->auxdataConst<float>("z0") - theHSvertex) < 1.5 ){
-	hist("Frac_reco_track_with_lowmatchprob_vs_track_pt_nearHS")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
+	hist("Frac_reco_track_with_lowmatchprob_vs_track_pt_1_5mmHS")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
 	if( std::abs( track_part->auxdataConst<float>("d0") ) < 1.0 ){
-	  hist("Frac_reco_track_with_lowmatchprob_vs_track_pt_nearHS_andsmalld0")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
-
+	  hist("Frac_reco_track_with_lowmatchprob_vs_track_pt_1_5mmHS_andd0under1")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
+	  if( std::abs(track_part->eta()) < 0.5 ){
+	    hist("Frac_reco_track_with_lowmatchprob_vs_track_pt_1_5mmHS_andd0under1_eta0_5")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
+	  }
+	  if( std::abs(track_part->eta()) > 1.5 ){
+	    hist("Frac_reco_track_with_lowmatchprob_vs_track_pt_1_5mmHS_andd0under1_eta1_5")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
+	  }
+	}
+      }
+      if( std::abs( track_part->auxdataConst<float>("z0") - theHSvertex) < 1.0 ){
+	hist("Frac_reco_track_with_lowmatchprob_vs_track_pt_1_0mmHS")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
+	if( std::abs( track_part->auxdataConst<float>("d0") ) < 1.0 ){
+	  hist("Frac_reco_track_with_lowmatchprob_vs_track_pt_1_0mmHS_andd0under1")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
+	}
+      }
+      if( std::abs( track_part->auxdataConst<float>("z0") - theHSvertex) < 0.5 ){
+	hist("Frac_reco_track_with_lowmatchprob_vs_track_pt_0_5mmHS")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
+	if( std::abs( track_part->auxdataConst<float>("d0") ) < 1.0 ){
+	  hist("Frac_reco_track_with_lowmatchprob_vs_track_pt_0_5mmHS_andd0under1")->Fill( track_part->pt() , probMatch < 0.5 ? 1.0 : 0.0);
 	}
       }
       int muBinIdx=getMuBin(ei->actualInteractionsPerCrossing());
@@ -680,9 +720,27 @@ for (const xAOD::TruthVertex *vxt : *truthVertex) {
 
     hist("Reco_eff_vs_track_pt")->Fill((*partitr)->pt(), vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
     if( std::abs( (*partitr)->auxdataConst<float>("z0") - theHSvertex) < 1.5 ){
-      hist("Reco_eff_vs_track_pt_nearHS")->Fill((*partitr)->pt(), vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
+      hist("Reco_eff_vs_track_pt_1_5mmHS")->Fill((*partitr)->pt(), vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
       if( std::abs( (*partitr)->auxdataConst<float>("d0") ) < 1.0 ){
-	hist("Reco_eff_vs_track_pt_nearHS_andsmalld0")->Fill((*partitr)->pt(), vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
+	hist("Reco_eff_vs_track_pt_1_5mmHS_andd0under1")->Fill((*partitr)->pt(), vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
+	if( std::abs((*partitr)->eta()) < 0.5 ){
+	  hist("Reco_eff_vs_track_pt_1_5mmHS_andd0under1_eta0_5")->Fill((*partitr)->pt(), vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
+	}
+	if( std::abs((*partitr)->eta()) > 1.5 ){
+	  hist("Reco_eff_vs_track_pt_1_5mmHS_andd0under1_eta1_5")->Fill((*partitr)->pt(), vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
+	}
+      }
+    }
+    if( std::abs( (*partitr)->auxdataConst<float>("z0") - theHSvertex) < 1.0 ){
+      hist("Reco_eff_vs_track_pt_1_0mmHS")->Fill((*partitr)->pt(), vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
+      if( std::abs( (*partitr)->auxdataConst<float>("d0") ) < 1.0 ){
+	hist("Reco_eff_vs_track_pt_1_0mmHS_andd0under1")->Fill((*partitr)->pt(), vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
+      }
+    }
+    if( std::abs( (*partitr)->auxdataConst<float>("z0") - theHSvertex) < 0.5 ){
+      hist("Reco_eff_vs_track_pt_0_5mmHS")->Fill((*partitr)->pt(), vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
+      if( std::abs( (*partitr)->auxdataConst<float>("d0") ) < 1.0 ){
+	hist("Reco_eff_vs_track_pt_0_5mmHS_andd0under1")->Fill((*partitr)->pt(), vec_of_matched_truth_indices.at( partitr - vec_of_truth_pointers.begin() ) > 0 ? 1.0 : 0.0);
       }
     }
     int muBinIdx=getMuBin(ei->actualInteractionsPerCrossing());
