@@ -47,7 +47,7 @@ void plot_fakerate(TString inputHistFile) {
 
   h_num_mu_high->Draw("PE");
   h_num_mu_high->GetXaxis()->SetRangeUser(100., 500.); //focus on low-pT
-  h_num_mu_high->GetYaxis()->SetRangeUser(0.0, 0.35); //focus on low-pT  
+  h_num_mu_high->GetYaxis()->SetRangeUser(0.0, 0.6); //focus on low-pT  
   h_num_mu_low->Draw("PE SAME");
   h_num_mu_med->Draw("PE SAME");
   h_num_mu_0->Draw("PE SAME");  
@@ -93,7 +93,7 @@ void plot_avgNfake(TString inputHistFile) {
 
   h_avgN->Draw("PE");
   h_avgN->GetXaxis()->SetRangeUser(100., 500.); //focus on low-pT
-  h_avgN->GetYaxis()->SetRangeUser(0.0, 0.35); //focus on low-pT  
+  h_avgN->GetYaxis()->SetRangeUser(0.0, 20); //focus on low-pT  
 
   l->AddEntry(h_avgN, "any #mu");
   l->Draw();

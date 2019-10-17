@@ -105,7 +105,7 @@ StatusCode TruthAnalysis :: initialize ()
   h_trk_eff_pt = nullptr;
   if (not input_trk_eff_file.empty()) {
     TFile *f_trk_eff = TFile::Open(input_trk_eff_file.c_str());
-    h_trk_eff_pt = dynamic_cast<TH1F*>(f_trk_eff->Get("h_trk_eff_pt"));
+    h_trk_eff_pt = static_cast<TH1F*>(f_trk_eff->Get("h_trk_eff_pt"));
     if (h_trk_eff_pt == nullptr) {
       ANA_MSG_ERROR("Error loading tracking efficiency (h_trk_eff_pt) from:" << input_trk_eff_file);
       return StatusCode::FAILURE;
