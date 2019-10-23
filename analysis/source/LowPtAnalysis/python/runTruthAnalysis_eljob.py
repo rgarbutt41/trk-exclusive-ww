@@ -16,6 +16,9 @@ parser.add_option('-d', '--debug', dest = 'debug',
 parser.add_option('', '--maxn', dest = 'maxn',
                   action = 'store', type='int', default=0,
                   help = "Limit maximum number of events to run on")
+partser.add_option('-pt', '--lowpt', dest ='min_pt',
+                   action = 'store', type='int',default=100,
+                   help = "Low-pT tracking  value in MeV, default 100 MeV")
 ( options, args ) = parser.parse_args()
 
 # Set up (Py)ROOT.
@@ -31,7 +34,6 @@ inputFilePath = options.input_dir
 print("Input folder: %s" % inputFilePath)
 ROOT.SH.ScanDir().filePattern( '*.pool.root*' ).scan( sh, inputFilePath )
 sh.printContent()
-
 # Create an EventLoop job.
 job = ROOT.EL.Job()
 job.sampleHandler( sh )
@@ -51,10 +53,10 @@ elif (options.debug == 2):
     alg.OutputLevel = ROOT.MSG.VERBOSE
 
 # Tweak settings, if necessary
-#alg.input_trk_eff_file = "/global/homes/s/spgriso/code/AtlasExclWW/trk-exclusive-ww/analysis/data/trk_eff_pt.root"
-alg.input_trk_eff_file = "/global/homes/s/spgriso/code/AtlasExclWW/trk-exclusive-ww/analysis/data/trk_eff_LowPtRoI.root"
+alg.input_trk_eff_file = "/global/homes/s/spgriso/code/AtlasExclWW/trk-exclusive-ww/analysis/data/trk_eff_pt.root"
+#alg.input_trk_eff_file = "/global/homes/s/spgriso/code/AtlasExclWW/trk-exclusive-ww/analysis/data/trk_eff_LowPtRoI.root" 
 alg.filter_by_selections=True
-alg.tracks_min_pt=100.0 # low-pT tracking
+alg.tracks_min_pt=  min_pt# pT tracking value
 
 # Add our algorithm to the job
 job.algsAdd( alg )

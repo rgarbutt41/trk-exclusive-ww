@@ -13,6 +13,7 @@ float lumi = 150e3; //pb^-1
 float exclWW_xsec = 8.5e-3*0.319; //pb; fixed x-sec, sample gives 1.49e-2 x-sec, wrong!
 float inclWW_xsec = 10.636; //pb
 float exclWW_SD_DD_corr = 3.39; ///< correction factor for exclusive WW SD/DD contributions
+float inclWW_filter_eff = 2.0132e-2; 
 std::string label="Min. track p_{T} = 100 MeV";
 
 void plot_TruthAnalysis_SBStudy_Hist(TH1F *h_excl, TH1F *h_incl,TH1F *h_excl_cutflow, TH1F *h_incl_cutflow);
@@ -92,7 +93,7 @@ void plot_TruthAnalysis_SBStudy_Hist(TH1F *h_excl, TH1F *h_incl,
 
   //apply scalings
   h_incl->Sumw2();
-  h_incl->Scale( inclWW_xsec*lumi / y_ngen_incl );
+  h_incl->Scale( inclWW_xsec*lumi / y_ngen_incl * inclWW_filter_eff);
   h_excl->Sumw2();
   h_excl->Scale( exclWW_xsec*lumi / y_ngen_excl );
   h_excl->Scale(exclWW_SD_DD_corr);
