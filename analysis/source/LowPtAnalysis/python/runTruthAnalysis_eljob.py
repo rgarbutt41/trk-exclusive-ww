@@ -16,7 +16,7 @@ parser.add_option('-d', '--debug', dest = 'debug',
 parser.add_option('', '--maxn', dest = 'maxn',
                   action = 'store', type='int', default=0,
                   help = "Limit maximum number of events to run on")
-partser.add_option('-pt', '--lowpt', dest ='min_pt',
+parser.add_option('', '--lowpt', dest ='min_pt',
                    action = 'store', type='int',default=100,
                    help = "Low-pT tracking  value in MeV, default 100 MeV")
 ( options, args ) = parser.parse_args()
@@ -56,7 +56,7 @@ elif (options.debug == 2):
 alg.input_trk_eff_file = "/global/homes/s/spgriso/code/AtlasExclWW/trk-exclusive-ww/analysis/data/trk_eff_pt.root"
 #alg.input_trk_eff_file = "/global/homes/s/spgriso/code/AtlasExclWW/trk-exclusive-ww/analysis/data/trk_eff_LowPtRoI.root" 
 alg.filter_by_selections=True
-alg.tracks_min_pt=  min_pt# pT tracking value
+alg.tracks_min_pt=  options.min_pt# pT tracking value
 
 # Add our algorithm to the job
 job.algsAdd( alg )
