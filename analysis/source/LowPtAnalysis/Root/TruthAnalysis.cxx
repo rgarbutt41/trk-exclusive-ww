@@ -215,7 +215,7 @@ StatusCode TruthAnalysis :: execute ()
   hist("num_fiducial_leptons")->Fill(m_lep_pt->size());
   if (m_lep_pt->size() != 2) {saveTree(); return StatusCode::SUCCESS;}
   if (m_lep_charge->at(0)*m_lep_charge->at(1) != -1) {saveTree(); return StatusCode::SUCCESS;}
-  if (abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13) {saveTree(); return StatusCode::SUCCESS;}
+  if ( ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  11*11 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 ) ) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_lep_ocof);
   ANA_MSG_VERBOSE("Pass cut_lep_ocof");
 

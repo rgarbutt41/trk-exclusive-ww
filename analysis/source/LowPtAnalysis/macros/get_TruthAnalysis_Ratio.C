@@ -1,11 +1,15 @@
 //Input histogram files to print out exclusive/inclusive yield and their ratio.
+#include <iostream>
+#include <fstream>
+
+
 float lumi = 150e3; //pb^-1
 float exclWW_xsec = 8.5e-3*0.319; //pb; fixed x-sec, sample gives 1.49e-2 x-sec, wrong!
 float inclWW_xsec = 10.636; //pb
 float exclWW_SD_DD_corr = 3.39; // correction factor for exclusive ww SD/DD contributions
 float inclWW_filter_eff = 2.0132e-2;
 
-void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW)
+void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int min_pt)
 {
   TFile *f_incl = TFile::Open(p_f_inclWW.c_str());
   TFile *f_excl = TFile::Open(p_f_exclWW.c_str());
@@ -30,7 +34,10 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW)
   std::cout<<"Exclusive Yield:"<<y_excl <<std::endl ; 
   std::cout<<"Inclusive Yield:"<< y_incl <<std::endl;
   std::cout<<"Ratio of Yields:"<< y_excl / y_incl <<std::endl;
-  
+  ofstream myfile;
+  myfile.open ("Ratios.txt", ios::app );
+  myfile << min_pt << " " << y_excl / y_incl << "\n";
+  myfile.close();
 }
 
   
