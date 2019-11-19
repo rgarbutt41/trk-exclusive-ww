@@ -32,121 +32,73 @@ float Ztautau_xsec = 1901; //pb
 
 
 
-void plot_TruthAnalysis_SBStudy_Hist(TH1F *h_excl, TH1F *h_incl,TH1F *h_excl_cutflow, TH1F *h_incl_cutflow, const char* label);
+void plot_TruthAnalysis_SBStudy_Hist(TH1F *h_excl, TH1F *h_incl,TH1F *h_excl_cutflow, TH1F *h_incl_cutflow, TH1F *h_Ztautau, TH1F *h_Ztautau_cutflow, TH1F *h_DYmumu, TH1F *h_DYmumu_cutflow );
 
 
 // Plot pT(e-mu) for single configuration
-void plot_TruthAnalysis_SBStudy(std::string p_f_exclWW, std::string p_f_inclWW, const char* label )
+void plot_CumulativeTruthStudy(std::string p_f_exclWW, std::string p_f_inclWW, std::string p_f_Ztautau, std::string p_f_DYmumu) // For simplicity keeping p_f_inclWW as the name, so I don't have to rename everything. Let Zmumu be inclWW.
 {
  
   TFile *f_incl = TFile::Open(p_f_inclWW.c_str());
   TFile *f_excl = TFile::Open(p_f_exclWW.c_str());
+  TFile *f_Ztautau = TFile::Open(p_f_Ztautau.c_str());
+  TFile *f_DYmumu = TFile::Open(p_f_DYmumu.c_str());
 
   TH1F *h_incl = (TH1F*) f_incl->Get("sr_dilep_pt");
   TH1F *h_excl = (TH1F*) f_excl->Get("sr_dilep_pt");
+  TH1F *h_Ztautau = (TH1F*) f_Ztautau->Get("sr_dilep_pt");
+  TH1F *h_DYmumu = (TH1F*) f_DYmumu->Get("sr_dilep_pt");
 
   TH1F *h_incl_cutflow = (TH1F*) f_incl->Get("cutflow");
   TH1F *h_excl_cutflow = (TH1F*) f_excl->Get("cutflow");
+  TH1F *h_Ztautau_cutflow = (TH1F*) f_Ztautau->Get("cutflow");
+  TH1F *h_DYmumu_cutflow = (TH1F*) f_DYmumu->Get("cutflow");
 
-  plot_TruthAnalysis_SBStudy_Hist(h_excl, h_incl, h_excl_cutflow, h_incl_cutflow, label);
+  plot_TruthAnalysis_SBStudy_Hist(h_excl, h_incl, h_excl_cutflow, h_incl_cutflow, h_Ztautau, h_Ztautau_cutflow, h_DYmumu, h_DYmumu_cutflow );
 
 };
 
-// Plot pT(e-mu) mixing up two configurations
-void plot_TruthAnalysis_Run2(std::string p_f_exclWW_500, std::string p_f_inclWW_500,
-			     std::string p_f_exclWW_400, std::string p_f_inclWW_400, const char* label )
-{
-  label = "Run 2 min. track p_{T}";
-  
-  TFile *f_incl_500 = TFile::Open(p_f_inclWW_500.c_str());
-  TFile *f_excl_500 = TFile::Open(p_f_exclWW_500.c_str());
-
-  TH1F *h_incl_500 = (TH1F*) f_incl_500->Get("sr_dilep_pt");
-  TH1F *h_excl_500 = (TH1F*) f_excl_500->Get("sr_dilep_pt");
-
-  TH1F *h_incl_cutflow_500 = (TH1F*) f_incl_500->Get("cutflow");
-  TH1F *h_excl_cutflow_500 = (TH1F*) f_excl_500->Get("cutflow");
-
-  TFile *f_incl_400 = TFile::Open(p_f_inclWW_400.c_str());
-  TFile *f_excl_400 = TFile::Open(p_f_exclWW_400.c_str());
-
-  TH1F *h_incl_400 = (TH1F*) f_incl_400->Get("sr_dilep_pt");
-  TH1F *h_excl_400 = (TH1F*) f_excl_400->Get("sr_dilep_pt");
-
-  TH1F *h_incl_cutflow_400 = (TH1F*) f_incl_400->Get("cutflow");
-  TH1F *h_excl_cutflow_400 = (TH1F*) f_excl_400->Get("cutflow");
-
-  const float mix_weight = 1.0; //ratio of luminosities
-
-  TH1F *h_incl = (TH1F*)h_incl_500->Clone();
-  h_incl->Add(h_incl_400, mix_weight); //same weight
-  TH1F *h_excl = (TH1F*)h_excl_500->Clone();
-  h_excl->Add(h_excl_400, mix_weight); //same weight
-
-  TH1F *h_incl_cutflow = (TH1F*)h_incl_cutflow_500->Clone();
-  h_incl_cutflow->Add(h_incl_cutflow_400, mix_weight); //same weight
-  TH1F *h_excl_cutflow = (TH1F*)h_excl_cutflow_500->Clone();
-  h_excl_cutflow->Add(h_excl_cutflow_400, mix_weight); //same weight
-
-  plot_TruthAnalysis_SBStudy_Hist(h_excl, h_incl, h_excl_cutflow, h_incl_cutflow, label);
-}
-
 // Work-horse function to make the plot
-void plot_TruthAnalysis_SBStudy_Hist(TH1F *h_excl, TH1F *h_incl,
-				     TH1F *h_excl_cutflow, TH1F *h_incl_cutflow, const char* label)
+void plot_TruthAnalysis_SBStudy_Hist(TH1F *h_excl, TH1F *h_incl,TH1F *h_excl_cutflow, TH1F *h_incl_cutflow, TH1F *h_Ztautau, TH1F *h_Ztautau_cutflow, TH1F *h_DYmumu, TH1F *h_DYmumu_cutflow  )
 {   
-
-  float filter_eff;
-  float xsec;
-
-  if ( strcmp("DYmumu", label) == 0 )
-    {
-      filter_eff = DYmumu_filter_eff;
-      xsec = DYmumu_xsec;
-    }
-  else if ( strcmp("inclWW", label) == 0 )
-    {
-      filter_eff = inclWW_filter_eff;
-      xsec = inclWW_xsec;
-    }
-  else  if ( strcmp("Zmumu", label) == 0 )
-    {
-      filter_eff = Zmumu_filter_eff;
-      xsec = Zmumu_xsec;
-    }
-  else if ( strcmp("Ztautau", label ) == 0 )
-    {
-      filter_eff = Ztautau_filter_eff;
-      xsec = Ztautau_xsec;
-    }
-  else if ( strcmp( "DYee", label ) == 0 )
-    {
-      filter_eff = DYee_filter_eff;
-      xsec = DYee_xsec;
-    }
   
   float y_raw_incl = h_incl->GetEntries();
   float y_raw_excl = h_excl->GetEntries();
+  float y_raw_Ztautau = h_Ztautau->GetEntries();
+  float y_raw_DYmumu = h_DYmumu->GetEntries();
 
   float y_ngen_incl = h_incl_cutflow->GetBinContent(1);
   float y_ngen_excl = h_excl_cutflow->GetBinContent(1);
+  float y_ngen_Ztautau = h_Ztautau_cutflow->GetBinContent(1);
+  float y_ngen_DYmumu = h_DYmumu_cutflow->GetBinContent(1);
 
   float eff_sel_incl = h_incl_cutflow->GetBinContent(6) / y_ngen_incl;
   float eff_sel_excl = h_excl_cutflow->GetBinContent(6) / y_ngen_excl;  
+  float eff_sel_Ztautau = h_Ztautau_cutflow->GetBinContent(6) / y_ngen_Ztautau;
+  float eff_sel_DYmumu = h_DYmumu_cutflow->GetBinContent(6) / y_ngen_DYmumu;  
   
   float eff_exclusivity_incl = h_incl_cutflow->GetBinContent(7) / h_incl_cutflow->GetBinContent(6);
   float eff_exclusivity_excl = h_excl_cutflow->GetBinContent(7) / h_excl_cutflow->GetBinContent(6);  
+  float eff_exclusivity_Ztautau = h_Ztautau_cutflow->GetBinContent(7) / h_Ztautau_cutflow->GetBinContent(6);
+  float eff_exclusivity_DYmumu = h_DYmumu_cutflow->GetBinContent(7) / h_DYmumu_cutflow->GetBinContent(6);  
 
   //apply scalings
   h_incl->Sumw2();
-  h_incl->Scale( xsec*lumi / y_ngen_incl * filter_eff);
+  h_incl->Scale(Zmumu_xsec*lumi / y_ngen_incl * Zmumu_filter_eff);
   h_excl->Sumw2();
   h_excl->Scale( exclWW_xsec*lumi / y_ngen_excl );
   h_excl->Scale( exclWW_SD_DD_corr );
+  h_Ztautau->Sumw2();
+  h_Ztautau->Scale( Ztautau_xsec*lumi / y_ngen_Ztautau* Ztautau_filter_eff );
+  h_DYmumu->Sumw2();
+  h_DYmumu->Scale( DYmumu_xsec*lumi / y_ngen_DYmumu* DYmumu_filter_eff );
+
 
   //calculate yields
   float y_incl = h_incl->Integral(0, h_incl->GetNbinsX()+1);
   float y_excl = h_excl->Integral(0, h_excl->GetNbinsX()+1);
+  float y_Ztautau = h_Ztautau->Integral(0,h_Ztautau->GetNbinsX()+1);
+  float y_DYmumu = h_DYmumu->Integral(0,h_DYmumu->GetNbinsX()+1);
 
   //apply style
   gStyle->SetPaperSize(20,26);
@@ -172,6 +124,8 @@ void plot_TruthAnalysis_SBStudy_Hist(TH1F *h_excl, TH1F *h_incl,
 
   int color_incl = kGreen+8;
   int color_excl = kBlue+2;
+  int color_Ztautau = kRed+0;
+  int color_DYmumu = kBlack;
 
   h_incl->SetFillColor(color_incl);
   h_incl->SetFillStyle(1001);
@@ -183,7 +137,15 @@ void plot_TruthAnalysis_SBStudy_Hist(TH1F *h_excl, TH1F *h_incl,
   h_excl->SetLineColor(color_excl);
   h_excl->SetLineWidth(2);  
 
-  
+  h_Ztautau->SetFillColor(color_Ztautau);
+  h_Ztautau->SetFillStyle(3490);
+  h_Ztautau->SetLineColor(color_Ztautau);
+  h_Ztautau->SetLineWidth(2);  
+
+  h_DYmumu->SetFillColor(color_DYmumu);
+  h_DYmumu->SetFillStyle(3353);
+  h_DYmumu->SetLineColor(color_DYmumu);
+  h_DYmumu->SetLineWidth(2);  
 
   //draw plot canvas
   TCanvas *c = new TCanvas();
@@ -191,7 +153,11 @@ void plot_TruthAnalysis_SBStudy_Hist(TH1F *h_excl, TH1F *h_incl,
   l->SetBorderSize(0);
   THStack *hs = new THStack("sr_pt", "");
   hs->Add(h_incl);
-  l->AddEntry(h_incl, label , "f");
+  l->AddEntry(h_incl, "Zmumu" , "f");
+  hs->Add(h_DYmumu);
+  l->AddEntry(h_DYmumu, "DYmumu", "f");
+  hs->Add(h_Ztautau);
+  l->AddEntry(h_Ztautau, "Ztautau", "f");  
   hs->Add(h_excl);
   l->AddEntry(h_excl, "Exclusive WW" , "f");
   hs->Draw("HIST");
@@ -209,14 +175,14 @@ void plot_TruthAnalysis_SBStudy_Hist(TH1F *h_excl, TH1F *h_incl,
   //print table with yields
   std::cout << "Raw yields:" << std::endl;
   std::cout << "Excl WW: " << y_raw_excl << std::endl;
-  std::cout << label << ": " << y_raw_incl << std::endl;  
+  std::cout << "Background" << ": " << y_raw_incl + y_raw_DYmumu + y_raw_Ztautau << std::endl;  
   std::cout << "Yields for L = " << lumi/1000. << " / fb" <<  std::endl;
-  std::cout << "|          | Excl. WW | "<< label <<" | Ratio |" << std::endl;
-  std::cout << "|----------|----------|----------|-----|" << std::endl; 
-  std::cout << "| Yield | " << y_excl << " | " << y_incl << " | " << y_excl / y_incl << " | " << std::endl;
-  std::cout << "| Eff   | " << y_raw_excl / y_ngen_excl *100 << "% | " << y_raw_incl / y_ngen_incl << "% | " << std::endl;
-  std::cout << "| Eff-sel | " << eff_sel_excl << " | " << eff_sel_incl << " | " << eff_sel_excl / eff_sel_incl << "| "  << std::endl;
-  std::cout << "| Eff-exclus. | " << eff_exclusivity_excl << " | " << eff_exclusivity_incl << " | " << eff_exclusivity_excl / eff_exclusivity_incl << "| "  << std::endl;  
+  std::cout << "|          | Excl. WW | Background  | Ratio |" << std::endl;
+  std::cout << "|----------|----------|-----------|-----|" << std::endl; 
+  std::cout << "| Yield | " << y_excl << " | " << y_incl + y_Ztautau + y_DYmumu << " | " << y_excl / (y_incl + y_Ztautau + y_DYmumu ) << " | " << std::endl;
+  std::cout << "| Eff   | " << y_raw_excl / y_ngen_excl *100 << "% | " << (y_raw_incl+y_raw_Ztautau + y_raw_DYmumu) /( y_ngen_incl+y_ngen_DYmumu + y_ngen_Ztautau ) << "% | " << std::endl;
+  std::cout << "| Eff-sel | " << eff_sel_excl << " | " << eff_sel_incl + eff_sel_Ztautau + eff_sel_DYmumu << " | " << eff_sel_excl / (eff_sel_incl+ eff_sel_DYmumu + eff_sel_Ztautau) << "| "  << std::endl;
+  std::cout << "| Eff-exclus. | " << eff_exclusivity_excl << " | " << eff_exclusivity_incl + eff_exclusivity_DYmumu + eff_exclusivity_Ztautau << " | " << eff_exclusivity_excl /( eff_exclusivity_incl + eff_exclusivity_DYmumu + eff_exclusivity_Ztautau)<< "| "  << std::endl;  
   std::cout << std::endl;										      
 
 }
