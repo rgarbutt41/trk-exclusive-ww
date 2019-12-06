@@ -15,8 +15,8 @@ const char* pT="Min. track p_{T} = 500 MeV";
 float exclWW_xsec = 8.5e-3*0.319; //pb; fixed x-sec, sample gives 1.49e-2 x-sec, wrong!
 float exclWW_SD_DD_corr = 3.39; ///< correction factor for exclusive WW SD/DD contributions
 
-float inclWW_filter_eff = 2.0132e-2; 
-float inclWW_xsec = 10.636; //pb
+float inclWW_filter_eff = 0.078889; 
+float inclWW_xsec = 10.612; //pb
 
 float DYmumu_filter_eff = 0.0484;
 float DYmumu_xsec = 32.11; //pb
@@ -29,6 +29,9 @@ float Zmumu_xsec = 1901; //pb
 
 float Ztautau_filter_eff = 0.000319;
 float Ztautau_xsec = 1901; //pb
+
+float LowMassDY_filter_eff = 0.000811;
+float LowMassDY_xsec = 531379.2; //pb
 
 
 
@@ -119,10 +122,10 @@ void plot_TruthAnalysis_SBStudy_Hist(TH1F *h_excl, TH1F *h_incl,
       filter_eff = Ztautau_filter_eff;
       xsec = Ztautau_xsec;
     }
-  else if ( strcmp( "DYee", label ) == 0 )
+  else if ( strcmp( "LowMassDY", label ) == 0 )
     {
-      filter_eff = DYee_filter_eff;
-      xsec = DYee_xsec;
+      filter_eff = LowMassDY_filter_eff;
+      xsec = LowMassDY_xsec;
     }
   
   float y_raw_incl = h_incl->GetEntries();

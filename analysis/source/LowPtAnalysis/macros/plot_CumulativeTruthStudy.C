@@ -10,7 +10,7 @@
 //Settings
 std::string plotName = "sr_dilep_pt"; ///< name of histogram to plot
 float lumi = 150e3; //pb^-1
-const char* pT="Min. track p_{T} = 500 MeV";
+const char* pT="Min. track p_{T} = 200 MeV";
 
 float exclWW_xsec = 8.5e-3*0.319; //pb; fixed x-sec, sample gives 1.49e-2 x-sec, wrong!
 float exclWW_SD_DD_corr = 3.39; ///< correction factor for exclusive WW SD/DD contributions
@@ -30,6 +30,8 @@ float Zmumu_xsec = 1901; //pb
 float Ztautau_filter_eff = 0.000319;
 float Ztautau_xsec = 1901; //pb
 
+float LowMassDY_filter_eff = 0.000811;
+float LowMassDY_xsec = 531379.2; //pb
 
 
 void plot_TruthAnalysis_SBStudy_Hist(TH1F *h_excl, TH1F *h_incl,TH1F *h_excl_cutflow, TH1F *h_incl_cutflow, TH1F *h_Ztautau, TH1F *h_Ztautau_cutflow, TH1F *h_DYmumu, TH1F *h_DYmumu_cutflow );

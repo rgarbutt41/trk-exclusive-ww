@@ -7,6 +7,8 @@
 #include <xAODTruth/xAODTruthHelpers.h>
 #include <xAODTracking/TrackParticleContainer.h>
 
+
+
 //ROOT includes
 #include "TFile.h"
 
@@ -53,7 +55,7 @@ StatusCode TruthAnalysis :: initialize ()
   ANA_MSG_INFO ("Initializing");
 
   // Random generator
-  m_rnd = new TRandom3(random_seed);
+  m_rnd = new TRandom3(0);
 
   // Output tree/histograms
   ANA_CHECK (book (TTree ("analysis", "Truth analysis ntuple")));
@@ -91,7 +93,7 @@ StatusCode TruthAnalysis :: initialize ()
   
   ANA_CHECK (book ( TH1F ("cutflow", "Cutflow", ncuts, -0.5, ncuts-0.5) ));
   ANA_CHECK (book ( TH1F ("num_fiducial_leptons", "Number of fiducial leptons", 10, 0, 10) ));
-  ANA_CHECK (book ( TH1F ("dilep_m", "m(e#mu) (GeV)", 60, 0, 300.) ));
+  ANA_CHECK (book ( TH1F ("dilep_m", "m(ll) (GeV)", 60, 0, 300.) ));
   ANA_CHECK (book ( TH1F ("dilep_pt", "p_{T} (e#mu) (GeV)", 60, 0, 300.) ));
   ANA_CHECK (book ( TH1F ("num_fiducial_tracks", "Number of fiducial tracks", 50, 0, 50) ));
   ANA_CHECK (book ( TH1F ("sr_dilep_pt", "p_{T} (e#mu) after all selections (GeV);p_{T}(e#mu) [GeV];Events/5 GeV", 60, 0, 300.) ));
@@ -115,6 +117,7 @@ StatusCode TruthAnalysis :: initialize ()
 
   //print properties values
   ANA_MSG_INFO("Properties values:");
+  ANA_MSG_INFO("Random Number = " << m_rnd->Rndm() );
   ANA_MSG_INFO("lep1_min_pt = " << lep1_min_pt);
   ANA_MSG_INFO("lep2_min_pt = " << lep2_min_pt);
   ANA_MSG_INFO("lep_max_eta = " << lep_max_eta);

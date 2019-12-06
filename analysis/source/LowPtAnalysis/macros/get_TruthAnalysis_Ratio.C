@@ -1,16 +1,15 @@
 //Input histogram files of respective sample type, prints ratios and adds ratios to a file called "Ratios.txt"
-//Must input one of the following sample types: inclWW, DYmumu , DYee, Ztautau, Zmumu
+//Must input one of the following sample types: InclWW, DYmumu , DYee, Ztautau, Zmumu
 #include <iostream>
 #include <fstream>
 
 float lumi = 150e3; //pb^-1
-std::string label="Min. track p_{T} = 500 MeV";
 
 float exclWW_xsec = 8.5e-3*0.319; //pb; fixed x-sec, sample gives 1.49e-2 x-sec, wrong!
 float exclWW_SD_DD_corr = 3.39; ///< correction factor for exclusive WW SD/DD contributions
 
-float inclWW_filter_eff = 2.0132e-2; 
-float inclWW_xsec = 10.636; //pb
+float inclWW_filter_eff = 0.078889; 
+float inclWW_xsec = 10.612; //pb
 
 float DYmumu_filter_eff = 0.0484;
 float DYmumu_xsec = 32.11; //pb
@@ -23,6 +22,9 @@ float Zmumu_xsec = 1901; //pb
 
 float Ztautau_filter_eff = 0.000319;
 float Ztautau_xsec = 1901; //pb
+
+float LowMassDY_filter_eff = 0.000811;
+float LowMassDY_xsec = 531379.2; //pb
 
 void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int min_pt, std::string Sample)
 {
@@ -38,13 +40,16 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
 
   float y_ngen_incl = h_incl_cutflow->GetBinContent(1);
   float y_ngen_excl = h_excl_cutflow->GetBinContent(1);
+  
+   float y_raw_incl = h_incl->GetEntries();
+   float y_raw_excl = h_excl->GetEntries();
 
   if ( Sample ==  "DYmumu")
     {
       xsec = DYmumu_xsec;
       filter_eff = DYmumu_filter_eff;
     }
-  else if ( Sample ==  "inclWW")
+  else if ( Sample ==  "InclWW")
     {
       xsec = inclWW_xsec;
       filter_eff = inclWW_filter_eff; 
@@ -59,10 +64,10 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
       xsec = Zmumu_xsec;
       filter_eff = Zmumu_filter_eff;
     }
-  else if ( Sample == "DYee" )
+  else if ( Sample == "LowMassDY" )
     {
-      xsec = DYee_xsec;
-      filter_eff = DYee_filter_eff;
+      xsec = LowMassDY_xsec;
+      filter_eff = LowMassDY_filter_eff;
     }
 
   //apply scalings
@@ -74,12 +79,12 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
 
   float y_incl = h_incl->Integral(0,h_incl->GetNbinsX()+1);
   float y_excl = h_excl->Integral(0,h_excl->GetNbinsX()+1);
-  std::cout<<"Exclusive Yield:"<<y_excl <<std::endl ; 
-  std::cout<<"Background Yield:"<< y_incl <<std::endl;
+  std::cout<<"Exclusive Raw Yield:"<<y_raw_excl <<std::endl ; 
+  std::cout<<"Background Raw Yield:"<< y_raw_incl <<std::endl;
   std::cout<<"Ratio of Yields:"<< y_excl / y_incl <<std::endl;
   ofstream myfile;
   myfile.open ("Ratios.txt", ios::app );
-  myfile << min_pt << " " << y_excl / y_incl << " " << y_excl <<"\n";
+  myfile << y_raw_incl  << " " << y_excl / y_incl << " " << y_raw_excl <<"\n";
   myfile.close();
 }
 
