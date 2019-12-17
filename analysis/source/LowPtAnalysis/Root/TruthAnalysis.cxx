@@ -94,9 +94,10 @@ StatusCode TruthAnalysis :: initialize ()
   ANA_CHECK (book ( TH1F ("cutflow", "Cutflow", ncuts, -0.5, ncuts-0.5) ));
   ANA_CHECK (book ( TH1F ("num_fiducial_leptons", "Number of fiducial leptons", 10, 0, 10) ));
   ANA_CHECK (book ( TH1F ("dilep_m", "m(ll) (GeV)", 60, 0, 300.) ));
-  ANA_CHECK (book ( TH1F ("dilep_pt", "p_{T} (e#mu) (GeV)", 60, 0, 300.) ));
+  ANA_CHECK (book ( TH1F ("dilep_pt", "p_{T} (ll) (GeV)", 60, 0, 300.) ));
   ANA_CHECK (book ( TH1F ("num_fiducial_tracks", "Number of fiducial tracks", 50, 0, 50) ));
-  ANA_CHECK (book ( TH1F ("sr_dilep_pt", "p_{T} (e#mu) after all selections (GeV);p_{T}(e#mu) [GeV];Events/5 GeV", 60, 0, 300.) ));
+  ANA_CHECK(book (TH1F ("delta_phi", "del_phi",60, 0, 3.14) ));
+  ANA_CHECK (book ( TH1F ("sr_dilep_pt", "p_{T} (ll) after all selections (GeV);p_{T}(ll) [GeV];Events/5 GeV", 60, 0, 300.) ));
 
   //set bin labels for cutflow
   for (int i=1; i<=ncuts;i++) {
@@ -172,8 +173,8 @@ StatusCode TruthAnalysis :: execute ()
 
     int pdgid = part->auxdata<int>("pdgId");
     if ( (abs(pdgid) == 11) or (abs(pdgid)==13) ) {
-      if ((part->pt() > lep2_min_pt) and
-	  (part->abseta() < lep_max_eta) ) {      
+      if  ( (part->pt() > lep2_min_pt) and (part->abseta() < lep_max_eta) )
+	{      
 	ANA_MSG_VERBOSE ("Store as lepton");
 	m_lep_pt->push_back(part->pt());
 	m_lep_eta->push_back(part->eta());
@@ -218,7 +219,10 @@ StatusCode TruthAnalysis :: execute ()
   hist("num_fiducial_leptons")->Fill(m_lep_pt->size());
   if (m_lep_pt->size() != 2) {saveTree(); return StatusCode::SUCCESS;}
   if (m_lep_charge->at(0)*m_lep_charge->at(1) != -1) {saveTree(); return StatusCode::SUCCESS;}
-  if ( ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  11*11 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 ) ) {saveTree(); return StatusCode::SUCCESS;}
+  //if ( ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  11*11 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 ) ) {saveTree(); return StatusCode::SUCCESS;} //For all e and mu selections 
+  //if (abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13){ saveTree(); return StatusCode::SUCCESS;} //For just emu
+  if ( ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  11*11 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 )  ) {saveTree(); return StatusCode::SUCCESS;}//ee and mumu
+  
   passCut(cut_lep_ocof);
   ANA_MSG_VERBOSE("Pass cut_lep_ocof");
 
@@ -230,6 +234,7 @@ StatusCode TruthAnalysis :: execute ()
   TLorentzVector lep1, lep2;
   int index_lep1=0;
   int index_lep2=1;
+  float m_delta_phi;
   if (m_lep_pt->at(1) > m_lep_pt->at(0)) {
     index_lep1=1;
     index_lep2=0;
@@ -238,6 +243,8 @@ StatusCode TruthAnalysis :: execute ()
   lep2.SetPtEtaPhiM(m_lep_pt->at(index_lep2), m_lep_eta->at(index_lep2), m_lep_phi->at(index_lep2), 0.0);
   m_dilep_m = (lep1+lep2).M();
   m_dilep_pt = (lep1+lep2).Pt();
+  m_delta_phi = abs((lep1).Phi()-(lep2).Phi());
+  if (m_delta_phi > 3.1415 ) { m_delta_phi = 6.183 - m_delta_phi;}
 
   hist("dilep_m")->Fill(m_dilep_m/GeV);
   if (m_dilep_m < dilep_min_mass) {saveTree(); return StatusCode::SUCCESS;}
@@ -257,6 +264,9 @@ StatusCode TruthAnalysis :: execute ()
 
   //Plots after all selections
   hist("sr_dilep_pt")->Fill(m_dilep_pt/GeV);
+  hist("delta_phi")->Fill(m_delta_phi);
+  
+  
 
   // Fill the event into the tree
   saveTree();
