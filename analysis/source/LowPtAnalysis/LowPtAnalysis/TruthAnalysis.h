@@ -7,6 +7,7 @@
 
 #include <TTree.h>
 #include <TH1F.h>
+#include<TProfile2D.h>
 #include <TRandom3.h>
 
 
@@ -65,6 +66,7 @@ private:
   unsigned int random_seed;
 
   // efficiency
+  //TProfile2D *h_trk_eff_pt;
   TH1F *h_trk_eff_pt;
 
   // output variables for the current event
@@ -77,6 +79,7 @@ private:
   std::vector<float> *m_lep_phi = nullptr;
   std::vector<int> *m_lep_charge = nullptr;
   std::vector<int> *m_lep_pdgid = nullptr;
+  
 
   //Fiducial "Tracks"  
   std::vector<float> *m_trk_pt = nullptr;
@@ -84,6 +87,7 @@ private:
   std::vector<float> *m_trk_phi = nullptr;
   std::vector<int> *m_trk_charge = nullptr;
   std::vector<int> *m_trk_pdgid = nullptr;
+  std::vector<float> *m_weights = nullptr;
 
   //Event-level selections
   std::vector<char> *m_pass_sel;

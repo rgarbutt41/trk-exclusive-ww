@@ -90,6 +90,8 @@ StatusCode TruthAnalysis :: initialize ()
   mytree->Branch ("trk_charge", &m_trk_charge);
   m_trk_pdgid = new std::vector<int>();
   mytree->Branch ("trk_pdgid", &m_trk_pdgid);
+  m_weights = new std::vector<float>();
+  mytree->Branch("weights", &m_weights);
   
   ANA_CHECK (book ( TH1F ("cutflow", "Cutflow", ncuts, -0.5, ncuts-0.5) ));
   ANA_CHECK (book ( TH1F ("num_fiducial_leptons", "Number of fiducial leptons", 10, 0, 10) ));
@@ -98,6 +100,8 @@ StatusCode TruthAnalysis :: initialize ()
   ANA_CHECK (book ( TH1F ("num_fiducial_tracks", "Number of fiducial tracks", 50, 0, 50) ));
   ANA_CHECK(book (TH1F ("delta_phi", "del_phi",60, 0, 3.14) ));
   ANA_CHECK (book ( TH1F ("sr_dilep_pt", "p_{T} (ll) after all selections (GeV);p_{T}(ll) [GeV];Events/5 GeV", 60, 0, 300.) ));
+  ANA_CHECK (book ( TH1F ("track_weights","Track Weights", 60, 0, 1.) ));
+  ANA_CHECK (book ( TH1F ("sr_dilep_pt_weights", "p_{T} (ll) after all selections (GeV);p_{T}(ll) [GeV];Events/5 GeV", 60, 0, 300.) ));
 
   //set bin labels for cutflow
   for (int i=1; i<=ncuts;i++) {
@@ -146,6 +150,8 @@ StatusCode TruthAnalysis :: execute ()
   m_trk_phi->clear();
   m_trk_charge->clear();
   m_trk_pdgid->clear();
+  m_weights->clear();
+  
   for (int i=0; i<ncuts;i++)
     m_pass_sel->at(i)=false;
 
@@ -192,13 +198,29 @@ StatusCode TruthAnalysis :: execute ()
     //apply parametrized tracking efficiency, if requested
     if (h_trk_eff_pt != nullptr) {
       int ibin = h_trk_eff_pt->FindBin(part->pt());
-      float trk_eff = 0.0; //default if underflow
+     float trk_eff = 0.0; //default if underflow
       if (ibin > 0) {
 	//use last bin if overflow
-	if (ibin > h_trk_eff_pt->GetNbinsX())
-	  ibin = h_trk_eff_pt->GetNbinsX();
-	trk_eff = h_trk_eff_pt->GetBinContent(ibin);      
-      }    
+	if (ibin > h_trk_eff_pt->GetNbinsX()) ibin = h_trk_eff_pt->GetNbinsX();
+	trk_eff = h_trk_eff_pt->GetBinContent(ibin)-0.05;      
+      }  
+    
+    /* if (h_trk_eff_pt != nullptr) {
+      //int ibin = h_trk_eff_pt_eta->FindBin(part->pt(), part->eta());
+      int xbin = h_trk_eff_pt->GetXaxis()->FindBin(part->pt());
+      int ybin = h_trk_eff_pt->GetYaxis()->FindBin(part->eta());
+      float trk_eff = 0.0; //default if underflow
+      if ( xbin > 0 && ybin > 0 ) {
+	//use last bin if overflow
+	if (xbin > h_trk_eff_pt->GetNbinsX()) xbin = h_trk_eff_pt->GetNbinsX();
+	if (ybin > h_trk_eff_pt->GetNbinsY()) ybin = h_trk_eff_pt->GetNbinsY();
+	  trk_eff = h_trk_eff_pt->GetBinContent(xbin, ybin)+h_trk_eff_pt->GetBinError(xbin,ybin);
+	}
+    */
+
+      //increment a per-event "weight" with 1-trk_eff  
+      m_weights->push_back( 1- trk_eff );
+
       if (m_rnd->Rndm() > trk_eff)
 	continue;
     }
@@ -212,6 +234,13 @@ StatusCode TruthAnalysis :: execute ()
     m_trk_pdgid->push_back(pdgid);
     
   } // end for loop over truth particles
+  
+  //The "tracking weight" is done
+  float  tracking_weight = 1;
+  for(int i = 0; (i < abs(m_weights->size())); i++)
+    {
+      tracking_weight *= m_weights->at(i);
+    }
 
   // Now evaluate event-level selections  
   ANA_MSG_VERBOSE("Checking event selections");
@@ -221,7 +250,7 @@ StatusCode TruthAnalysis :: execute ()
   if (m_lep_charge->at(0)*m_lep_charge->at(1) != -1) {saveTree(); return StatusCode::SUCCESS;}
   //if ( ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  11*11 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 ) ) {saveTree(); return StatusCode::SUCCESS;} //For all e and mu selections 
   //if (abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13){ saveTree(); return StatusCode::SUCCESS;} //For just emu
-  if ( ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  11*11 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 )  ) {saveTree(); return StatusCode::SUCCESS;}//ee and mumu
+  if ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 )  {saveTree(); return StatusCode::SUCCESS;}// mumu
   
   passCut(cut_lep_ocof);
   ANA_MSG_VERBOSE("Pass cut_lep_ocof");
@@ -247,7 +276,7 @@ StatusCode TruthAnalysis :: execute ()
   if (m_delta_phi > 3.1415 ) { m_delta_phi = 6.183 - m_delta_phi;}
 
   hist("dilep_m")->Fill(m_dilep_m/GeV);
-  if (m_dilep_m < dilep_min_mass) {saveTree(); return StatusCode::SUCCESS;}
+  if ( (m_dilep_m < dilep_min_mass) || ((m_dilep_m> 70*GeV ) && ( m_dilep_m < 110*GeV ) ) ) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_m_ll);
   ANA_MSG_VERBOSE("Pass cut_m_ll");
 
@@ -257,6 +286,8 @@ StatusCode TruthAnalysis :: execute ()
   passCut(cut_pt_ll);
   ANA_MSG_VERBOSE("Pass cut_pt_ll");
 
+  hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV, tracking_weight);
+  hist("track_weights")->Fill(tracking_weight);
   hist("num_fiducial_tracks")->Fill(m_trk_pt->size());
   if (m_trk_pt->size() > tracks_max_n) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_exclusive);
@@ -295,6 +326,7 @@ TruthAnalysis :: ~TruthAnalysis () {
     delete m_lep_phi;
     delete m_lep_charge;
     delete m_lep_pdgid;
+    delete m_weights;
     
     delete m_trk_pt;
     delete m_trk_eta;

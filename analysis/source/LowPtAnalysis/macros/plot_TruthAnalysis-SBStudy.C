@@ -10,12 +10,12 @@
 //Settings
 std::string plotName = "sr_dilep_pt"; ///< name of histogram to plot
 float lumi = 150e3; //pb^-1
-const char* pT="Min. track p_{T} = 500 MeV";
+const char* pT="Min. track p_{T} = 100 MeV";
 
 float exclWW_xsec = 8.5e-3*0.319; //pb; fixed x-sec, sample gives 1.49e-2 x-sec, wrong!
 float exclWW_SD_DD_corr = 3.39; ///< correction factor for exclusive WW SD/DD contributions
 
-float inclWW_filter_eff = 0.078889; 
+float inclWW_filter_eff = 0.026; 
 float inclWW_xsec = 10.612; //pb
 
 float DYmumu_filter_eff = 0.0484;
@@ -45,8 +45,8 @@ void plot_TruthAnalysis_SBStudy(std::string p_f_exclWW, std::string p_f_inclWW, 
   TFile *f_incl = TFile::Open(p_f_inclWW.c_str());
   TFile *f_excl = TFile::Open(p_f_exclWW.c_str());
 
-  TH1F *h_incl = (TH1F*) f_incl->Get("sr_dilep_pt");
-  TH1F *h_excl = (TH1F*) f_excl->Get("sr_dilep_pt");
+  TH1F *h_incl = (TH1F*) f_incl->Get("sr_dilep_pt_weights");
+  TH1F *h_excl = (TH1F*) f_excl->Get("sr_dilep_pt_weights");
 
   TH1F *h_incl_cutflow = (TH1F*) f_incl->Get("cutflow");
   TH1F *h_excl_cutflow = (TH1F*) f_excl->Get("cutflow");

@@ -53,8 +53,9 @@ elif (options.debug == 2):
     alg.OutputLevel = ROOT.MSG.VERBOSE
 
 # Tweak settings, if necessary
-alg.input_trk_eff_file = "/global/homes/s/spgriso/code/AtlasExclWW/trk-exclusive-ww/analysis/data/trk_eff_pt.root"
+alg.input_trk_eff_file = "/global/homes/s/spgriso/code/AtlasExclWW/trk-exclusive-ww/analysis/data/trk_eff_pt.root" #Histogram excluding errors
 #alg.input_trk_eff_file = "/global/homes/s/spgriso/code/AtlasExclWW/trk-exclusive-ww/analysis/data/trk_eff_LowPtRoI.root" 
+#alg.input_trk_eff_file = "/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/data/hist-all.root" 
 alg.filter_by_selections=True
 alg.tracks_min_pt=  options.min_pt# pT tracking value
 

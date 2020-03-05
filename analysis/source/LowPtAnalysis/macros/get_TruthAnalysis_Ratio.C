@@ -8,7 +8,7 @@ float lumi = 150e3; //pb^-1
 float exclWW_xsec = 8.5e-3*0.319; //pb; fixed x-sec, sample gives 1.49e-2 x-sec, wrong!
 float exclWW_SD_DD_corr = 3.39; ///< correction factor for exclusive WW SD/DD contributions
 
-float inclWW_filter_eff = 0.078889; 
+float inclWW_filter_eff = 0.026; 
 float inclWW_xsec = 10.612; //pb
 
 float DYmumu_filter_eff = 0.0484;
@@ -32,8 +32,8 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
   float filter_eff;
   TFile *f_incl = TFile::Open(p_f_inclWW.c_str());
   TFile *f_excl = TFile::Open(p_f_exclWW.c_str());
-  TH1F *h_incl =(TH1F*) f_incl->Get("sr_dilep_pt");
-  TH1F *h_excl = (TH1F*)f_excl->Get("sr_dilep_pt");
+  TH1F *h_incl =(TH1F*) f_incl->Get("sr_dilep_pt_weights");
+  TH1F *h_excl = (TH1F*)f_excl->Get("sr_dilep_pt_weights");
 
   TH1F *h_incl_cutflow =(TH1F*)  f_incl->Get("cutflow");
   TH1F *h_excl_cutflow = (TH1F*)f_excl->Get("cutflow");
@@ -79,11 +79,11 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
 
   float y_incl = h_incl->Integral(0,h_incl->GetNbinsX()+1);
   float y_excl = h_excl->Integral(0,h_excl->GetNbinsX()+1);
-  std::cout<<"Exclusive Raw Yield:"<<y_raw_excl <<std::endl ; 
-  std::cout<<"Background Raw Yield:"<< y_raw_incl <<std::endl;
-  std::cout<<"Ratio of Yields:"<< y_excl / y_incl <<std::endl;
-  std::cout<<"Inclusive Yield:" << y_incl << std::endl;
-  std::cout << "Exclusive Yield:" <<y_excl << std::endl;
+  //std::cout<<"Exclusive Raw Yield:"<<y_raw_excl <<std::endl ; 
+  //std::cout<<"Background Raw Yield:"<< y_raw_incl <<std::endl;
+  //std::cout<<"Ratio of Yields:"<< y_excl / y_incl <<std::endl;
+  //std::cout<<"Inclusive Yield:" << y_incl << std::endl;
+  //std::cout << "Exclusive Yield:" <<y_excl << std::endl;
   ofstream myfile;
   myfile.open ("Ratios.txt", ios::app );
   myfile << y_raw_incl  << " " << y_excl / y_incl << " " << y_raw_excl <<"\n";
