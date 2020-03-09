@@ -102,6 +102,8 @@ StatusCode TruthAnalysis :: initialize ()
   ANA_CHECK (book ( TH1F ("sr_dilep_pt", "p_{T} (ll) after all selections (GeV);p_{T}(ll) [GeV];Events/5 GeV", 60, 0, 300.) ));
   ANA_CHECK (book ( TH1F ("track_weights","Track Weights", 60, 0, 1.) ));
   ANA_CHECK (book ( TH1F ("sr_dilep_pt_weights", "p_{T} (ll) after all selections (GeV);p_{T}(ll) [GeV];Events/5 GeV", 60, 0, 300.) ));
+  
+  ANA_CHECK (book ( TH1F ("num_HSpart_pt", "Num. non-lepton particles from Hard Scatter;p_{T}(particle) [MeV];Tracks/50 MeV", 60, 0, 3000.) ));
 
   //set bin labels for cutflow
   for (int i=1; i<=ncuts;i++) {
@@ -170,7 +172,7 @@ StatusCode TruthAnalysis :: execute ()
   for (const xAOD::TruthParticle *part : *truthParts) {    
     //select fiducial truth particles
     ANA_MSG_VERBOSE ("Particle PDG " << part->auxdata<int>("pdgId") << ", pT=" << part->pt() << ", eta=" << part->eta() << ", charge=" << part->charge() << ", status=" << part->auxdata<int>("status") << ", barcode=" << part->auxdata<int>("barcode"));
-    if (part->pt() < std::min(tracks_min_pt,lep2_min_pt)) continue;
+    //if (part->pt() < std::min(tracks_min_pt,lep2_min_pt)) continue;
     if (part->abseta() > std::max(tracks_max_eta,lep_max_eta)) continue;
     if (part->charge() == 0) continue;
     if (part->auxdata<int>("status") != 1) continue;
@@ -190,6 +192,8 @@ StatusCode TruthAnalysis :: execute ()
 	continue; //do not consider it as track
       }
     }
+
+    hist("num_HSpart_pt")->Fill(part->pt());
 
     if (part->pt() < tracks_min_pt) continue;
     if (part->abseta() > tracks_max_eta) continue;
