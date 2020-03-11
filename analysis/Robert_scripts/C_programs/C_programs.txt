@@ -1,0 +1,35 @@
+Format
+File_name (inputs)
+Purpose
+Corresponding script
+
+Retrieve_Ratios.C(String:Ratio_file,String:Output_file) (text file)
+Used to combine all mumu backgroud ratio files together
+
+get_TruthAnalysis_Ratio.C(String:ExclWW_hist,String:Background_hist,int:min_pt,String Sample_name)
+   Produces the ratio of exclWW to inputted background. Inputs into Ratios.txt file as rows of raw_background,Ratio,raw_excl
+Get_Ratio.sh
+
+plot_CumulativeTruthStudy.C(ExclWW_hist,InclWW_hist,Ztautau_hist,DYmumu_hist,Zmumu_hist, min_pt) 
+   Produces a plot of the number of events that pass selection as a function of the pt(ll)
+plot_Cumulative.sh
+
+plot_Cumulative_Ratios.C(InclWW_Rat.txt,Zmumu*,Ztautau*,DY*) Plot
+Plots the ratios as a function of min_pT for the nominal mumu/ee case.
+plot_Cumulative_Ratios.sh
+ 
+plot_Cumulative_emu_Ratios.C(InclWW_Rat.txt,Ztautau***) Plot ***Ztautau Commented out
+Plots the ratios as a function of min_pT for the nominal emu case
+
+plot_Ratios.C(string:Ratio_File, char:Title)
+Plots the ratios for one specific background, Title is the literal title of the plot.
+
+plot_emu.C(String:Nom_Ratio_file,String:Add_Ratio_file,String:Low_Ratio_file)
+plots for the emu case assuming only 10 entries.
+plot_emu.sh
+
+plot_mumu.C(String:Nom_Ratio_file,String:Add_Ratio_file,String:Low_Ratio_file)
+plots for the three mumu cases assuming each file has 40 entries.
+plot_mumu.sh
+
+

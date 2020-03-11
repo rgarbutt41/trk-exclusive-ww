@@ -1,0 +1,34 @@
+Format
+File_Name (inputs) (outputs)
+Description
+
+Each_Round.sh
+Make after adjusting the Truthanalysis.cxx file, also performs sourcing */setup.sh
+
+Get_Ratio.sh min_pt Interaction(ex. DYmumu) run/.../Flavor <-Insert ...
+If Ratios.txt is present, fills the text file with the flavor's ratios
+
+TruthAnalysis.sh min_pt Flavor
+Runs the selection process on specific flavor with given min_pt value
+
+Apply_selections.sh 
+Produces all required folders with respective Ratios.txt files and performs the exclusivity.
+   Directory setup -> Nom/Flavor
+
+plot_Cumulative.sh min_pT run/.../Flavor enter ...
+Creates the events/pt(ll) plot for mumu
+
+plot_Cumulative_Ratios.sh run/.../Flavor
+Creates the nominal ratios vs min_pt plot
+
+plot_Cumulative_emu_Ratios.sh run/.../Flavor
+Creates the Ratios plot for the emu case
+
+plot_TruthAnalysis.sh min_pt Flavor run/.../Flavor
+Plots the events/pt(ll) for a specific flavor.
+
+plot_emu.sh run/../Add
+plots the emu ratios as fct of min_pt
+
+plot_mumu.sh run/../(Text_Files)
+plots the mumu ratios as fct of min_pt
