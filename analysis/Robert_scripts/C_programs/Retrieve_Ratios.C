@@ -10,7 +10,7 @@ Output File should be of the form Add/Nom/Low_Ratios.txt
 void  Retrieve_Ratios(std::string Ratio_File, std::string Output_File)
 {
   int counter = 0;
-  int n = 10;
+  int n = 9;
   Double_t Ratios[n];
   int ratio_index = 0;
   int raw_index = 0;

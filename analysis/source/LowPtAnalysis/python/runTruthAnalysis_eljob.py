@@ -34,6 +34,7 @@ inputFilePath = options.input_dir
 print("Input folder: %s" % inputFilePath)
 ROOT.SH.ScanDir().filePattern( '*.pool.root*' ).scan( sh, inputFilePath )
 sh.printContent()
+
 # Create an EventLoop job.
 job = ROOT.EL.Job()
 job.sampleHandler( sh )
@@ -53,11 +54,19 @@ elif (options.debug == 2):
     alg.OutputLevel = ROOT.MSG.VERBOSE
 
 # Tweak settings, if necessary
-alg.input_trk_eff_file = "/global/homes/s/spgriso/code/AtlasExclWW/trk-exclusive-ww/analysis/data/trk_eff_pt.root" #Histogram excluding errors
+#alg.input_trk_eff_file = "/global/homes/s/spgriso/code/AtlasExclWW/trk-exclusive-ww/analysis/data/trk_eff_pt.root" Pre_PU_Fakes
 #alg.input_trk_eff_file = "/global/homes/s/spgriso/code/AtlasExclWW/trk-exclusive-ww/analysis/data/trk_eff_LowPtRoI.root" 
 #alg.input_trk_eff_file = "/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/data/hist-all.root" 
-alg.filter_by_selections=True
-alg.tracks_min_pt=  options.min_pt# pT tracking value
+
+#alg.input_trk_eff_file = "/global/homes/s/spgriso/code/AtlasExclWW/trk-exclusive-ww/analysis/data/trk_eff_pt.root" #Trk-eff of previous analysis
+
+alg.input_trk_eff_file = "/global/cfs/projectdirs/atlas/wmccorma/ExclWW/trk-exclusive-ww/analysis/data/hist-lowpt_trkeff.root" #2D trk-eff
+
+alg.input_trk_eff_pt_eta_file = "/global/cfs/projectdirs/atlas/wmccorma/ExclWW/Trk_eff_output/links_of_hists/hist-all_v3.root" #Track efficiency for TProfile2D
+
+#alg.input_pu_file = "/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/data/ZPU.root" #Pileup file.
+#alg.filter_by_selections=True
+alg.tracks_min_pt=  options.min_pt # pT tracking value
 
 # Add our algorithm to the job
 job.algsAdd( alg )

@@ -10,7 +10,7 @@
 //Settings
 std::string plotName = "sr_dilep_pt"; ///< name of histogram to plot
 float lumi = 150e3; //pb^-1
-const char* pT="Min. track p_{T} = 100 MeV";
+const char* pT="Min. track p_{T} = 500 MeV";
 
 float exclWW_xsec = 8.5e-3*0.319; //pb; fixed x-sec, sample gives 1.49e-2 x-sec, wrong!
 float exclWW_SD_DD_corr = 3.39; ///< correction factor for exclusive WW SD/DD contributions

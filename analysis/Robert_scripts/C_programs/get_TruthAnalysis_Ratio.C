@@ -94,7 +94,9 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
   //std::cout << "Exclusive Yield:" <<y_excl << std::endl;
   ofstream myfile;
   myfile.open ("Ratios.txt", ios::app );
-  myfile << y_raw_incl  << " " << y_excl / y_incl << " " << y_raw_excl <<"\n";
+  myfile << y_incl  << " " << y_excl / y_incl << " " << y_excl <<"\n";
+  //myfile << y_incl << "\n";
+  //myfile << y_excl << "\n";
   myfile.close();
 }
 

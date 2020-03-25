@@ -62,12 +62,15 @@ private:
   float tracks_max_eta; 
   float tracks_max_n;
   std::string input_trk_eff_file;
+  std::string input_trk_eff_pt_eta_file;
   bool filter_by_selections;
   unsigned int random_seed;
 
   // efficiency
-  //TProfile2D *h_trk_eff_pt;
-  TH1F *h_trk_eff_pt;
+  TProfile2D *h_trk_eff_pt_eta;
+  TProfile2D *h_electron_eff;
+  TProfile2D *h_muon_eff;
+  //TH1F *h_trk_eff_pt;
 
   // output variables for the current event
   float m_dilep_pt;
@@ -79,7 +82,8 @@ private:
   std::vector<float> *m_lep_phi = nullptr;
   std::vector<int> *m_lep_charge = nullptr;
   std::vector<int> *m_lep_pdgid = nullptr;
-  
+  float electron_eff;
+  float muon_eff;
 
   //Fiducial "Tracks"  
   std::vector<float> *m_trk_pt = nullptr;

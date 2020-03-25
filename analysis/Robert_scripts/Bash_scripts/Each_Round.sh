@@ -1,4 +1,4 @@
 #!/bin/bash
-cd /global/projecta/projectdirs/atlas/rgarbutt/AnalysisCode/analysis/build
+cd /global/cfs/projectdirs/atlas/rgarbutt/trk-exclusive-ww/analysis/build
 make
 source */setup.sh

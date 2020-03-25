@@ -7,7 +7,7 @@
 #include <xAODTruth/xAODTruthHelpers.h>
 #include <xAODTracking/TrackParticleContainer.h>
 
-
+#include <cmath>
 
 //ROOT includes
 #include "TFile.h"
@@ -23,7 +23,7 @@ TruthAnalysis :: TruthAnalysis (const std::string& name,
   // rather go into the initialize() function.
 
   // Properties
-  declareProperty("lep1_min_pt", lep1_min_pt = 25*GeV);
+  declareProperty("lep1_min_pt", lep1_min_pt = 27*GeV);
   declareProperty("lep2_min_pt", lep2_min_pt = 20*GeV);
   declareProperty("lep_max_eta", lep_max_eta = 2.5);
   declareProperty("dilep_min_pt", dilep_min_pt = 30.0*GeV);
@@ -36,6 +36,8 @@ TruthAnalysis :: TruthAnalysis (const std::string& name,
 		  "exclusivity selection");
   declareProperty("input_trk_eff_file", input_trk_eff_file = "",
 		  "tracking efficiency input. if empty, use hard-coded numbers");
+  declareProperty("input_trk_eff_pt_eta_file", input_trk_eff_pt_eta_file = "",
+		  "e/mu tracking efficiency input. if empty, use hard-coded numbers");
   declareProperty("filter_by_selections", filter_by_selections = false,
 		  "if true, only events passing selections are stored in the output");
   declareProperty("random_seed", random_seed=29873,
@@ -78,6 +80,8 @@ StatusCode TruthAnalysis :: initialize ()
   mytree->Branch ("lep_charge", &m_lep_charge);
   m_lep_pdgid = new std::vector<int>();
   mytree->Branch ("lep_pdgid", &m_lep_pdgid);
+  muon_eff = 0.0;
+  electron_eff = 0.0;
 
   //Tracks
   m_trk_pt = new std::vector<float>();
@@ -92,7 +96,42 @@ StatusCode TruthAnalysis :: initialize ()
   mytree->Branch ("trk_pdgid", &m_trk_pdgid);
   m_weights = new std::vector<float>();
   mytree->Branch("weights", &m_weights);
-  
+
+  /*
+  //////TRUTH STUFF no pseudo-reco
+  mytree->Branch ("truedilep_pt", &m_truedilep_pt);
+  mytree->Branch ("truedilep_m", &m_truedilep_m);
+  mytree->Branch ("numTrueHSparticles", &m_numTrueHSparticles);
+  m_truelep_pt = new std::vector<float>();
+  mytree->Branch ("truelep_pt", &m_truelep_pt);
+  m_truelep_eta = new std::vector<float>();
+  mytree->Branch ("truelep_eta", &m_truelep_eta);
+  m_truelep_phi = new std::vector<float>();
+  mytree->Branch ("truelep_phi", &m_truelep_phi);
+  m_truelep_charge = new std::vector<int>();
+  mytree->Branch ("truelep_charge", &m_truelep_charge);
+  m_truelep_pdgid = new std::vector<int>();
+  mytree->Branch ("truelep_pdgid", &m_truelep_pdgid);
+  m_truetrk_pt = new std::vector<float>();
+  mytree->Branch ("truetrk_pt", &m_truetrk_pt);
+  m_truetrk_eta = new std::vector<float>();
+  mytree->Branch ("truetrk_eta", &m_truetrk_eta);
+  m_truetrk_phi = new std::vector<float>();
+  mytree->Branch ("truetrk_phi", &m_truetrk_phi);
+  m_truetrk_charge = new std::vector<int>();
+  mytree->Branch ("truetrk_charge", &m_truetrk_charge);
+  m_truetrk_pdgid = new std::vector<int>();
+  mytree->Branch ("truetrk_pdgid", &m_truetrk_pdgid);
+  mytree->Branch ("true_twoleps", &m_true_twoleps);
+  mytree->Branch ("true_twoOSleps", &m_true_twoOSleps);
+  mytree->Branch ("true_absproduct_of_lepton_pdgidvals", &m_true_absproduct_of_lepton_pdgidvals);
+  mytree->Branch ("true_leadlep_ptpass", &m_true_leadlep_ptpass);
+  mytree->Branch ("true_subleadlep_ptpass", &m_true_subleadlep_ptpass);
+  mytree->Branch ("true_dilep_masspass", &m_true_dilep_masspass);
+  mytree->Branch ("true_dilep_ptpass", &m_true_dilep_ptpass);
+  mytree->Branch ("true_numCh_and_PU", &m_true_numCh_and_PU);
+  */  
+
   ANA_CHECK (book ( TH1F ("cutflow", "Cutflow", ncuts, -0.5, ncuts-0.5) ));
   ANA_CHECK (book ( TH1F ("num_fiducial_leptons", "Number of fiducial leptons", 10, 0, 10) ));
   ANA_CHECK (book ( TH1F ("dilep_m", "m(ll) (GeV)", 60, 0, 300.) ));
@@ -111,12 +150,28 @@ StatusCode TruthAnalysis :: initialize ()
   }
 
   //retrieve tracking efficiency, if needed
-  h_trk_eff_pt = nullptr;
-  if (not input_trk_eff_file.empty()) {
-    TFile *f_trk_eff = TFile::Open(input_trk_eff_file.c_str());
-    h_trk_eff_pt = static_cast<TH1F*>(f_trk_eff->Get("h_trk_eff_pt"));
-    if (h_trk_eff_pt == nullptr) {
-      ANA_MSG_ERROR("Error loading tracking efficiency (h_trk_eff_pt) from:" << input_trk_eff_file);
+  h_trk_eff_pt_eta = nullptr; //2D
+  //h_trk_eff_pt = nullptr;
+  h_electron_eff = nullptr;
+  h_muon_eff = nullptr;
+  if ( not input_trk_eff_pt_eta_file.empty()) {
+    //TFile *f_trk_eff = TFile::Open(input_trk_eff_file.c_str());
+    TFile *f_trk_eff_pt_eta = TFile::Open(input_trk_eff_file.c_str());
+    h_trk_eff_pt_eta = static_cast<TProfile2D*>(f_trk_eff_pt_eta->Get("Tracking_Eff_2D")); //2D
+    //h_trk_eff_pt = static_cast<TH1F*>(f_trk_eff->Get("h_trk_eff_pt"));
+    h_electron_eff= static_cast<TProfile2D*>(f_trk_eff_pt_eta->Get("Electron_Eff_2D"));
+    h_muon_eff= static_cast<TProfile2D*>(f_trk_eff_pt_eta->Get("Muon_Eff_2D"));
+
+    if (h_trk_eff_pt_eta == nullptr) {
+      ANA_MSG_ERROR("Error loading tracking efficiency (h_trk_eff_pt_eta) from:" << input_trk_eff_file);
+      return StatusCode::FAILURE;
+    }
+    if (h_electron_eff == nullptr) {
+      ANA_MSG_ERROR("Error loading electron efficiency from:" << input_trk_eff_file);
+      return StatusCode::FAILURE;
+    }
+    if (h_muon_eff == nullptr) {
+      ANA_MSG_ERROR("Error loading muon efficiency from:" << input_trk_eff_file);
       return StatusCode::FAILURE;
     }
     ANA_MSG_INFO("Loaded tracking efficiency from " << input_trk_eff_file);
@@ -153,7 +208,30 @@ StatusCode TruthAnalysis :: execute ()
   m_trk_charge->clear();
   m_trk_pdgid->clear();
   m_weights->clear();
-  
+
+  /*
+  m_truedilep_pt = -1.;
+  m_truedilep_m = -1.;
+  //m_numTrueHSparticles = -1;
+  m_truelep_pt->clear();
+  m_truelep_eta->clear();
+  m_truelep_phi->clear();
+  m_truelep_charge->clear();
+  m_truelep_pdgid->clear();
+  m_truetrk_pt->clear();
+  m_truetrk_eta->clear();
+  m_truetrk_phi->clear();
+  m_truetrk_charge->clear();
+  m_truetrk_pdgid->clear();
+  m_true_twoleps = false;
+  m_true_twoOSleps = false;
+  m_true_absproduct_of_lepton_pdgidvals = 0;
+  m_true_leadlep_ptpass = false;
+  m_true_subleadlep_ptpass = false;
+  m_true_dilep_masspass = false;
+  m_true_dilep_ptpass = false;
+  m_true_numCh_and_PU = -1;
+  */
   for (int i=0; i<ncuts;i++)
     m_pass_sel->at(i)=false;
 
@@ -167,23 +245,90 @@ StatusCode TruthAnalysis :: execute ()
   // trigger, assumed 100% efficiency after other selections
   passCut(cut_trigger);
 
+  int tmpsize = 0;
+  int tmpsizetruth = 0;
+
   // loop over the particles in the container
   // and select fiducial leptons and tracks
   for (const xAOD::TruthParticle *part : *truthParts) {    
+
     //select fiducial truth particles
     ANA_MSG_VERBOSE ("Particle PDG " << part->auxdata<int>("pdgId") << ", pT=" << part->pt() << ", eta=" << part->eta() << ", charge=" << part->charge() << ", status=" << part->auxdata<int>("status") << ", barcode=" << part->auxdata<int>("barcode"));
-    //if (part->pt() < std::min(tracks_min_pt,lep2_min_pt)) continue;
+    if (part->pt() < std::min(tracks_min_pt,lep2_min_pt)) continue;
     if (part->abseta() > std::max(tracks_max_eta,lep_max_eta)) continue;
     if (part->charge() == 0) continue;
     if (part->auxdata<int>("status") != 1) continue;
     if (part->auxdata<int>("barcode") > 200000) continue;
     ANA_MSG_VERBOSE("Pass pre-fiducial cuts");
 
-    int pdgid = part->auxdata<int>("pdgId");
+    //Pre-Lepton reco efficiency
+    /* int pdgid = part->auxdata<int>("pdgId");
     if ( (abs(pdgid) == 11) or (abs(pdgid)==13) ) {
       if  ( (part->pt() > lep2_min_pt) and (part->abseta() < lep_max_eta) )
 	{      
 	ANA_MSG_VERBOSE ("Store as lepton");
+	m_lep_pt->push_back(part->pt());
+	m_lep_eta->push_back(part->eta());
+	m_lep_phi->push_back(part->phi());
+	m_lep_charge->push_back(static_cast<int>(part->charge()));
+	m_lep_pdgid->push_back(pdgid);
+	continue; //do not consider it as track
+      }
+    }
+    */
+int pdgid = part->auxdata<int>("pdgId");
+    if ( (abs(pdgid) == 11) or (abs(pdgid)==13) ) {
+      if ((part->pt() > lep2_min_pt) and
+	  (part->abseta() < lep_max_eta) ) {      
+	/*
+	m_truelep_pt->push_back(part->pt());
+	m_truelep_eta->push_back(part->eta());
+	m_truelep_phi->push_back(part->phi());
+	m_truelep_charge->push_back(static_cast<int>(part->charge()));
+	m_truelep_pdgid->push_back(pdgid);
+	*/
+	if ( h_electron_eff != nullptr && (abs(pdgid) == 11) ) {
+	  ANA_MSG_VERBOSE ("Candidate electron; is it reconstructed?");
+	  int xbin = h_electron_eff->GetXaxis()->FindBin(part->pt());
+	  int ybin = h_electron_eff->GetYaxis()->FindBin(part->eta());
+	  //float trk_eff = 0.0; //default if underflow
+	  if ( xbin > 0 && ybin > 0 ) {
+	    //use last bin if overflow
+	    if (xbin > h_electron_eff->GetNbinsX()){
+	      xbin = h_electron_eff->GetNbinsX();
+	    }
+	    electron_eff = h_electron_eff->GetBinContent(xbin, ybin);      
+	    if ( std::abs(part->eta()) > 2.5 ){
+	      electron_eff = 0.0;
+	    }
+	  }    
+	  //if (m_rnd->Rndm() > trk_eff){
+	    //continue;
+	  //}
+	}
+
+	if ( h_muon_eff != nullptr && (abs(pdgid) == 13) ) {
+	  ANA_MSG_VERBOSE ("Candidate muon; is it reconstructed?");
+	  int xbin = h_muon_eff->GetXaxis()->FindBin(part->pt());
+	  int ybin = h_muon_eff->GetYaxis()->FindBin(part->eta());
+	  // float trk_eff = 0.0; //default if underflow
+	  muon_eff = 0.0; //default if underflow
+	  if ( xbin > 0 && ybin > 0 ) {
+	    //use last bin if overflow
+	    if (xbin > h_muon_eff->GetNbinsX()){
+	      xbin = h_muon_eff->GetNbinsX();
+	    }
+	    muon_eff = h_muon_eff->GetBinContent(xbin, ybin);      
+	    if ( std::abs(part->eta()) > 2.5 ){
+	      muon_eff = 0.0;
+	    }
+	  }    
+	  // if (m_rnd->Rndm() > trk_eff)
+	  //continue;
+	}
+
+
+	ANA_MSG_VERBOSE ("It was recoed.  Store as lepton");
 	m_lep_pt->push_back(part->pt());
 	m_lep_eta->push_back(part->eta());
 	m_lep_phi->push_back(part->phi());
@@ -198,36 +343,50 @@ StatusCode TruthAnalysis :: execute ()
     if (part->pt() < tracks_min_pt) continue;
     if (part->abseta() > tracks_max_eta) continue;
     ANA_MSG_VERBOSE("Candidate track");
-    
+
+    /*
+    m_truetrk_pt->push_back(part->pt());
+    m_truetrk_eta->push_back(part->eta());
+    m_truetrk_phi->push_back(part->phi());
+    m_truetrk_charge->push_back(static_cast<int>(part->charge()));
+    m_truetrk_pdgid->push_back(pdgid);
+    */
+    tmpsizetruth += 1;
+
     //apply parametrized tracking efficiency, if requested
+
+    //Old 1D track efficiency
+    /*
     if (h_trk_eff_pt != nullptr) {
       int ibin = h_trk_eff_pt->FindBin(part->pt());
-     float trk_eff = 0.0; //default if underflow
+      float trk_eff = 0.0; //default if underflow
       if (ibin > 0) {
 	//use last bin if overflow
 	if (ibin > h_trk_eff_pt->GetNbinsX()) ibin = h_trk_eff_pt->GetNbinsX();
-	trk_eff = h_trk_eff_pt->GetBinContent(ibin)-0.05;      
+	trk_eff = h_trk_eff_pt->GetBinContent(ibin);      
       }  
-    
-    /* if (h_trk_eff_pt != nullptr) {
+    */
+    //2D track efficiency
+    if (h_trk_eff_pt_eta != nullptr) {
       //int ibin = h_trk_eff_pt_eta->FindBin(part->pt(), part->eta());
-      int xbin = h_trk_eff_pt->GetXaxis()->FindBin(part->pt());
-      int ybin = h_trk_eff_pt->GetYaxis()->FindBin(part->eta());
+      int xbin = h_trk_eff_pt_eta->GetXaxis()->FindBin(part->pt());
+      int ybin = h_trk_eff_pt_eta->GetYaxis()->FindBin(part->eta());
       float trk_eff = 0.0; //default if underflow
       if ( xbin > 0 && ybin > 0 ) {
 	//use last bin if overflow
-	if (xbin > h_trk_eff_pt->GetNbinsX()) xbin = h_trk_eff_pt->GetNbinsX();
-	if (ybin > h_trk_eff_pt->GetNbinsY()) ybin = h_trk_eff_pt->GetNbinsY();
-	  trk_eff = h_trk_eff_pt->GetBinContent(xbin, ybin)+h_trk_eff_pt->GetBinError(xbin,ybin);
+	if (xbin > h_trk_eff_pt_eta->GetNbinsX()) xbin = h_trk_eff_pt_eta->GetNbinsX();
+	if (ybin > h_trk_eff_pt_eta->GetNbinsY()) ybin = h_trk_eff_pt_eta->GetNbinsY();
+	trk_eff = h_trk_eff_pt_eta->GetBinContent(xbin, ybin);   // When including error: +h_trk_eff_pt->GetBinError(xbin,ybin);
+	if (std::abs(part->eta()) > 2.5) { trk_eff= 0.0; }
 	}
-    */
-
+    
       //increment a per-event "weight" with 1-trk_eff  
       m_weights->push_back( 1- trk_eff );
 
-      if (m_rnd->Rndm() > trk_eff)
-	continue;
+      //if (m_rnd->Rndm() > trk_eff)
+      //continue;
     }
+    tmpsize += 1 ;
 
     //store basic kinematic and particle info
     ANA_MSG_VERBOSE("Store track");
@@ -237,10 +396,10 @@ StatusCode TruthAnalysis :: execute ()
     m_trk_charge->push_back(static_cast<int>(part->charge()));
     m_trk_pdgid->push_back(pdgid);
     
-  } // end for loop over truth particles
+} // end for loop over truth particles
   
   //The "tracking weight" is done
-  float  tracking_weight = 1;
+float  tracking_weight = 1;
   for(int i = 0; (i < abs(m_weights->size())); i++)
     {
       tracking_weight *= m_weights->at(i);
@@ -290,7 +449,7 @@ StatusCode TruthAnalysis :: execute ()
   passCut(cut_pt_ll);
   ANA_MSG_VERBOSE("Pass cut_pt_ll");
 
-  hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV, tracking_weight);
+hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV, tracking_weight*electron_eff*muon_eff);
   hist("track_weights")->Fill(tracking_weight);
   hist("num_fiducial_tracks")->Fill(m_trk_pt->size());
   if (m_trk_pt->size() > tracks_max_n) {saveTree(); return StatusCode::SUCCESS;}

@@ -30,7 +30,7 @@ float LowMassDY_xsec = 531379.2; //pb
 void  plot_Cumulative_Ratios(std::string InclWW_Ratio_File, std::string Zmumu_Ratio_File, std::string Ztautau_Ratio_File, std::string DYmumu_Ratio_File) // std::string LowMassDY_Ratio_File)
 {
   double exclusive_yield = 393.831;
-  int n = 10;
+  int n = 9;
   Double_t ey[n],ex[n], Cumulative[n],min_pT[n];
   int counter = 0;
   Double_t Zmumu_Raw[n], DYmumu_Raw[n], Ztautau_Raw[n], InclWW_Raw[n],LowMassDY_Raw[n],ExclWW_Raw[n], Ratio[n];
@@ -185,7 +185,7 @@ void  plot_Cumulative_Ratios(std::string InclWW_Ratio_File, std::string Zmumu_Ra
   //Scale factors for the ratios.
   for (int i = 0; i<n; i++)
     {
-      min_pT[i] = 50*(i+1);
+      min_pT[i] = 50*(i+2);
       
       rho_ExclWW[i] = exclusive_yield/ExclWW_Raw[i] ;
       //rho_LowMassDY[i] = exclusive_yield/LowMassDY_Ratios[i]/LowMassDY_Raw[i];
@@ -208,9 +208,10 @@ void  plot_Cumulative_Ratios(std::string InclWW_Ratio_File, std::string Zmumu_Ra
 
   auto cl = new TCanvas("cl","cl");
   auto gr = new TGraphErrors(n,min_pT,Ratio,ex,ey);
-  gr->SetTitle("Exclusive to Background Yield Ratios (mumu&ee)");
+  gr->SetTitle("Same Flavor S/B with 2D track eff");
   gr->GetXaxis()->SetTitle("Min_pT(MeV)");
   gr->GetYaxis()->SetTitle("Ratios of Excl to Background");
+  gr->GetYaxis()->SetRangeUser(0,5.2);
   gr->Draw("ALP");
 
   std::cout << "For Track min_pT of 100 MeV"<< endl;
