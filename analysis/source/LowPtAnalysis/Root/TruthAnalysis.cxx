@@ -155,9 +155,9 @@ StatusCode TruthAnalysis :: initialize ()
   h_electron_eff = nullptr;
   h_muon_eff = nullptr;
   if ( not input_trk_eff_pt_eta_file.empty()) {
-    //TFile *f_trk_eff = TFile::Open(input_trk_eff_file.c_str());
-    TFile *f_trk_eff_pt_eta = TFile::Open(input_trk_eff_file.c_str());
-    h_trk_eff_pt_eta = static_cast<TProfile2D*>(f_trk_eff_pt_eta->Get("Tracking_Eff_2D")); //2D
+    TFile *f_trk_eff = TFile::Open(input_trk_eff_file.c_str());
+    TFile *f_trk_eff_pt_eta = TFile::Open(input_trk_eff_pt_eta_file.c_str());
+    h_trk_eff_pt_eta = static_cast<TProfile2D*>(f_trk_eff ->Get("Tracking_Eff_2D")); //2D
     //h_trk_eff_pt = static_cast<TH1F*>(f_trk_eff->Get("h_trk_eff_pt"));
     h_electron_eff= static_cast<TProfile2D*>(f_trk_eff_pt_eta->Get("Electron_Eff_2D"));
     h_muon_eff= static_cast<TProfile2D*>(f_trk_eff_pt_eta->Get("Muon_Eff_2D"));
@@ -167,11 +167,11 @@ StatusCode TruthAnalysis :: initialize ()
       return StatusCode::FAILURE;
     }
     if (h_electron_eff == nullptr) {
-      ANA_MSG_ERROR("Error loading electron efficiency from:" << input_trk_eff_file);
+      ANA_MSG_ERROR("Error loading electron efficiency from:" << input_trk_eff_pt_eta_file);
       return StatusCode::FAILURE;
     }
     if (h_muon_eff == nullptr) {
-      ANA_MSG_ERROR("Error loading muon efficiency from:" << input_trk_eff_file);
+      ANA_MSG_ERROR("Error loading muon efficiency from:" << input_trk_eff_pt_eta_file);
       return StatusCode::FAILURE;
     }
     ANA_MSG_INFO("Loaded tracking efficiency from " << input_trk_eff_file);
@@ -412,8 +412,8 @@ float  tracking_weight = 1;
   if (m_lep_pt->size() != 2) {saveTree(); return StatusCode::SUCCESS;}
   if (m_lep_charge->at(0)*m_lep_charge->at(1) != -1) {saveTree(); return StatusCode::SUCCESS;}
   //if ( ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  11*11 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 ) ) {saveTree(); return StatusCode::SUCCESS;} //For all e and mu selections 
-  //if (abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13){ saveTree(); return StatusCode::SUCCESS;} //For just emu
-  if ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 )  {saveTree(); return StatusCode::SUCCESS;}// mumu
+  if (abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13){ saveTree(); return StatusCode::SUCCESS;} //For just emu
+  //if ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 )  {saveTree(); return StatusCode::SUCCESS;}// mumu
   
   passCut(cut_lep_ocof);
   ANA_MSG_VERBOSE("Pass cut_lep_ocof");
