@@ -14,8 +14,8 @@ float Ztautau_xsec = 1901; //pb
 
 void plot_Cumulative_emu_Ratios(std::string InclWW_Ratio_File)// std::string Ztautau_Ratio_File)
 {
-  double exclusive_yield = 393.831;
-  int n = 10;
+  double exclusive_yield = 237.452;
+  int n = 9;
   Double_t ey[n], ex[n], Cumulative[n], min_pT[n];
   Double_t Ztautau_Raw[n], InclWW_Raw[n], ExclWW_Raw[n];
   Double_t rho_ExclWW[n], rho_InclWW[n], rho_Ztautau[n];
@@ -83,7 +83,7 @@ void plot_Cumulative_emu_Ratios(std::string InclWW_Ratio_File)// std::string Zta
   */
   for (int i = 0; i<n; i++)
     {
-      min_pT[i] = 50*(i+1);
+      min_pT[i] = 50*(i+2);
       
       rho_ExclWW[i] = exclusive_yield/ExclWW_Raw[i] ;
       rho_InclWW[i] = exclusive_yield/InclWW_Ratios[i]/InclWW_Raw[i];
