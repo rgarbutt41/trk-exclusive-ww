@@ -1,2 +1,2 @@
 #!/bin/bash
-root -l '/global/projecta/projectdirs/atlas/rgarbutt/AnalysisCode/analysis/run/C_programs/plot_Cumulative_emu_Ratios.C("/global/projecta/projectdirs/atlas/rgarbutt/AnalysisCode/analysis/run/'$1'/InclWW/Ratios.txt")'
+root -l '/global/cfs/projectdirs/atlas/rgarbutt/trk-exclusive-ww/analysis/Robert_scripts/C_programs/plot_Cumulative_emu_Ratios.C("/global/cfs/projectdirs/atlas/rgarbutt/trk-exclusive-ww/analysis/run/'$1'/InclWW/Ratios.txt")'
