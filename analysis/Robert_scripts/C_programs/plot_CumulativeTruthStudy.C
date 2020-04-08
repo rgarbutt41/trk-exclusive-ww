@@ -16,8 +16,9 @@ std::string plotName = "sr_dilep_pt"; ///< name of histogram to plot
 float lumi = 150e3; //pb^-1
 std::string pT="Min. track p_{T} = ";
 
-float exclWW_xsec = 8.5e-3*0.319; //pb; fixed x-sec, sample gives 1.49e-2 x-sec, wrong!
+float exclWW_xsec = 8.5434e-3; //pb; fixed x-sec, sample gives 1.49e-2 x-sec, wrong! Previous 8.5e-3*0.319
 float exclWW_SD_DD_corr = 3.39; ///< correction factor for exclusive WW SD/DD contributions
+float exclWW_filter_eff = 0.30838;
 
 float inclWW_filter_eff = 0.026; 
 float inclWW_xsec = 10.612; //pb
@@ -99,7 +100,7 @@ void plot_TruthAnalysis_SBStudy_Hist(TH1F *h_excl, TH1F *h_incl,TH1F *h_excl_cut
   h_incl->Sumw2();
   h_incl->Scale(inclWW_xsec*lumi / y_ngen_incl * inclWW_filter_eff);
   h_excl->Sumw2();
-  h_excl->Scale( exclWW_xsec*lumi / y_ngen_excl );
+  h_excl->Scale( exclWW_xsec*lumi / y_ngen_excl*exclWW_filter_eff );
   h_excl->Scale( exclWW_SD_DD_corr );
   h_Ztautau->Sumw2();
   h_Ztautau->Scale( Ztautau_xsec*lumi / y_ngen_Ztautau* Ztautau_filter_eff );

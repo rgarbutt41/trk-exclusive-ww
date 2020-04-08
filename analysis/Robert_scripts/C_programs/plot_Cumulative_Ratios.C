@@ -5,8 +5,9 @@
 #include <fstream>
 #include <math.h>
 //Scaling factors.
-float exclWW_xsec = 8.5e-3*0.319; //pb; fixed x-sec, sample gives 1.49e-2 x-sec, wrong!
+float exclWW_xsec = 8.5434e-3; //pb; fixed x-sec, sample gives 1.49e-2 x-sec, wrong! Previous 8.5e-3*0.319
 float exclWW_SD_DD_corr = 3.39; ///< correction factor for exclusive WW SD/DD contributions
+float exclWW_filter_eff = 0.30838;
 
 float inclWW_filter_eff = 0.026; 
 float inclWW_xsec = 10.612; //pb
