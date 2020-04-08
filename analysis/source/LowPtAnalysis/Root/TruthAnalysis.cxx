@@ -8,6 +8,9 @@
 #include <xAODTracking/TrackParticleContainer.h>
 
 #include <cmath>
+#include <string>
+#include<stdio.h>
+#include<math.h>
 
 //ROOT includes
 #include "TFile.h"
@@ -42,6 +45,8 @@ TruthAnalysis :: TruthAnalysis (const std::string& name,
 		  "if true, only events passing selections are stored in the output");
   declareProperty("random_seed", random_seed=29873,
 		  "Random seed for tracking efficiency");
+  declareProperty("input_pu_file", input_pu_file = "", 
+		  "PU info input, if empty, use hard-coded numbers");
 
 }
 
@@ -68,6 +73,7 @@ StatusCode TruthAnalysis :: initialize ()
   mytree->Branch ("dilep_m", &m_dilep_m);
   m_pass_sel = new std::vector<char>(ncuts);
   mytree->Branch("pass_sel", m_pass_sel);
+  mytree->Branch("numPUtracks", &m_numPUtracks);
 
   //Leptons
   m_lep_pt = new std::vector<float>();
@@ -176,6 +182,21 @@ StatusCode TruthAnalysis :: initialize ()
     }
     ANA_MSG_INFO("Loaded tracking efficiency from " << input_trk_eff_file);
   }
+  //retricve pu eff
+  h_pu_info=nullptr;
+  if (not input_pu_file.empty()) {
+    TFile *f_pu = TFile::Open(input_pu_file.c_str());
+    std::string PU = "PU_dist_min";
+    std::string PU_hist;
+    PU_hist = PU + std::to_string((int)tracks_min_pt)+"_half";
+    h_pu_info = static_cast<TH1D*>(f_pu->Get(PU_hist.c_str()));
+    if(h_pu_info == nullptr) {
+      ANA_MSG_ERROR("Error loading pu info from:" <<input_pu_file);
+      ANA_MSG_ERROR("PU Hist Name:" << PU_hist);
+      return StatusCode::FAILURE;
+    }
+    ANA_MSG_INFO("Loaded pu info from " << input_pu_file);
+  }
 
   //print properties values
   ANA_MSG_INFO("Properties values:");
@@ -188,6 +209,7 @@ StatusCode TruthAnalysis :: initialize ()
   ANA_MSG_INFO("tracks_max_eta = " << tracks_max_eta);
   ANA_MSG_INFO("filter_by_selections = " << filter_by_selections);
   ANA_MSG_INFO("input_trk_eff_file = " << input_trk_eff_file);
+  ANA_MSG_INFO("input_pu_file = " << input_pu_file);
 
   return StatusCode::SUCCESS;
 }
@@ -197,6 +219,7 @@ StatusCode TruthAnalysis :: execute ()
   //reset variables
   m_dilep_pt = -1.0;
   m_dilep_m = -1.0;
+  m_numPUtracks = 0;
   m_lep_pt->clear();
   m_lep_eta->clear();
   m_lep_phi->clear();
@@ -235,6 +258,20 @@ StatusCode TruthAnalysis :: execute ()
   for (int i=0; i<ncuts;i++)
     m_pass_sel->at(i)=false;
 
+  //How many PU tracks in window? Compare rand against the integral of the PDF of the track multiplicity
+  if(h_pu_info != nullptr) {
+    double rand = m_rnd->Rndm();
+    m_rand = rand;
+    double integral = 0;
+    Pileup_eff = h_pu_info->GetBinContent(1);
+    for(int b = 1; b < h_pu_info -> GetNbinsX(); b++){
+      integral += h_pu_info->GetBinContent(b);
+      if(integral > rand){
+	m_numPUtracks = b-1;
+	break;
+      }
+    }
+  }
   // get truth particle container of interest
   const xAOD::TruthParticleContainer* truthParts = 0;
   ANA_CHECK (evtStore()->retrieve( truthParts, "TruthParticles"));
@@ -398,6 +435,8 @@ int pdgid = part->auxdata<int>("pdgId");
     
 } // end for loop over truth particles
   
+  int num_track_in_window = m_numPUtracks;
+
   //The "tracking weight" is done
 float  tracking_weight = 1;
   for(int i = 0; (i < abs(m_weights->size())); i++)
@@ -407,13 +446,13 @@ float  tracking_weight = 1;
 
   // Now evaluate event-level selections  
   ANA_MSG_VERBOSE("Checking event selections");
-  ANA_MSG_DEBUG("NLep = " << m_lep_pt->size() << ", NTracks = " << m_trk_pt->size());
+  ANA_MSG_DEBUG("NLep = " << m_lep_pt->size() << ", NTracks = " << num_track_in_window);
   hist("num_fiducial_leptons")->Fill(m_lep_pt->size());
   if (m_lep_pt->size() != 2) {saveTree(); return StatusCode::SUCCESS;}
   if (m_lep_charge->at(0)*m_lep_charge->at(1) != -1) {saveTree(); return StatusCode::SUCCESS;}
   //if ( ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  11*11 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 ) ) {saveTree(); return StatusCode::SUCCESS;} //For all e and mu selections 
   if (abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13){ saveTree(); return StatusCode::SUCCESS;} //For just emu
-  //if ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 )  {saveTree(); return StatusCode::SUCCESS;}// mumu
+  // if ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 )  {saveTree(); return StatusCode::SUCCESS;}// mumu
   
   passCut(cut_lep_ocof);
   ANA_MSG_VERBOSE("Pass cut_lep_ocof");
@@ -449,17 +488,19 @@ float  tracking_weight = 1;
   passCut(cut_pt_ll);
   ANA_MSG_VERBOSE("Pass cut_pt_ll");
 
-hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV, tracking_weight*electron_eff*muon_eff);
-  hist("track_weights")->Fill(tracking_weight);
-  hist("num_fiducial_tracks")->Fill(m_trk_pt->size());
-  if (m_trk_pt->size() > tracks_max_n) {saveTree(); return StatusCode::SUCCESS;}
+  //hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV, tracking_weight*electron_eff*muon_eff);
+  hist("track_weights")->Fill(1-Pileup_eff);
+  hist("num_fiducial_tracks")->Fill(num_track_in_window);
+  hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV, tracking_weight*electron_eff*muon_eff*Pileup_eff);
+
+  if (num_track_in_window > tracks_max_n) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_exclusive);
   ANA_MSG_VERBOSE("Pass cut_exclusive");
 
   //Plots after all selections
   hist("sr_dilep_pt")->Fill(m_dilep_pt/GeV);
   hist("delta_phi")->Fill(m_delta_phi);
-  
+  //hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV, tracking_weight*electron_eff*muon_eff);
   
 
   // Fill the event into the tree

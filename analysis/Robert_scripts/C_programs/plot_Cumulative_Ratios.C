@@ -183,6 +183,7 @@ void  plot_Cumulative_Ratios(std::string InclWW_Ratio_File, std::string Zmumu_Ra
   */ 
 
   //Scale factors for the ratios.
+  /*
   for (int i = 0; i<n; i++)
     {
       min_pT[i] = 50*(i+2);
@@ -205,20 +206,27 @@ void  plot_Cumulative_Ratios(std::string InclWW_Ratio_File, std::string Zmumu_Ra
       ey[i] = Ratio[i]*sqrt( 1/pow( sum[i] , 2 )*Background_sygma[i]+ 1/ExclWW_Raw[i] );
       ex[i] = 0;
     }
+  */
+  for (int i = 0; i<n; i++)
+  {
+    min_pT[i]=50*(i+2);
+    Ratio[i]=ExclWW_Raw[i]/(Zmumu_Raw[i]+DYmumu_Raw[i]+InclWW_Raw[i]+Ztautau_Raw[i]);
+  }
+
 
   auto cl = new TCanvas("cl","cl");
-  auto gr = new TGraphErrors(n,min_pT,Ratio,ex,ey);
-  gr->SetTitle("Same Flavor S/B with 2D track eff");
+  auto gr = new TGraph(n,min_pT,Ratio);
+  gr->SetTitle("Same Flavor S/B with 2D track eff and PU");
   gr->GetXaxis()->SetTitle("Min_pT(MeV)");
   gr->GetYaxis()->SetTitle("Ratios of Excl to Background");
-  gr->GetYaxis()->SetRangeUser(0,5.2);
+  gr->GetYaxis()->SetRangeUser(0,5);
   gr->Draw("ALP");
 
   std::cout << "For Track min_pT of 100 MeV"<< endl;
-  std::cout << "DYmumu Raw Yield:" << DYmumu_Raw[1] <<" " << "DYmumu Scale:" << rho_DYmumu[1] << endl;
-  std::cout << "Zmumu Raw Yield:" << Zmumu_Raw[1] <<" " << "Zmumu Scale:" << rho_Zmumu[1] << endl;
-  std::cout << "Ztautau Raw Yield:" << Ztautau_Raw[1] <<" " << "Ztautau Scale:" << rho_Ztautau[1] << endl;
-  std::cout << "InclWW Raw Yield:" << InclWW_Raw[1] <<" " << "InclWW Scale:" << rho_InclWW[1] << endl;
- 
+  std::cout << "DYmumu Exp Yield:" << DYmumu_Raw[0] <<" " << "DYmumu Scale:" << rho_DYmumu[1] << endl;
+  std::cout << "Zmumu Exp Yield:" << Zmumu_Raw[0] <<" " << "Zmumu Scale:" << rho_Zmumu[1] << endl;
+  std::cout << "Ztautau Exp Yield:" << Ztautau_Raw[0] <<" " << "Ztautau Scale:" << rho_Ztautau[1] << endl;
+  std::cout << "InclWW Exp Yield:" << InclWW_Raw[0] <<" " << "InclWW Scale:" << rho_InclWW[1] << endl;
+  std::cout << Ratio[0];
   
 }

@@ -50,6 +50,7 @@ public:
 
   const float MeV=1.0; //default units: MeV
   const float GeV=1e3*MeV; 
+  float m_rand;
 
 private:
   // selections
@@ -63,6 +64,9 @@ private:
   float tracks_max_n;
   std::string input_trk_eff_file;
   std::string input_trk_eff_pt_eta_file;
+  std::string input_pu_file;
+  float Pileup_eff;
+  //std::string input_weight_file;
   bool filter_by_selections;
   unsigned int random_seed;
 
@@ -70,11 +74,13 @@ private:
   TProfile2D *h_trk_eff_pt_eta;
   TProfile2D *h_electron_eff;
   TProfile2D *h_muon_eff;
+  TH1D *h_pu_info;
   //TH1F *h_trk_eff_pt;
 
   // output variables for the current event
   float m_dilep_pt;
   float m_dilep_m;
+  float m_numPUtracks;
 
   //Leptons
   std::vector<float> *m_lep_pt = nullptr;

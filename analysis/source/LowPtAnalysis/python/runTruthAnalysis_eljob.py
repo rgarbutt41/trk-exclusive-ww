@@ -64,9 +64,13 @@ alg.input_trk_eff_file = "/global/cfs/projectdirs/atlas/wmccorma/ExclWW/trk-excl
 
 alg.input_trk_eff_pt_eta_file = "/global/cfs/projectdirs/atlas/wmccorma/ExclWW/Trk_eff_output/links_of_hists/hist-all_v3.root" #Track efficiency for TProfile2D
 
+
+
 #alg.input_pu_file = "/global/projecta/projectdirs/atlas/wmccorma/TrkExclusiveWW/analysis/data/ZPU.root" #Pileup file.
 #alg.filter_by_selections=True
 alg.tracks_min_pt=  options.min_pt # pT tracking value
+
+alg.input_pu_file = "/global/cfs/projectdirs/atlas/wmccorma/ExclWW/Production_InclWW_Rebase_2_05_20/ExclWW_Analysis/PU_Fakes_withlowpt.root"
 
 # Add our algorithm to the job
 job.algsAdd( alg )

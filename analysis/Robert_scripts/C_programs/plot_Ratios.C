@@ -10,7 +10,7 @@ void  plot_Ratios(std::string Ratio_File, const char* Title)
   std::ifstream myfile;
   myfile.open (Ratio_File);
   double i;
-  int n = 10;
+  int n = 9;
   Double_t b_raw_yield[n], Ratios[n], e_raw_yield[n], min_pT[n];
   int k = 0;
   int g = 0;
@@ -39,7 +39,7 @@ void  plot_Ratios(std::string Ratio_File, const char* Title)
   myfile.close();
   for (int i = 0; i<n; i++)
     {
-      min_pT[i] = 50*(i+1);
+      min_pT[i] = 50*(i+2);
       ey[i] = Ratios[i]*sqrt(1/e_raw_yield[i]+1/b_raw_yield[i]);
       ex[i] = 0;
       //std::cout << Ratios[i] << endl;
@@ -60,10 +60,11 @@ void  plot_Ratios(std::string Ratio_File, const char* Title)
       //std::cout << ey_s[j];
     }
   auto cl = new TCanvas("cl","cl");
-  auto gr = new TGraphErrors(n,min_pT,Ratios,ex,ey);
+  auto gr = new TGraph(n,min_pT,Ratios);
   gr->SetTitle(Title);
   gr->GetXaxis()->SetTitle("Min_pT(MeV)");
-  gr->GetYaxis()->SetTitle("Ratios of Excl to Background");
-  gr->GetYaxis()->SetRangeUser(0,18);
+  gr->GetYaxis()->SetTitle("Ratios of Excl to Incl");
+  gr->GetYaxis()->SetRangeUser(0, 20);
+  gr->SetMarkerStyle(20);
   gr->Draw("ALP");
 }

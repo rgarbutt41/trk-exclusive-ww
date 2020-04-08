@@ -3,13 +3,13 @@ mkdir Add Nom Low
 for k in  Nom; #Add Low;
 do
     cd $k
-    mkdir InclWW ExclWW #DY Ztautau Zmumu InclWW ExclWW
+    mkdir InclWW ExclWW #DY Ztautau Zmumu
     cd InclWW
     mkdir Individual_Samples
     cd ../
     for num in {100..500..50};
     do
-	for i in InclWW ExclWW #DY Ztautau Zmumu InclWW ExclWW;
+	for i in InclWW ExclWW; #DY Ztautau Zmumu;
 	do
 	    if [ "$i" = "DY" ];
 	    then
