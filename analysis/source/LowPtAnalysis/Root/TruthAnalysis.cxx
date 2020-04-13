@@ -39,7 +39,7 @@ TruthAnalysis :: TruthAnalysis (const std::string& name,
 		  "exclusivity selection");
   declareProperty("input_trk_eff_file", input_trk_eff_file = "",
 		  "tracking efficiency input. if empty, use hard-coded numbers");
-  declareProperty("input_trk_eff_pt_eta_file", input_trk_eff_pt_eta_file = "",
+  declareProperty("input_lepton_reco_eff_file", input_lepton_reco_eff_file = "",
 		  "e/mu tracking efficiency input. if empty, use hard-coded numbers");
   declareProperty("filter_by_selections", filter_by_selections = false,
 		  "if true, only events passing selections are stored in the output");
@@ -157,27 +157,27 @@ StatusCode TruthAnalysis :: initialize ()
 
   //retrieve tracking efficiency, if needed
   h_trk_eff_pt_eta = nullptr; //2D
-  //h_trk_eff_pt = nullptr;
+  // h_trk_eff_pt = nullptr;
   h_electron_eff = nullptr;
   h_muon_eff = nullptr;
-  if ( not input_trk_eff_pt_eta_file.empty()) {
+  if ( not input_lepton_reco_eff_file.empty()) {
     TFile *f_trk_eff = TFile::Open(input_trk_eff_file.c_str());
-    TFile *f_trk_eff_pt_eta = TFile::Open(input_trk_eff_pt_eta_file.c_str());
+    TFile *f_lepton_reco_eff = TFile::Open(input_lepton_reco_eff_file.c_str());
     h_trk_eff_pt_eta = static_cast<TProfile2D*>(f_trk_eff ->Get("Tracking_Eff_2D")); //2D
     //h_trk_eff_pt = static_cast<TH1F*>(f_trk_eff->Get("h_trk_eff_pt"));
-    h_electron_eff= static_cast<TProfile2D*>(f_trk_eff_pt_eta->Get("Electron_Eff_2D"));
-    h_muon_eff= static_cast<TProfile2D*>(f_trk_eff_pt_eta->Get("Muon_Eff_2D"));
+    h_electron_eff= static_cast<TProfile2D*>(f_lepton_reco_eff->Get("Electron_Eff_2D"));
+    h_muon_eff= static_cast<TProfile2D*>(f_lepton_reco_eff->Get("Muon_Eff_2D"));
 
     if (h_trk_eff_pt_eta == nullptr) {
       ANA_MSG_ERROR("Error loading tracking efficiency (h_trk_eff_pt_eta) from:" << input_trk_eff_file);
       return StatusCode::FAILURE;
     }
     if (h_electron_eff == nullptr) {
-      ANA_MSG_ERROR("Error loading electron efficiency from:" << input_trk_eff_pt_eta_file);
+      ANA_MSG_ERROR("Error loading electron efficiency from:" << input_lepton_reco_eff_file);
       return StatusCode::FAILURE;
     }
     if (h_muon_eff == nullptr) {
-      ANA_MSG_ERROR("Error loading muon efficiency from:" << input_trk_eff_pt_eta_file);
+      ANA_MSG_ERROR("Error loading muon efficiency from:" << input_lepton_reco_eff_file);
       return StatusCode::FAILURE;
     }
     ANA_MSG_INFO("Loaded tracking efficiency from " << input_trk_eff_file);
@@ -188,7 +188,7 @@ StatusCode TruthAnalysis :: initialize ()
     TFile *f_pu = TFile::Open(input_pu_file.c_str());
     std::string PU = "PU_dist_min";
     std::string PU_hist;
-    PU_hist = PU + std::to_string((int)tracks_min_pt)+"_half";
+    PU_hist = PU + std::to_string((int)tracks_min_pt); //+"_half";
     h_pu_info = static_cast<TH1D*>(f_pu->Get(PU_hist.c_str()));
     if(h_pu_info == nullptr) {
       ANA_MSG_ERROR("Error loading pu info from:" <<input_pu_file);
@@ -259,18 +259,19 @@ StatusCode TruthAnalysis :: execute ()
     m_pass_sel->at(i)=false;
 
   //How many PU tracks in window? Compare rand against the integral of the PDF of the track multiplicity
+
   if(h_pu_info != nullptr) {
     double rand = m_rnd->Rndm();
     m_rand = rand;
-    double integral = 0;
+    //double integral = 0;
     Pileup_eff = h_pu_info->GetBinContent(1);
-    for(int b = 1; b < h_pu_info -> GetNbinsX(); b++){
+    /* for(int b = 1; b < h_pu_info -> GetNbinsX(); b++){
       integral += h_pu_info->GetBinContent(b);
       if(integral > rand){
 	m_numPUtracks = b-1;
 	break;
-      }
-    }
+	}
+	}*/
   }
   // get truth particle container of interest
   const xAOD::TruthParticleContainer* truthParts = 0;
@@ -335,9 +336,7 @@ int pdgid = part->auxdata<int>("pdgId");
 	      xbin = h_electron_eff->GetNbinsX();
 	    }
 	    electron_eff = h_electron_eff->GetBinContent(xbin, ybin);      
-	    if ( std::abs(part->eta()) > 2.5 ){
-	      electron_eff = 0.0;
-	    }
+	    // if ( std::abs(part->eta()) > 2.5 ){electron_eff = 0.0;}
 	  }    
 	  //if (m_rnd->Rndm() > trk_eff){
 	    //continue;
@@ -405,7 +404,6 @@ int pdgid = part->auxdata<int>("pdgId");
     */
     //2D track efficiency
     if (h_trk_eff_pt_eta != nullptr) {
-      //int ibin = h_trk_eff_pt_eta->FindBin(part->pt(), part->eta());
       int xbin = h_trk_eff_pt_eta->GetXaxis()->FindBin(part->pt());
       int ybin = h_trk_eff_pt_eta->GetYaxis()->FindBin(part->eta());
       float trk_eff = 0.0; //default if underflow
@@ -413,10 +411,12 @@ int pdgid = part->auxdata<int>("pdgId");
 	//use last bin if overflow
 	if (xbin > h_trk_eff_pt_eta->GetNbinsX()) xbin = h_trk_eff_pt_eta->GetNbinsX();
 	if (ybin > h_trk_eff_pt_eta->GetNbinsY()) ybin = h_trk_eff_pt_eta->GetNbinsY();
-	trk_eff = h_trk_eff_pt_eta->GetBinContent(xbin, ybin);   // When including error: +h_trk_eff_pt->GetBinError(xbin,ybin);
-	if (std::abs(part->eta()) > 2.5) { trk_eff= 0.0; }
+	trk_eff = h_trk_eff_pt_eta->GetBinContent(xbin, ybin); 
+	//if (std::abs(part->eta()) > 2.5) { trk_eff= 0.0; }
 	}
     
+      // When including error: +h_trk_eff_pt->GetBinError(xbin,ybin);
+
       //increment a per-event "weight" with 1-trk_eff  
       m_weights->push_back( 1- trk_eff );
 

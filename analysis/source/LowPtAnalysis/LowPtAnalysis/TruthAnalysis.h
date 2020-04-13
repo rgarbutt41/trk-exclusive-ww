@@ -63,7 +63,7 @@ private:
   float tracks_max_eta; 
   float tracks_max_n;
   std::string input_trk_eff_file;
-  std::string input_trk_eff_pt_eta_file;
+  std::string input_lepton_reco_eff_file;
   std::string input_pu_file;
   float Pileup_eff;
   //std::string input_weight_file;

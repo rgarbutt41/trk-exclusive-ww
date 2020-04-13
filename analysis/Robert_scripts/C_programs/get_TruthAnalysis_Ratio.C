@@ -2,12 +2,13 @@
 //Must input one of the following sample types: InclWW, DYmumu, Ztautau, Zmumu
 #include <iostream>
 #include <fstream>
+#include <math.h>
 
 
 //List of relevant constants
 float lumi = 150e3; //pb^-1
 
-float exclWW_xsec = 8.5434e-3*; //pb; fixed x-sec, sample gives 1.49e-2 x-sec, wrong!
+float exclWW_xsec = 8.5434e-3; //pb; fixed x-sec, sample gives 1.49e-2 x-sec, wrong!
 float exclWW_SD_DD_corr = 3.39; ///< correction factor for exclusive WW SD/DD contributions
 float exclWW_filter_eff = 0.30838;
 
@@ -46,6 +47,9 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
 
   float y_ngen_incl = h_incl_cutflow->GetBinContent(1);
   float y_ngen_excl = h_excl_cutflow->GetBinContent(1);
+
+  float y_pass_excl = h_excl_cutflow->GetBinContent(6);
+  float y_pass_incl = h_incl_cutflow->GetBinContent(6);
   
    float y_raw_incl = h_incl->GetEntries();
    float y_raw_excl = h_excl->GetEntries();
@@ -85,9 +89,9 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
   h_excl->Scale( exclWW_xsec*lumi / y_ngen_excl * exclWW_filter_eff );
   h_excl->Scale(exclWW_SD_DD_corr);
 
-  
   float y_incl = h_incl->Integral(0,h_incl->GetNbinsX()+1);
   float y_excl = h_excl->Integral(0,h_excl->GetNbinsX()+1);
+
   //std::cout<<"Exclusive Raw Yield:"<<y_raw_excl <<std::endl ; 
   //std::cout<<"Background Raw Yield:"<< y_raw_incl <<std::endl;
   //std::cout<<"Ratio of Yields:"<< y_excl / y_incl <<std::endl;
@@ -99,6 +103,11 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
   //myfile << y_incl << "\n";
   //myfile << y_excl << "\n";
   myfile.close();
+
+  ofstream errorfile;
+  errorfile.open ("Errors.txt", ios::app );
+  errorfile << y_incl/sqrt( y_pass_incl ) << " " << y_excl / sqrt( y_pass_excl )  << " " << 1/sqrt(y_pass_incl) << " " << 1/sqrt(y_pass_excl) << "\n";
+  errorfile.close();
 }
 
   
