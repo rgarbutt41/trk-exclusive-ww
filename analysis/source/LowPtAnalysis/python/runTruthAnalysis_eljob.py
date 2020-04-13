@@ -62,7 +62,7 @@ elif (options.debug == 2):
 
 alg.input_trk_eff_file = "/global/cfs/projectdirs/atlas/wmccorma/ExclWW/trk-exclusive-ww/analysis/data/hist-lowpt_trkeff.root" #2D trk-eff
 
-alg.input_trk_eff_pt_eta_file = "/global/cfs/projectdirs/atlas/wmccorma/ExclWW/Trk_eff_output/links_of_hists/hist-all_v3.root" #Track efficiency for TProfile2D
+alg.input_lepton_reco_eff_file = "/global/cfs/projectdirs/atlas/wmccorma/ExclWW/Trk_eff_output/links_of_hists/hist-all_v3.root" #Track efficiency for TProfile2D
 
 
 
