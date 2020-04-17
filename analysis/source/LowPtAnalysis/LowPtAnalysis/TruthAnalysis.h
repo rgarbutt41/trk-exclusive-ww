@@ -66,6 +66,7 @@ private:
   std::string input_lepton_reco_eff_file;
   std::string input_pu_file;
   float Pileup_eff;
+  float Fakes_eff;
   //std::string input_weight_file;
   bool filter_by_selections;
   unsigned int random_seed;
@@ -75,6 +76,7 @@ private:
   TProfile2D *h_electron_eff;
   TProfile2D *h_muon_eff;
   TH1D *h_pu_info;
+  TH1D *h_fakes_info;
   //TH1F *h_trk_eff_pt;
 
   // output variables for the current event

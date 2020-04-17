@@ -46,7 +46,7 @@ TruthAnalysis :: TruthAnalysis (const std::string& name,
   declareProperty("random_seed", random_seed=29873,
 		  "Random seed for tracking efficiency");
   declareProperty("input_pu_file", input_pu_file = "", 
-		  "PU info input, if empty, use hard-coded numbers");
+		  "PU info input, if empty, use hard-coded numbers. Also includes Fakes info");
 
 }
 
@@ -197,6 +197,23 @@ StatusCode TruthAnalysis :: initialize ()
     }
     ANA_MSG_INFO("Loaded pu info from " << input_pu_file);
   }
+  //retricve Fakes eff
+  h_fakes_info=nullptr;
+  if (not input_pu_file.empty()) {
+    TFile *f_fakes = TFile::Open(input_pu_file.c_str());
+    std::string Fakes = "Fakes_dist_min";
+    std::string Fakes_hist;
+    Fakes_hist = Fakes + std::to_string((int)tracks_min_pt); //+"_half";
+    h_fakes_info = static_cast<TH1D*>(f_fakes->Get(Fakes_hist.c_str()));
+    if(h_fakes_info == nullptr) {
+      ANA_MSG_ERROR("Error loading pu info from:" <<input_pu_file);
+      ANA_MSG_ERROR("Fakes Hist Name:" << Fakes_hist);
+      return StatusCode::FAILURE;
+    }
+    ANA_MSG_INFO("Loaded Fakes info from " << input_pu_file);
+  }
+
+
 
   //print properties values
   ANA_MSG_INFO("Properties values:");
@@ -273,6 +290,12 @@ StatusCode TruthAnalysis :: execute ()
 	}
 	}*/
   }
+
+  //How many Fakes in window?
+  if(h_fakes_info != nullptr) {
+    Fakes_eff = h_fakes_info->GetBinContent(1);
+  }
+
   // get truth particle container of interest
   const xAOD::TruthParticleContainer* truthParts = 0;
   ANA_CHECK (evtStore()->retrieve( truthParts, "TruthParticles"));
@@ -491,7 +514,7 @@ float  tracking_weight = 1;
   //hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV, tracking_weight*electron_eff*muon_eff);
   hist("track_weights")->Fill(1-Pileup_eff);
   hist("num_fiducial_tracks")->Fill(num_track_in_window);
-  hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV, tracking_weight*electron_eff*muon_eff*Pileup_eff);
+  hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV, tracking_weight*electron_eff*muon_eff*Pileup_eff*Fakes_eff);
 
   if (num_track_in_window > tracks_max_n) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_exclusive);
