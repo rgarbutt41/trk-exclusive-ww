@@ -5,10 +5,11 @@
 #include <fstream>
 #include <math.h>
 
-void  plot_compare_emu(std::string Previous_Ratio_File,std::string Previous_Error_File, std::string New_Ratio_File, std::string New_Error_File)
+void  plot_root_compare_emu(std::string Previous_Ratio_File,std::string Previous_Error_File, std::string New_Ratio_File, std::string New_Error_File)
 {
   int n = 9;
   Double_t min_pT[n], prev_incl_yield[n], prev_excl_yield[n], prev_incl_error[n], prev_excl_error[n], new_incl_yield[n], new_excl_yield[n], new_excl_error[n], new_incl_error[n], prev_Ratio[n],prev_Ratio_error[n],new_Ratio[n],new_Ratio_error[n];
+  Double_t new_root_ratio[n],prev_root_ratio[n];
 
   float value;
   int counter = 0;
@@ -126,22 +127,27 @@ void  plot_compare_emu(std::string Previous_Ratio_File,std::string Previous_Erro
       min_pT[i] = 50*(i+2);
       new_Ratio_error[i] = new_Ratio[i] * sqrt( pow ( new_excl_error[i] / new_excl_yield[i]  , 2 ) + pow ( new_incl_error[i] / new_incl_yield[i], 2 )  );
       prev_Ratio_error[i] = prev_Ratio[i] * sqrt( pow ( prev_excl_error[i] / prev_excl_yield[i] , 2 ) + pow ( prev_incl_error[i] / prev_incl_yield[i] , 2 ) );
-      std::cout << new_Ratio[i] << " " << prev_Ratio[i] << "\n";
+
+      prev_root_ratio[i] = new_Ratio[i]*sqrt(prev_incl_yield[i]);
+      new_root_ratio[i] = prev_Ratio[i]*sqrt(new_incl_yield[i]);
+      
+      std::cout << new_Ratio[i] << " " << prev_Ratio[i] << " " << new_root_ratio[i] <<" "<< prev_root_ratio[i] << "\n";
       std::cout << new_Ratio_error[i] << " " << prev_Ratio_error[i] << "\n";
+      
     }
 
   auto cl = new TCanvas("cl","cl");
-  auto prev_case = new TGraphErrors(n,min_pT, prev_Ratio, 0, prev_Ratio_error);
-  auto new_case = new TGraphErrors(n,min_pT, new_Ratio, 0, new_Ratio_error);
+  auto prev_case = new TGraphErrors(n,min_pT, prev_root_ratio, 0, prev_Ratio_error);
+  auto new_case = new TGraphErrors(n,min_pT, new_root_ratio, 0, new_Ratio_error);
 
   TLegend *len = new TLegend (0.55,0.65,0.8,0.8);
   len->AddEntry(prev_case,"Without Fakes","l");
   len->AddEntry(new_case,"With Fakes","l");
 
-  prev_case->SetTitle("S/B for 1mm Fakes Implementation Compared to Pre-Fakes,  (emu)");
-  prev_case->GetXaxis()->SetTitle("Min_pT(MeV)");
-  prev_case->GetYaxis()->SetTitle("Ratios of Excl to Inclusive");
-  prev_case->GetYaxis()->SetRangeUser(0,23);
+  prev_case->SetTitle("S/#sqrt{B} for 1mm Fakes Implementation Compared to Pre-Fakes (emu)");
+  prev_case->GetXaxis()->SetTitle("Min p_{T}(MeV)");
+  prev_case->GetYaxis()->SetTitle("Ratio of Exclusive Yield to Square Root Inclusive Yield");
+  prev_case->GetYaxis()->SetRangeUser(0,30);
 
   new_case->SetLineColor(4);
   new_case->SetLineColor(2);

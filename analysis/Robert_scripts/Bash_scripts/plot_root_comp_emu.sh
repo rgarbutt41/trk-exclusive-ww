@@ -1,0 +1,2 @@
+#!/bin/bash
+root -l '/global/cfs/projectdirs/atlas/rgarbutt/trk-exclusive-ww/analysis/Robert_scripts/C_programs/plot_root_compare_emu.C("/global/cfs/projectdirs/atlas/rgarbutt/trk-exclusive-ww/analysis/run/'$1'/InclWW/Ratios.txt","/global/cfs/projectdirs/atlas/rgarbutt/trk-exclusive-ww/analysis/run/'$1'/InclWW/Errors.txt","/global/cfs/projectdirs/atlas/rgarbutt/trk-exclusive-ww/analysis/run/'$2'/InclWW/Ratios.txt","/global/cfs/projectdirs/atlas/rgarbutt/trk-exclusive-ww/analysis/run/'$2'/InclWW/Errors.txt")'
