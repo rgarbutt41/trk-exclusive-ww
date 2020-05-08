@@ -11,6 +11,8 @@
 #include <string>
 #include<stdio.h>
 #include<math.h>
+#include<iostream>
+#include<fstream>
 
 //ROOT includes
 #include "TFile.h"
@@ -74,6 +76,7 @@ StatusCode TruthAnalysis :: initialize ()
   m_pass_sel = new std::vector<char>(ncuts);
   mytree->Branch("pass_sel", m_pass_sel);
   mytree->Branch("numPUtracks", &m_numPUtracks);
+  mytree->Branch("mcWeight" , m_mcWeight);
 
   //Leptons
   m_lep_pt = new std::vector<float>();
@@ -103,41 +106,6 @@ StatusCode TruthAnalysis :: initialize ()
   m_weights = new std::vector<float>();
   mytree->Branch("weights", &m_weights);
 
-  /*
-  //////TRUTH STUFF no pseudo-reco
-  mytree->Branch ("truedilep_pt", &m_truedilep_pt);
-  mytree->Branch ("truedilep_m", &m_truedilep_m);
-  mytree->Branch ("numTrueHSparticles", &m_numTrueHSparticles);
-  m_truelep_pt = new std::vector<float>();
-  mytree->Branch ("truelep_pt", &m_truelep_pt);
-  m_truelep_eta = new std::vector<float>();
-  mytree->Branch ("truelep_eta", &m_truelep_eta);
-  m_truelep_phi = new std::vector<float>();
-  mytree->Branch ("truelep_phi", &m_truelep_phi);
-  m_truelep_charge = new std::vector<int>();
-  mytree->Branch ("truelep_charge", &m_truelep_charge);
-  m_truelep_pdgid = new std::vector<int>();
-  mytree->Branch ("truelep_pdgid", &m_truelep_pdgid);
-  m_truetrk_pt = new std::vector<float>();
-  mytree->Branch ("truetrk_pt", &m_truetrk_pt);
-  m_truetrk_eta = new std::vector<float>();
-  mytree->Branch ("truetrk_eta", &m_truetrk_eta);
-  m_truetrk_phi = new std::vector<float>();
-  mytree->Branch ("truetrk_phi", &m_truetrk_phi);
-  m_truetrk_charge = new std::vector<int>();
-  mytree->Branch ("truetrk_charge", &m_truetrk_charge);
-  m_truetrk_pdgid = new std::vector<int>();
-  mytree->Branch ("truetrk_pdgid", &m_truetrk_pdgid);
-  mytree->Branch ("true_twoleps", &m_true_twoleps);
-  mytree->Branch ("true_twoOSleps", &m_true_twoOSleps);
-  mytree->Branch ("true_absproduct_of_lepton_pdgidvals", &m_true_absproduct_of_lepton_pdgidvals);
-  mytree->Branch ("true_leadlep_ptpass", &m_true_leadlep_ptpass);
-  mytree->Branch ("true_subleadlep_ptpass", &m_true_subleadlep_ptpass);
-  mytree->Branch ("true_dilep_masspass", &m_true_dilep_masspass);
-  mytree->Branch ("true_dilep_ptpass", &m_true_dilep_ptpass);
-  mytree->Branch ("true_numCh_and_PU", &m_true_numCh_and_PU);
-  */  
-
   ANA_CHECK (book ( TH1F ("cutflow", "Cutflow", ncuts, -0.5, ncuts-0.5) ));
   ANA_CHECK (book ( TH1F ("num_fiducial_leptons", "Number of fiducial leptons", 10, 0, 10) ));
   ANA_CHECK (book ( TH1F ("dilep_m", "m(ll) (GeV)", 60, 0, 300.) ));
@@ -147,14 +115,30 @@ StatusCode TruthAnalysis :: initialize ()
   ANA_CHECK (book ( TH1F ("sr_dilep_pt", "p_{T} (ll) after all selections (GeV);p_{T}(ll) [GeV];Events/5 GeV", 60, 0, 300.) ));
   ANA_CHECK (book ( TH1F ("track_weights","Track Weights", 60, 0, 1.) ));
   ANA_CHECK (book ( TH1F ("sr_dilep_pt_weights", "p_{T} (ll) after all selections (GeV);p_{T}(ll) [GeV];Events/5 GeV", 60, 0, 300.) ));
-  
+    ANA_CHECK (book ( TH1F ("weighted_number_of_events", "Weighted number of events that pass selections prior to 0 trk requirement.", 60, 0, 300.) ));
+  ANA_CHECK (book ( TH1D ("hCutFlow_Sum", "Cut Flow Sum", 3, 0, 3.) ));
+
   ANA_CHECK (book ( TH1F ("num_HSpart_pt", "Num. non-lepton particles from Hard Scatter;p_{T}(particle) [MeV];Tracks/50 MeV", 60, 0, 3000.) ));
 
-  //set bin labels for cutflow
+   ANA_CHECK (book ( TH1D ("pass_2leps", "passes 2leps", 60, 0, 3000.) ));
+   ANA_CHECK (book ( TH1D ("pass_2leps_OS", "passes 2leps", 60, 0, 3000.) ));
+   ANA_CHECK (book ( TH1D ("pass_2leps_OS_OF", "passes 2leps", 60, 0, 3000.) ));
+   ANA_CHECK (book ( TH1D ("pass_2leps_OS_OF_sublep", "passes 2leps", 60, 0, 3000.) ));
+   ANA_CHECK (book ( TH1D ("pass_2leps_OS_OF_sublep_leadlep", "passes 2leps", 60, 0, 3000.) ));
+   ANA_CHECK (book ( TH1D ("pass_2leps_OS_OF_sublep_leadlep_mll", "passes 2leps", 60, 0, 3000.) ));
+   ANA_CHECK (book ( TH1D ("pass_2leps_OS_OF_sublep_leadlep_mll_ptll", "passes 2leps", 60, 0, 3000.) ));
+   ANA_CHECK (book ( TH1D ("pass_2leps_OS_OF_sublep_leadlep_mll_ptll_0trk", "passes 2leps", 60, 0, 3000.) ));
+   ANA_CHECK (book ( TH1D ("pass_2leps_OS_OF_sublep_leadlep_mll_ptll_0trk_withPU", "passes 2leps", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("electron_eff","Electron efficiency", 60, 0, 1.) ));
+  ANA_CHECK (book ( TH1D ("pileup_weights","Pileup weighting", 60, 0, 1.) ));
+  ANA_CHECK (book ( TH1D ("total_weighting","Cumulative weighting of all efficiencies plus the ncr reweighting", 60, 0, 1.) ));
+  ANA_CHECK (book ( TH1D ("muon_eff","Muon efficiency", 60, 0, 1.) ));
+  ANA_CHECK (book ( TH1F ("mcWeight","mcWeight per event",60,0,1.) ));
+   //set bin labels for cutflow
   for (int i=1; i<=ncuts;i++) {
     hist("cutflow")->GetXaxis()->SetBinLabel(i, cuts_labels[i-1].c_str());
   }
-
+  
   //retrieve tracking efficiency, if needed
   h_trk_eff_pt_eta = nullptr; //2D
   // h_trk_eff_pt = nullptr;
@@ -182,6 +166,8 @@ StatusCode TruthAnalysis :: initialize ()
     }
     ANA_MSG_INFO("Loaded tracking efficiency from " << input_trk_eff_file);
   }
+  
+
   //retricve pu eff
   h_pu_info=nullptr;
   if (not input_pu_file.empty()) {
@@ -198,6 +184,7 @@ StatusCode TruthAnalysis :: initialize ()
     ANA_MSG_INFO("Loaded pu info from " << input_pu_file);
   }
   //retricve Fakes eff
+  /*
   h_fakes_info=nullptr;
   if (not input_pu_file.empty()) {
     TFile *f_fakes = TFile::Open(input_pu_file.c_str());
@@ -212,7 +199,7 @@ StatusCode TruthAnalysis :: initialize ()
     }
     ANA_MSG_INFO("Loaded Fakes info from " << input_pu_file);
   }
-
+  */
 
 
   //print properties values
@@ -248,6 +235,7 @@ StatusCode TruthAnalysis :: execute ()
   m_trk_charge->clear();
   m_trk_pdgid->clear();
   m_weights->clear();
+  m_mcWeight = -1;
 
   /*
   m_truedilep_pt = -1.;
@@ -274,6 +262,20 @@ StatusCode TruthAnalysis :: execute ()
   */
   for (int i=0; i<ncuts;i++)
     m_pass_sel->at(i)=false;
+  std::ofstream myfile;
+  myfile.open("test_output.txt");
+  //get event info
+  const xAOD::EventInfo* eventInfo;
+  ANA_CHECK(evtStore()->retrieve(eventInfo,"EventInfo"));
+  double mcWeight = 1;
+  const std::vector< float > weights = eventInfo->mcEventWeights();
+  if( weights.size() > 0 ) mcWeight = weights[0];
+
+  hist("hCutFlow_Sum")->Fill(0.5, 1);
+  hist("hCutFlow_Sum")->Fill(1.5,mcWeight);
+  hist("hCutFlow_Sum")->Fill(2.5,mcWeight*mcWeight);
+
+  m_mcWeight = mcWeight;
 
   //How many PU tracks in window? Compare rand against the integral of the PDF of the track multiplicity
 
@@ -292,9 +294,9 @@ StatusCode TruthAnalysis :: execute ()
   }
 
   //How many Fakes in window?
-  if(h_fakes_info != nullptr) {
-    Fakes_eff = h_fakes_info->GetBinContent(1);
-  }
+  //if(h_fakes_info != nullptr) {
+  //Fakes_eff = h_fakes_info->GetBinContent(1);
+  //}
 
   // get truth particle container of interest
   const xAOD::TruthParticleContainer* truthParts = 0;
@@ -436,15 +438,11 @@ int pdgid = part->auxdata<int>("pdgId");
 	if (ybin > h_trk_eff_pt_eta->GetNbinsY()) ybin = h_trk_eff_pt_eta->GetNbinsY();
 	trk_eff = h_trk_eff_pt_eta->GetBinContent(xbin, ybin); 
 	//if (std::abs(part->eta()) > 2.5) { trk_eff= 0.0; }
+	//myfile << part->pt()<< " " << part->eta()<< " " << trk_eff << "\n";
 	}
     
-      // When including error: +h_trk_eff_pt->GetBinError(xbin,ybin);
-
       //increment a per-event "weight" with 1-trk_eff  
       m_weights->push_back( 1- trk_eff );
-
-      //if (m_rnd->Rndm() > trk_eff)
-      //continue;
     }
     tmpsize += 1 ;
 
@@ -458,7 +456,7 @@ int pdgid = part->auxdata<int>("pdgId");
     
 } // end for loop over truth particles
   
-  int num_track_in_window = m_numPUtracks;
+  int num_track_in_window = m_trk_pt->size() + m_numPUtracks;
 
   //The "tracking weight" is done
 float  tracking_weight = 1;
@@ -472,16 +470,20 @@ float  tracking_weight = 1;
   ANA_MSG_DEBUG("NLep = " << m_lep_pt->size() << ", NTracks = " << num_track_in_window);
   hist("num_fiducial_leptons")->Fill(m_lep_pt->size());
   if (m_lep_pt->size() != 2) {saveTree(); return StatusCode::SUCCESS;}
+  hist("pass_2leps")->Fill(1,mcWeight*electron_eff*muon_eff);
   if (m_lep_charge->at(0)*m_lep_charge->at(1) != -1) {saveTree(); return StatusCode::SUCCESS;}
   //if ( ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  11*11 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 ) ) {saveTree(); return StatusCode::SUCCESS;} //For all e and mu selections 
+  hist("pass_2leps_OS")->Fill(1,mcWeight*electron_eff*muon_eff);
   if (abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13){ saveTree(); return StatusCode::SUCCESS;} //For just emu
   // if ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 )  {saveTree(); return StatusCode::SUCCESS;}// mumu
-  
+  hist("pass_2leps_OS_OF")->Fill(1,mcWeight*electron_eff*muon_eff);
   passCut(cut_lep_ocof);
   ANA_MSG_VERBOSE("Pass cut_lep_ocof");
 
   if (std::min(m_lep_pt->at(0), m_lep_pt->at(1)) < lep2_min_pt) {saveTree(); return StatusCode::SUCCESS;}
+  hist("pass_2leps_OS_OF_sublep")->Fill(1,mcWeight*electron_eff*muon_eff);
   if (std::max(m_lep_pt->at(0), m_lep_pt->at(1)) < lep1_min_pt) {saveTree(); return StatusCode::SUCCESS;}
+  hist("pass_2leps_OS_OF_sublep_leadlep")->Fill(1,mcWeight*electron_eff*muon_eff);
   passCut(cut_lep_minpt);
   ANA_MSG_VERBOSE("Pass cut_lep_minpt");
 
@@ -498,10 +500,12 @@ float  tracking_weight = 1;
   m_dilep_m = (lep1+lep2).M();
   m_dilep_pt = (lep1+lep2).Pt();
   m_delta_phi = abs((lep1).Phi()-(lep2).Phi());
-  if (m_delta_phi > 3.1415 ) { m_delta_phi = 6.183 - m_delta_phi;}
+  if (m_delta_phi > 3.1415 ) { m_delta_phi = 6.283 - m_delta_phi;}
 
   hist("dilep_m")->Fill(m_dilep_m/GeV);
-  if ( (m_dilep_m < dilep_min_mass) || ((m_dilep_m> 70*GeV ) && ( m_dilep_m < 110*GeV ) ) ) {saveTree(); return StatusCode::SUCCESS;}
+  if (m_dilep_m < dilep_min_mass) //||  ((m_dilep_m> 70*GeV ) && ( m_dilep_m < 110*GeV ) ) ) m(ll) cut
+    {saveTree(); return StatusCode::SUCCESS;}
+  hist("pass_2leps_OS_OF_sublep_leadlep_mll")->Fill(1,mcWeight*electron_eff*muon_eff);
   passCut(cut_m_ll);
   ANA_MSG_VERBOSE("Pass cut_m_ll");
 
@@ -509,23 +513,30 @@ float  tracking_weight = 1;
   hist("dilep_pt")->Fill(m_dilep_pt/GeV);
   if (m_dilep_pt < dilep_min_pt) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_pt_ll);
+  hist("pass_2leps_OS_OF_sublep_leadlep_mll_ptll")->Fill(1,mcWeight*electron_eff*muon_eff);
   ANA_MSG_VERBOSE("Pass cut_pt_ll");
 
   //hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV, tracking_weight*electron_eff*muon_eff);
-  hist("track_weights")->Fill(1-Pileup_eff);
-  hist("num_fiducial_tracks")->Fill(num_track_in_window);
-  hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV, tracking_weight*electron_eff*muon_eff*Pileup_eff*Fakes_eff);
-
-  if (num_track_in_window > tracks_max_n) {saveTree(); return StatusCode::SUCCESS;}
+  hist("track_weights")->Fill(tracking_weight);
+  hist("electron_eff")->Fill(electron_eff);
+  hist("muon_eff")->Fill(muon_eff);
+  hist("num_fiducial_tracks")->Fill(m_trk_pt->size());
+  hist("pileup_weights")->Fill(Pileup_eff);
+  hist("total_weighting")->Fill(Pileup_eff*mcWeight*tracking_weight*electron_eff*muon_eff);
+  hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV);//, tracking_weight*electron_eff*muon_eff*Pileup_eff*mcWeight);//*Fakes_eff);
+  hist("mcWeight")->Fill(mcWeight);
+  hist("weighted_number_of_events")->Fill(1,mcWeight*tracking_weight*electron_eff*muon_eff);
+ if (num_track_in_window > tracks_max_n) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_exclusive);
   ANA_MSG_VERBOSE("Pass cut_exclusive");
-
+  hist("pass_2leps_OS_OF_sublep_leadlep_mll_ptll_0trk")->Fill(1,mcWeight*electron_eff*muon_eff);
+  hist("pass_2leps_OS_OF_sublep_leadlep_mll_ptll_0trk_withPU")->Fill(1,Pileup_eff*mcWeight*electron_eff*muon_eff);
   //Plots after all selections
   hist("sr_dilep_pt")->Fill(m_dilep_pt/GeV);
   hist("delta_phi")->Fill(m_delta_phi);
   //hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV, tracking_weight*electron_eff*muon_eff);
   
-
+  myfile.close();
   // Fill the event into the tree
   saveTree();
   return StatusCode::SUCCESS;
