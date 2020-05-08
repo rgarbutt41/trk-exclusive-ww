@@ -14,6 +14,7 @@ float exclWW_filter_eff = 0.30838;
 
 float inclWW_filter_eff = 0.026; 
 float inclWW_xsec = 10.612; //pb
+float inclWW_kfactor = 1.15;
 
 float DYmumu_filter_eff = 0.0484;
 float DYmumu_xsec = 32.11; //pb
@@ -39,20 +40,14 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
   //Getting the proper histograms.
   TFile *f_incl = TFile::Open(p_f_inclWW.c_str());
   TFile *f_excl = TFile::Open(p_f_exclWW.c_str());
-  TH1F *h_incl =(TH1F*) f_incl->Get("sr_dilep_pt_weights");
-  TH1F *h_excl = (TH1F*)f_excl->Get("sr_dilep_pt_weights");
+  TH1F *h_incl =(TH1F*) f_incl->Get("weighted_number_of_events");
+  TH1F *h_excl = (TH1F*)f_excl->Get("weighted_number_of_events");
 
-  TH1F *h_incl_cutflow =(TH1F*)  f_incl->Get("cutflow");
-  TH1F *h_excl_cutflow = (TH1F*)f_excl->Get("cutflow");
+  TH1F *h_incl_cutflow =(TH1F*)  f_incl->Get("hCutFlow_Sum");
+  TH1F *h_excl_cutflow = (TH1F*)f_excl->Get("hCutFlow_Sum");
 
-  float y_ngen_incl = h_incl_cutflow->GetBinContent(1);
-  float y_ngen_excl = h_excl_cutflow->GetBinContent(1);
-
-  float y_pass_excl = h_excl_cutflow->GetBinContent(6);
-  float y_pass_incl = h_incl_cutflow->GetBinContent(6);
-  
-   float y_raw_incl = h_incl->GetEntries();
-   float y_raw_excl = h_excl->GetEntries();
+  float y_ngen_incl = h_incl_cutflow->GetBinContent(2);
+  float y_ngen_excl = h_excl_cutflow->GetBinContent(2);
 
    //Retrieval of correct scaling factor for respective sample type
   if ( Sample ==  "DYmumu")
@@ -81,16 +76,18 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
       filter_eff = LowMassDY_filter_eff;
     }
 
+  float incl_scale = xsec*lumi / y_ngen_incl * filter_eff*inclWW_kfactor;
+  float excl_scale =  exclWW_xsec*lumi / y_ngen_excl * exclWW_filter_eff*exclWW_SD_DD_corr;
 
   //apply scalings
   h_incl->Sumw2();
-  h_incl->Scale( xsec*lumi / y_ngen_incl * filter_eff);
+  h_incl->Scale( xsec*lumi / y_ngen_incl * filter_eff*inclWW_kfactor);
   h_excl->Sumw2();
   h_excl->Scale( exclWW_xsec*lumi / y_ngen_excl * exclWW_filter_eff );
   h_excl->Scale(exclWW_SD_DD_corr);
 
-  float y_incl = h_incl->Integral(0,h_incl->GetNbinsX()+1);
-  float y_excl = h_excl->Integral(0,h_excl->GetNbinsX()+1);
+  float y_incl = h_incl->GetBinContent(1);
+  float y_excl = h_excl->GetBinContent(1);
 
   //std::cout<<"Exclusive Raw Yield:"<<y_raw_excl <<std::endl ; 
   //std::cout<<"Background Raw Yield:"<< y_raw_incl <<std::endl;
@@ -104,9 +101,27 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
   //myfile << y_excl << "\n";
   myfile.close();
 
+
+  //Calculating Errors
+
+  TH1F *excl_track_hist = (TH1F*)f_excl->Get("num_fiducial_tracks");
+  TH1F *incl_track_hist = (TH1F*)f_incl->Get("num_fiducial_tracks");
+  float incl_tracks = 0;
+  float excl_tracks = 0;
+  float P_average = 0.71427198;
+  
+  for(int i=1;(i < 51);i++)
+    {
+      incl_tracks += incl_track_hist->GetBinContent(i)*pow(1-P_average,2*i);
+      excl_tracks += excl_track_hist->GetBinContent(i)*pow(1-P_average,2*i);
+    }
+
+  float incl_error = sqrt(incl_tracks)*incl_scale;
+  float excl_error = sqrt(excl_tracks)*excl_scale;
+
   ofstream errorfile;
   errorfile.open ("Errors.txt", ios::app );
-  errorfile << y_incl/sqrt( y_pass_incl ) << " " << y_excl / sqrt( y_pass_excl )  << " " << 1/sqrt(y_pass_incl) << " " << 1/sqrt(y_pass_excl) << "\n";
+  errorfile << incl_error << " " << excl_error  << " " << 1 << " " << 1 << "\n";
   errorfile.close();
 }
 
