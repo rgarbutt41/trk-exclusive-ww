@@ -174,7 +174,7 @@ StatusCode TruthAnalysis :: initialize ()
     TFile *f_pu = TFile::Open(input_pu_file.c_str());
     std::string PU = "PU_dist_min";
     std::string PU_hist;
-    PU_hist = PU + std::to_string((int)tracks_min_pt); //+"_half";
+    PU_hist = PU + std::to_string((int)tracks_min_pt);//+"_half";
     h_pu_info = static_cast<TH1D*>(f_pu->Get(PU_hist.c_str()));
     if(h_pu_info == nullptr) {
       ANA_MSG_ERROR("Error loading pu info from:" <<input_pu_file);
@@ -184,13 +184,13 @@ StatusCode TruthAnalysis :: initialize ()
     ANA_MSG_INFO("Loaded pu info from " << input_pu_file);
   }
   //retricve Fakes eff
-  /*
+  
   h_fakes_info=nullptr;
   if (not input_pu_file.empty()) {
     TFile *f_fakes = TFile::Open(input_pu_file.c_str());
     std::string Fakes = "Fakes_dist_min";
     std::string Fakes_hist;
-    Fakes_hist = Fakes + std::to_string((int)tracks_min_pt); //+"_half";
+    Fakes_hist = Fakes + std::to_string((int)tracks_min_pt);//+"_half";
     h_fakes_info = static_cast<TH1D*>(f_fakes->Get(Fakes_hist.c_str()));
     if(h_fakes_info == nullptr) {
       ANA_MSG_ERROR("Error loading pu info from:" <<input_pu_file);
@@ -199,7 +199,7 @@ StatusCode TruthAnalysis :: initialize ()
     }
     ANA_MSG_INFO("Loaded Fakes info from " << input_pu_file);
   }
-  */
+  
 
 
   //print properties values
@@ -294,9 +294,9 @@ StatusCode TruthAnalysis :: execute ()
   }
 
   //How many Fakes in window?
-  //if(h_fakes_info != nullptr) {
-  //Fakes_eff = h_fakes_info->GetBinContent(1);
-  //}
+  if(h_fakes_info != nullptr) {
+  Fakes_eff = h_fakes_info->GetBinContent(1);
+  }
 
   // get truth particle container of interest
   const xAOD::TruthParticleContainer* truthParts = 0;
@@ -520,12 +520,12 @@ float  tracking_weight = 1;
   hist("track_weights")->Fill(tracking_weight);
   hist("electron_eff")->Fill(electron_eff);
   hist("muon_eff")->Fill(muon_eff);
-  hist("num_fiducial_tracks")->Fill(m_trk_pt->size());
+  hist("num_fiducial_tracks")->Fill(m_trk_pt->size(),mcWeight);
   hist("pileup_weights")->Fill(Pileup_eff);
-  hist("total_weighting")->Fill(Pileup_eff*mcWeight*tracking_weight*electron_eff*muon_eff);
+  hist("total_weighting")->Fill(Pileup_eff*mcWeight*tracking_weight*electron_eff*muon_eff*Fakes_eff);
   hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV);//, tracking_weight*electron_eff*muon_eff*Pileup_eff*mcWeight);//*Fakes_eff);
   hist("mcWeight")->Fill(mcWeight);
-  hist("weighted_number_of_events")->Fill(1,mcWeight*tracking_weight*electron_eff*muon_eff);
+  hist("weighted_number_of_events")->Fill(1,mcWeight*tracking_weight*electron_eff*muon_eff*Pileup_eff);
  if (num_track_in_window > tracks_max_n) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_exclusive);
   ANA_MSG_VERBOSE("Pass cut_exclusive");

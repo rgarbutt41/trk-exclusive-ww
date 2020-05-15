@@ -118,7 +118,7 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
 
   float incl_error = sqrt(incl_tracks)*incl_scale;
   float excl_error = sqrt(excl_tracks)*excl_scale;
-
+  std::cout << incl_scale << "\n";
   ofstream errorfile;
   errorfile.open ("Errors.txt", ios::app );
   errorfile << incl_error << " " << excl_error  << " " << 1 << " " << 1 << "\n";
