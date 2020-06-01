@@ -76,7 +76,7 @@ void plot_mll(std::string DY_Sample, std::string Ztautau_Sample, std::string Zmu
 
   TCanvas *cs = new TCanvas("cs","cs");
   auto legend = new TLegend(0.1,0.7,0.48,0.9);
-  /egend->AddEntry(h_DY,"DYmumu");
+  legend->AddEntry(h_DY,"DYmumu");
   legend->AddEntry(h_Zmumu, "Zmumu");
   legend->AddEntry(h_Ztautau, "Ztautau");
   
