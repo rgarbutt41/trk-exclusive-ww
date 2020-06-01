@@ -70,14 +70,14 @@ void plot_mll(std::string DY_Sample, std::string Ztautau_Sample, std::string Zmu
   h_DY->SetFillColor(kRed);
   h_Zmumu->SetFillColor(kBlue);
   h_Ztautau->SetFillColor(kGreen);
-  //hs->Add(h_DY);
+  hs->Add(h_DY);
   hs->Add(h_Ztautau);
-  //hs->Add(h_Zmumu);
+  hs->Add(h_Zmumu);
 
   TCanvas *cs = new TCanvas("cs","cs");
   auto legend = new TLegend(0.1,0.7,0.48,0.9);
-  //legend->AddEntry(h_DY,"DYmumu");
-  //legend->AddEntry(h_Zmumu, "Zmumu");
+  /egend->AddEntry(h_DY,"DYmumu");
+  legend->AddEntry(h_Zmumu, "Zmumu");
   legend->AddEntry(h_Ztautau, "Ztautau");
   
   hs->Draw("HIST");
