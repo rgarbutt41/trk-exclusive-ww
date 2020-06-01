@@ -1,5 +1,4 @@
-//Input histogram files of respective sample type, prints ratios and adds ratios to a file called "Ratios.txt"
-//Must input one of the following sample types: InclWW, DYmumu, Ztautau, Zmumu
+//Input root files of the DY, Ztautau, and Zmumu samples in order
 #include <iostream>
 #include <fstream>
 #include <math.h>
