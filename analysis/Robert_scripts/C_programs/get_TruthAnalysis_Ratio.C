@@ -40,14 +40,20 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
   //Getting the proper histograms.
   TFile *f_incl = TFile::Open(p_f_inclWW.c_str());
   TFile *f_excl = TFile::Open(p_f_exclWW.c_str());
-  TH1F *h_incl =(TH1F*) f_incl->Get("weighted_number_of_events");
-  TH1F *h_excl = (TH1F*)f_excl->Get("weighted_number_of_events");
+  TH1F *h_incl =(TH1F*) f_incl->Get("Fakes");
+  TH1F *h_excl = (TH1F*)f_excl->Get("Fakes");
 
   TH1F *h_incl_cutflow =(TH1F*)  f_incl->Get("hCutFlow_Sum");
   TH1F *h_excl_cutflow = (TH1F*)f_excl->Get("hCutFlow_Sum");
 
+  TH1D *error_incl = (TH1D*) f_incl->Get("error_Fakes");
+  TH1D *error_excl = (TH1D*) f_excl->Get("error_Fakes");
+
   float y_ngen_incl = h_incl_cutflow->GetBinContent(2);
   float y_ngen_excl = h_excl_cutflow->GetBinContent(2);
+
+  float raw_incl = h_incl->GetBinContent(1);
+  float raw_excl = h_excl->GetBinContent(1);
 
    //Retrieval of correct scaling factor for respective sample type
   if ( Sample ==  "DYmumu")
@@ -57,7 +63,7 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
     }
   else if ( Sample ==  "InclWW")
     {
-      xsec = inclWW_xsec;
+      xsec = inclWW_xsec*inclWW_kfactor;
       filter_eff = inclWW_filter_eff; 
     }
   else if ( Sample == "Ztautau" )
@@ -76,12 +82,12 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
       filter_eff = LowMassDY_filter_eff;
     }
 
-  float incl_scale = xsec*lumi / y_ngen_incl * filter_eff*inclWW_kfactor;
+  float incl_scale = xsec*lumi / y_ngen_incl * filter_eff*0.447;
   float excl_scale =  exclWW_xsec*lumi / y_ngen_excl * exclWW_filter_eff*exclWW_SD_DD_corr;
 
   //apply scalings
   h_incl->Sumw2();
-  h_incl->Scale( xsec*lumi / y_ngen_incl * filter_eff*inclWW_kfactor);
+  h_incl->Scale( xsec*lumi / y_ngen_incl * filter_eff*inclWW_kfactor*0.447);
   h_excl->Sumw2();
   h_excl->Scale( exclWW_xsec*lumi / y_ngen_excl * exclWW_filter_eff );
   h_excl->Scale(exclWW_SD_DD_corr);
@@ -116,12 +122,14 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
       excl_tracks += excl_track_hist->GetBinContent(i)*pow(1-P_average,2*i);
     }
 
-  float incl_error = sqrt(incl_tracks)*incl_scale;
-  float excl_error = sqrt(excl_tracks)*excl_scale;
+  float incl_sys_error = sqrt(incl_tracks)*incl_scale;
+  float excl_sys_error = sqrt(excl_tracks)*excl_scale;
+  float incl_error = sqrt(error_incl->GetBinContent(1))*incl_scale;
+  float excl_error = sqrt(error_excl->GetBinContent(1))*excl_scale;
   std::cout << incl_scale << "\n";
   ofstream errorfile;
   errorfile.open ("Errors.txt", ios::app );
-  errorfile << incl_error << " " << excl_error  << " " << 1 << " " << 1 << "\n";
+  errorfile << incl_error << " " << incl_sys_error  << " " << excl_error << " " << excl_sys_error << "\n";
   errorfile.close();
 }
 
