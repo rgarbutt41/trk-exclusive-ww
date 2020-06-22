@@ -1,0 +1,2 @@
+#!/bin/bash
+root -l '/global/cfs/projectdirs/atlas/rgarbutt/trk-exclusive-ww/analysis/Robert_scripts/C_programs/plot_opp_flavor_vs_selections.C("/global/cfs/projectdirs/atlas/rgarbutt/trk-exclusive-ww/analysis/run/'$1'/InclWW/Ratios.txt","/global/cfs/projectdirs/atlas/rgarbutt/trk-exclusive-ww/analysis/run/'$1'/InclWW/Errors.txt")'
