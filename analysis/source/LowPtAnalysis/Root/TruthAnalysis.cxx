@@ -109,28 +109,95 @@ StatusCode TruthAnalysis :: initialize ()
   ANA_CHECK (book ( TH1F ("cutflow", "Cutflow", ncuts, -0.5, ncuts-0.5) ));
   ANA_CHECK (book ( TH1F ("num_fiducial_leptons", "Number of fiducial leptons", 10, 0, 10) ));
   ANA_CHECK (book ( TH1F ("dilep_m", "m(ll) (GeV)", 60, 0, 300.) ));
+  ANA_CHECK (book ( TH1F ("dilep_m_mcweight", "m(ll) (GeV)", 60, 0, 300.) ));
+  ANA_CHECK (book ( TH1F ("dilep_m_post_sel","m(ll) (GeV)",60, 0, 300.) ));
   ANA_CHECK (book ( TH1F ("dilep_pt", "p_{T} (ll) (GeV)", 60, 0, 300.) ));
+  ANA_CHECK (book ( TH1F ("dilep_pt_post_sel", "p_{T} (ll) (GeV)", 60, 0, 300.) ));
+    ANA_CHECK (book ( TH1F ("dilep_pt_mcweight", "m(ll) (GeV)", 60, 0, 300.) ));
+  
   ANA_CHECK (book ( TH1F ("num_fiducial_tracks", "Number of fiducial tracks", 50, 0, 50) ));
   ANA_CHECK(book (TH1F ("delta_phi", "del_phi",60, 0, 3.14) ));
   ANA_CHECK (book ( TH1F ("sr_dilep_pt", "p_{T} (ll) after all selections (GeV);p_{T}(ll) [GeV];Events/5 GeV", 60, 0, 300.) ));
   ANA_CHECK (book ( TH1F ("track_weights","Track Weights", 60, 0, 1.) ));
   ANA_CHECK (book ( TH1F ("sr_dilep_pt_weights", "p_{T} (ll) after all selections (GeV);p_{T}(ll) [GeV];Events/5 GeV", 60, 0, 300.) ));
     ANA_CHECK (book ( TH1F ("weighted_number_of_events", "Weighted number of events that pass selections prior to 0 trk requirement.", 60, 0, 300.) ));
+    ANA_CHECK (book ( TH1F ("weighted_number_of_events_ee", "Weighted number of events that pass selections prior to 0 trk requirement.ee case", 60, 0, 300.) ));
+    ANA_CHECK (book ( TH1F ("weighted_number_of_events_pseudo_ee", "Weighted number of events that pass selections prior to 0 trk requirement.Electron case for samples without ee", 60, 0, 300.) ))
+;
+    ANA_CHECK (book ( TH1D ("error_ee", "squares of weighting for ee", 60, 0, 3000.) ));
+    ANA_CHECK (book ( TH1D ("error_mumu", "squares of weighting for mumu", 60, 0, 3000.) ));
+    ANA_CHECK (book ( TH1D ("error_pseudo_ee", "squares of weighting for pseudo ee", 60, 0, 3000.) ));
+    ANA_CHECK (book ( TH1D ("error_opp", "squares of weighting for opposite flavor", 60, 0, 3000.) ));
+    ANA_CHECK (book ( TH1F ("weighted_number_of_events_mumu", "Weighted number of events that pass selections prior to 0 trk requirement. mumu case", 60, 0, 300.) ));
   ANA_CHECK (book ( TH1D ("hCutFlow_Sum", "Cut Flow Sum", 3, 0, 3.) ));
 
   ANA_CHECK (book ( TH1F ("num_HSpart_pt", "Num. non-lepton particles from Hard Scatter;p_{T}(particle) [MeV];Tracks/50 MeV", 60, 0, 3000.) ));
 
-   ANA_CHECK (book ( TH1D ("pass_2leps", "passes 2leps", 60, 0, 3000.) ));
-   ANA_CHECK (book ( TH1D ("pass_2leps_OS", "passes 2leps", 60, 0, 3000.) ));
-   ANA_CHECK (book ( TH1D ("pass_2leps_OS_OF", "passes 2leps", 60, 0, 3000.) ));
-   ANA_CHECK (book ( TH1D ("pass_2leps_OS_OF_sublep", "passes 2leps", 60, 0, 3000.) ));
-   ANA_CHECK (book ( TH1D ("pass_2leps_OS_OF_sublep_leadlep", "passes 2leps", 60, 0, 3000.) ));
-   ANA_CHECK (book ( TH1D ("pass_2leps_OS_OF_sublep_leadlep_mll", "passes 2leps", 60, 0, 3000.) ));
-   ANA_CHECK (book ( TH1D ("pass_2leps_OS_OF_sublep_leadlep_mll_ptll", "passes 2leps", 60, 0, 3000.) ));
-   ANA_CHECK (book ( TH1D ("pass_2leps_OS_OF_sublep_leadlep_mll_ptll_0trk", "passes 2leps", 60, 0, 3000.) ));
-   ANA_CHECK (book ( TH1D ("pass_2leps_OS_OF_sublep_leadlep_mll_ptll_0trk_withPU", "passes 2leps", 60, 0, 3000.) ));
-  ANA_CHECK (book ( TH1D ("electron_eff","Electron efficiency", 60, 0, 1.) ));
-  ANA_CHECK (book ( TH1D ("pileup_weights","Pileup weighting", 60, 0, 1.) ));
+  ANA_CHECK (book ( TH1D ("Base_Case","Raw Yield with mcWeight mumu", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_Base_Case","Raw yield with mcWeight mumu", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("Tracks","2D track  efficiency mumu", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_Tracks","2D track efficiency error mumu", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("Lepton_Reco","Lepton reco efficiency mumu", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_Lepton_Reco","Lepton reco efficiency error mumu", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("Pileup","1mm Pileup efficiency mumu", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_Pileup","1mm Pileup efficiency error mumu", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("halfmm_Pileup","0.5mm Pileup efficiency mumu", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_halfmm_Pileup","0.5mm Pileup efficiency error mumu", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("Fakes","1mm Fakes efficiency mumu", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_Fakes","1mm Fakes efficiency error mumu", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("halfmm_Fakes","0.5mm Fakes efficiency mumu", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_halfmm_Fakes","0.5mm Fakes efficiency error mumu", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("ee_Base_Case","Raw Yield with mcWeight", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_ee_Base_Case","Raw yield with mcWeight", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("ee_Tracks","2D track  efficiency", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_ee_Tracks","2D track efficiency error", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("ee_Lepton_Reco","Lepton reco efficiency", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_ee_Lepton_Reco","Lepton reco efficiency error", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("ee_Pileup","1mm Pileup efficiency", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_ee_Pileup","1mm Pileup efficiency error", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("ee_halfmm_Pileup","0.5mm Pileup efficiency", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_ee_halfmm_Pileup","0.5mm Pileup efficiency error", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("ee_Fakes","1mm Fakes efficiency", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_ee_Fakes","1mm Fakes efficiency error", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("ee_halfmm_Fakes","0.5mm Fakes efficiency", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_ee_halfmm_Fakes","0.5mm Fakes efficiency error", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("p_Base_Case","Raw Yield with mcWeight pseudo", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_p_Base_Case","Raw yield with mcWeight pseudo", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("p_Tracks","2D track  efficiency pseduo", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_p_Tracks","2D track efficiency error pseudo", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("p_Lepton_Reco","Lepton reco efficiency pseudo", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_p_Lepton_Reco","Lepton reco efficiency error pseudo", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("p_Pileup","1mm Pileup efficiency pseudo", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_p_Pileup","1mm Pileup efficiency error pseudo", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("p_halfmm_Pileup","0.5mm Pileup efficiency pseudo", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_p_halfmm_Pileup","0.5mm Pileup efficiency error pseudo", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("p_Fakes","1mm Fakes efficiency pseudo", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_p_Fakes","1mm Fakes efficiency error pseudo", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("p_halfmm_Fakes","0.5mm Fakes efficiency pseudo", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("error_p_halfmm_Fakes","0.5mm Fakes efficiency error pseudo", 60, 0, 3000.) ));
+
+  ANA_CHECK (book ( TH1D ("electron_eff","Electron efficiency", 60, 0, 3000.) ));
+  ANA_CHECK (book ( TH1D ("pileup_weights","Pileup weighting", 60, 0, 3000.) ));
   ANA_CHECK (book ( TH1D ("total_weighting","Cumulative weighting of all efficiencies plus the ncr reweighting", 60, 0, 1.) ));
   ANA_CHECK (book ( TH1D ("muon_eff","Muon efficiency", 60, 0, 1.) ));
   ANA_CHECK (book ( TH1F ("mcWeight","mcWeight per event",60,0,1.) ));
@@ -174,9 +241,12 @@ StatusCode TruthAnalysis :: initialize ()
     TFile *f_pu = TFile::Open(input_pu_file.c_str());
     std::string PU = "PU_dist_min";
     std::string PU_hist;
-    PU_hist = PU + std::to_string((int)tracks_min_pt);//+"_half";
+    std::string halfmm_PU_hist;
+    PU_hist = PU + std::to_string((int)tracks_min_pt);
+    halfmm_PU_hist = PU + std::to_string((int)tracks_min_pt)+"_half";
     h_pu_info = static_cast<TH1D*>(f_pu->Get(PU_hist.c_str()));
-    if(h_pu_info == nullptr) {
+    h_halfmm_pu_info = static_cast<TH1D*>(f_pu->Get(halfmm_PU_hist.c_str()));
+    if((h_pu_info == nullptr)|| (h_halfmm_pu_info == nullptr)) {
       ANA_MSG_ERROR("Error loading pu info from:" <<input_pu_file);
       ANA_MSG_ERROR("PU Hist Name:" << PU_hist);
       return StatusCode::FAILURE;
@@ -186,13 +256,18 @@ StatusCode TruthAnalysis :: initialize ()
   //retricve Fakes eff
   
   h_fakes_info=nullptr;
+  h_halfmm_fakes_info = nullptr;
   if (not input_pu_file.empty()) {
     TFile *f_fakes = TFile::Open(input_pu_file.c_str());
     std::string Fakes = "Fakes_dist_min";
     std::string Fakes_hist;
-    Fakes_hist = Fakes + std::to_string((int)tracks_min_pt);//+"_half";
+    std::string halfmm_Fakes_hist;
+    Fakes_hist = Fakes + std::to_string((int)tracks_min_pt);
+    halfmm_Fakes_hist = Fakes + std::to_string((int)tracks_min_pt)+"_half";
     h_fakes_info = static_cast<TH1D*>(f_fakes->Get(Fakes_hist.c_str()));
-    if(h_fakes_info == nullptr) {
+    h_halfmm_fakes_info = static_cast<TH1D*>(f_fakes->Get(halfmm_Fakes_hist.c_str()));
+    
+    if((h_fakes_info == nullptr)|| (h_halfmm_fakes_info == nullptr))  {
       ANA_MSG_ERROR("Error loading pu info from:" <<input_pu_file);
       ANA_MSG_ERROR("Fakes Hist Name:" << Fakes_hist);
       return StatusCode::FAILURE;
@@ -279,24 +354,18 @@ StatusCode TruthAnalysis :: execute ()
 
   //How many PU tracks in window? Compare rand against the integral of the PDF of the track multiplicity
 
-  if(h_pu_info != nullptr) {
-    double rand = m_rnd->Rndm();
-    m_rand = rand;
-    //double integral = 0;
-    Pileup_eff = h_pu_info->GetBinContent(1);
-    /* for(int b = 1; b < h_pu_info -> GetNbinsX(); b++){
-      integral += h_pu_info->GetBinContent(b);
-      if(integral > rand){
-	m_numPUtracks = b-1;
-	break;
-	}
-	}*/
-  }
+  if((h_pu_info != nullptr)&& (h_halfmm_pu_info != nullptr))
+    {
+      Pileup_eff = h_pu_info->GetBinContent(1);
+      halfmm_Pileup_eff = h_halfmm_pu_info->GetBinContent(1);
+    }
 
   //How many Fakes in window?
-  if(h_fakes_info != nullptr) {
-  Fakes_eff = h_fakes_info->GetBinContent(1);
-  }
+  if((h_fakes_info != nullptr) &&(h_halfmm_fakes_info != nullptr))
+    {
+      Fakes_eff = h_fakes_info->GetBinContent(1);
+      halfmm_Fakes_eff = h_halfmm_fakes_info->GetBinContent(1);
+    }
 
   // get truth particle container of interest
   const xAOD::TruthParticleContainer* truthParts = 0;
@@ -314,7 +383,6 @@ StatusCode TruthAnalysis :: execute ()
   // loop over the particles in the container
   // and select fiducial leptons and tracks
   for (const xAOD::TruthParticle *part : *truthParts) {    
-
     //select fiducial truth particles
     ANA_MSG_VERBOSE ("Particle PDG " << part->auxdata<int>("pdgId") << ", pT=" << part->pt() << ", eta=" << part->eta() << ", charge=" << part->charge() << ", status=" << part->auxdata<int>("status") << ", barcode=" << part->auxdata<int>("barcode"));
     if (part->pt() < std::min(tracks_min_pt,lep2_min_pt)) continue;
@@ -372,13 +440,26 @@ int pdgid = part->auxdata<int>("pdgId");
 	  ANA_MSG_VERBOSE ("Candidate muon; is it reconstructed?");
 	  int xbin = h_muon_eff->GetXaxis()->FindBin(part->pt());
 	  int ybin = h_muon_eff->GetYaxis()->FindBin(part->eta());
+	  int pxbin = h_electron_eff->GetXaxis()->FindBin(part->pt());
+	  int pybin = h_electron_eff->GetYaxis()->FindBin(part->eta());
+	  
+	  if ( pxbin > 0 && pybin > 0 ) {
+	    //use last bin if overflow
+	    if (pxbin > h_electron_eff->GetNbinsX()){
+	      pxbin = h_electron_eff->GetNbinsX();
+	    }
+	    p_electron_eff = h_electron_eff->GetBinContent(pxbin, pybin);      
+	    // if ( std::abs(part->eta()) > 2.5 ){electron_eff = 0.0;}
+	  }    
+	  
 	  // float trk_eff = 0.0; //default if underflow
 	  muon_eff = 0.0; //default if underflow
 	  if ( xbin > 0 && ybin > 0 ) {
 	    //use last bin if overflow
-	    if (xbin > h_muon_eff->GetNbinsX()){
+	    if (xbin > h_muon_eff->GetNbinsX())
+	      {
 	      xbin = h_muon_eff->GetNbinsX();
-	    }
+	      }
 	    muon_eff = h_muon_eff->GetBinContent(xbin, ybin);      
 	    if ( std::abs(part->eta()) > 2.5 ){
 	      muon_eff = 0.0;
@@ -387,8 +468,6 @@ int pdgid = part->auxdata<int>("pdgId");
 	  // if (m_rnd->Rndm() > trk_eff)
 	  //continue;
 	}
-
-
 	ANA_MSG_VERBOSE ("It was recoed.  Store as lepton");
 	m_lep_pt->push_back(part->pt());
 	m_lep_eta->push_back(part->eta());
@@ -427,6 +506,7 @@ int pdgid = part->auxdata<int>("pdgId");
 	trk_eff = h_trk_eff_pt->GetBinContent(ibin);      
       }  
     */
+
     //2D track efficiency
     if (h_trk_eff_pt_eta != nullptr) {
       int xbin = h_trk_eff_pt_eta->GetXaxis()->FindBin(part->pt());
@@ -470,20 +550,16 @@ float  tracking_weight = 1;
   ANA_MSG_DEBUG("NLep = " << m_lep_pt->size() << ", NTracks = " << num_track_in_window);
   hist("num_fiducial_leptons")->Fill(m_lep_pt->size());
   if (m_lep_pt->size() != 2) {saveTree(); return StatusCode::SUCCESS;}
-  hist("pass_2leps")->Fill(1,mcWeight*electron_eff*muon_eff);
   if (m_lep_charge->at(0)*m_lep_charge->at(1) != -1) {saveTree(); return StatusCode::SUCCESS;}
-  //if ( ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  11*11 ) && ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 ) ) {saveTree(); return StatusCode::SUCCESS;} //For all e and mu selections 
-  hist("pass_2leps_OS")->Fill(1,mcWeight*electron_eff*muon_eff);
-  if (abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13){ saveTree(); return StatusCode::SUCCESS;} //For just emu
-  // if ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13 )  {saveTree(); return StatusCode::SUCCESS;}// mumu
-  hist("pass_2leps_OS_OF")->Fill(1,mcWeight*electron_eff*muon_eff);
+
+  //if (abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*13){ saveTree(); return StatusCode::SUCCESS;} //For just emu
+  if ( ( abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1) ) !=  13*13) & (abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) != 11*11))  {saveTree(); return StatusCode::SUCCESS;} // same flavor
+
   passCut(cut_lep_ocof);
   ANA_MSG_VERBOSE("Pass cut_lep_ocof");
 
   if (std::min(m_lep_pt->at(0), m_lep_pt->at(1)) < lep2_min_pt) {saveTree(); return StatusCode::SUCCESS;}
-  hist("pass_2leps_OS_OF_sublep")->Fill(1,mcWeight*electron_eff*muon_eff);
   if (std::max(m_lep_pt->at(0), m_lep_pt->at(1)) < lep1_min_pt) {saveTree(); return StatusCode::SUCCESS;}
-  hist("pass_2leps_OS_OF_sublep_leadlep")->Fill(1,mcWeight*electron_eff*muon_eff);
   passCut(cut_lep_minpt);
   ANA_MSG_VERBOSE("Pass cut_lep_minpt");
 
@@ -503,34 +579,143 @@ float  tracking_weight = 1;
   if (m_delta_phi > 3.1415 ) { m_delta_phi = 6.283 - m_delta_phi;}
 
   hist("dilep_m")->Fill(m_dilep_m/GeV);
-  if (m_dilep_m < dilep_min_mass) //||  ((m_dilep_m> 70*GeV ) && ( m_dilep_m < 110*GeV ) ) ) m(ll) cut
+  hist("dilep_m_mcweight")->Fill(m_dilep_m/GeV,mcWeight);
+  if ((m_dilep_m < dilep_min_mass) ||  ((m_dilep_m> 70*GeV ) && ( m_dilep_m < 110*GeV )))// m(ll) cut
     {saveTree(); return StatusCode::SUCCESS;}
-  hist("pass_2leps_OS_OF_sublep_leadlep_mll")->Fill(1,mcWeight*electron_eff*muon_eff);
   passCut(cut_m_ll);
   ANA_MSG_VERBOSE("Pass cut_m_ll");
 
 
   hist("dilep_pt")->Fill(m_dilep_pt/GeV);
+  hist("dilep_pt_mcweight")->Fill(m_dilep_pt/GeV,mcWeight);
   if (m_dilep_pt < dilep_min_pt) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_pt_ll);
-  hist("pass_2leps_OS_OF_sublep_leadlep_mll_ptll")->Fill(1,mcWeight*electron_eff*muon_eff);
+  
   ANA_MSG_VERBOSE("Pass cut_pt_ll");
 
-  //hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV, tracking_weight*electron_eff*muon_eff);
+  
   hist("track_weights")->Fill(tracking_weight);
   hist("electron_eff")->Fill(electron_eff);
   hist("muon_eff")->Fill(muon_eff);
   hist("num_fiducial_tracks")->Fill(m_trk_pt->size(),mcWeight);
   hist("pileup_weights")->Fill(Pileup_eff);
   hist("total_weighting")->Fill(Pileup_eff*mcWeight*tracking_weight*electron_eff*muon_eff*Fakes_eff);
-  hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV);//, tracking_weight*electron_eff*muon_eff*Pileup_eff*mcWeight);//*Fakes_eff);
+  hist("sr_dilep_pt_weights")->Fill(m_dilep_pt/GeV);
+
+  //Fill histograms for Opposite Flavor
+  /*
+  hist("Base_Case")->Fill(1,mcWeight);
+  hist("error_Base_Case")->Fill(1,mcWeight*mcWeight);
+
+  hist("Tracks")->Fill(1,mcWeight*tracking_weight);
+  hist("error_Tracks")->Fill(1,pow(mcWeight*tracking_weight,2));
+
+  hist("Lepton_Reco")->Fill(1,mcWeight*tracking_weight*muon_eff*electron_eff);
+  hist("error_Lepton_Reco")->Fill(1,pow(mcWeight*tracking_weight*muon_eff*electron_eff,2));
+
+  hist("Pileup")->Fill(1,mcWeight*tracking_weight*muon_eff*electron_eff*Pileup_eff);
+  hist("error_Pileup")->Fill(1,pow(mcWeight*tracking_weight*muon_eff*electron_eff*Pileup_eff, 2));
+
+  hist("halfmm_Pileup")->Fill(1,mcWeight*tracking_weight*muon_eff*electron_eff*halfmm_Pileup_eff);
+  hist("error_halfmm_Pileup")->Fill(1,pow(mcWeight*tracking_weight*muon_eff*electron_eff*halfmm_Pileup_eff, 2));
+
+  hist("Fakes")->Fill(1,mcWeight*tracking_weight*muon_eff*electron_eff*Pileup_eff*Fakes_eff);
+  hist("error_Fakes")->Fill(1,pow(mcWeight*tracking_weight*muon_eff*electron_eff*Pileup_eff*Fakes_eff, 2));
+
+  hist("halfmm_Fakes")->Fill(1,mcWeight*tracking_weight*muon_eff*electron_eff*halfmm_Pileup_eff*halfmm_Fakes_eff);
+  hist("error_halfmm_Fakes")->Fill(1,pow(mcWeight*tracking_weight*muon_eff*electron_eff*halfmm_Pileup_eff*halfmm_Fakes_eff, 2));
+  */
   hist("mcWeight")->Fill(mcWeight);
-  hist("weighted_number_of_events")->Fill(1,mcWeight*tracking_weight*electron_eff*muon_eff*Pileup_eff);
- if (num_track_in_window > tracks_max_n) {saveTree(); return StatusCode::SUCCESS;}
+  hist("error_opp")->Fill(1,pow( mcWeight*tracking_weight*muon_eff*electron_eff*Pileup_eff*Fakes_eff, 2 ));
+
+  hist("weighted_number_of_events")->Fill(1,mcWeight*tracking_weight*muon_eff*electron_eff*Pileup_eff*Fakes_eff);
+  
+  if (abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) == 11*11) //ee case
+    {
+      hist("weighted_number_of_events_ee")->Fill(1,mcWeight*tracking_weight*electron_eff*electron_eff*Pileup_eff*Fakes_eff);
+      hist("error_ee")->Fill(1,pow( mcWeight*tracking_weight*electron_eff*electron_eff*Pileup_eff*Fakes_eff, 2 ));
+      
+      hist("ee_Base_Case")->Fill(1,mcWeight);
+      hist("error_ee_Base_Case")->Fill(1,mcWeight*mcWeight);
+      
+      hist("ee_Tracks")->Fill(1,mcWeight*tracking_weight);
+      hist("error_ee_Tracks")->Fill(1,pow(mcWeight*tracking_weight,2));
+      
+      hist("ee_Lepton_Reco")->Fill(1,mcWeight*tracking_weight*electron_eff*electron_eff);
+      hist("error_ee_Lepton_Reco")->Fill(1,pow(mcWeight*tracking_weight*electron_eff*electron_eff,2));
+      
+      hist("ee_Pileup")->Fill(1,mcWeight*tracking_weight*electron_eff*electron_eff*Pileup_eff);
+      hist("error_ee_Pileup")->Fill(1,pow(mcWeight*tracking_weight*electron_eff*electron_eff*Pileup_eff, 2));
+      
+      hist("ee_halfmm_Pileup")->Fill(1,mcWeight*tracking_weight*electron_eff*electron_eff*halfmm_Pileup_eff);
+      hist("error_ee_halfmm_Pileup")->Fill(1,pow(mcWeight*tracking_weight*electron_eff*electron_eff*halfmm_Pileup_eff, 2));
+
+      hist("ee_Fakes")->Fill(1,mcWeight*tracking_weight*electron_eff*electron_eff*Pileup_eff*Fakes_eff);
+      hist("error_ee_Fakes")->Fill(1,pow(mcWeight*tracking_weight*electron_eff*electron_eff*Pileup_eff*Fakes_eff, 2));
+
+      hist("ee_halfmm_Fakes")->Fill(1,mcWeight*tracking_weight*electron_eff*electron_eff*halfmm_Pileup_eff*halfmm_Fakes_eff);
+      hist("error_ee_halfmm_Fakes")->Fill(1,pow(mcWeight*tracking_weight*electron_eff*electron_eff*halfmm_Pileup_eff*halfmm_Fakes_eff, 2));
+    
+    }
+  else if (abs(m_lep_pdgid->at(0)*m_lep_pdgid->at(1)) == 13*13) //mumu and pseudo ee case
+    {
+      hist("error_mumu")->Fill(1, pow(mcWeight*tracking_weight*muon_eff*muon_eff*Pileup_eff*Fakes_eff, 2));
+      hist("error_pseudo_ee")->Fill(1,pow(mcWeight*tracking_weight*p_electron_eff*p_electron_eff*Pileup_eff*Fakes_eff,2));
+      hist("weighted_number_of_events_mumu")->Fill(1,mcWeight*tracking_weight*muon_eff*muon_eff*Pileup_eff*Fakes_eff);
+      hist("weighted_number_of_events_pseudo_ee")->Fill(1,mcWeight*tracking_weight*p_electron_eff*p_electron_eff*Pileup_eff*Fakes_eff);
+      hist("dilep_m_post_sel")->Fill(m_dilep_m/GeV,mcWeight*tracking_weight*muon_eff*muon_eff*Pileup_eff*Fakes_eff);
+      hist("dilep_pt_post_sel")->Fill(m_dilep_pt/GeV,mcWeight*tracking_weight*muon_eff*muon_eff*Pileup_eff*Fakes_eff);
+      //mumu
+      hist("Base_Case")->Fill(1,mcWeight);
+      hist("error_Base_Case")->Fill(1,mcWeight*mcWeight);
+      
+      hist("Tracks")->Fill(1,mcWeight*tracking_weight);
+      hist("error_Tracks")->Fill(1,pow(mcWeight*tracking_weight,2));
+      
+      hist("Lepton_Reco")->Fill(1,mcWeight*tracking_weight*muon_eff*muon_eff);
+      hist("error_Lepton_Reco")->Fill(1,pow(mcWeight*tracking_weight*muon_eff*muon_eff,2));
+      
+      hist("Pileup")->Fill(1,mcWeight*tracking_weight*muon_eff*muon_eff*Pileup_eff);
+      hist("error_Pileup")->Fill(1,pow(mcWeight*tracking_weight*muon_eff*muon_eff*Pileup_eff, 2));
+      
+      hist("halfmm_Pileup")->Fill(1,mcWeight*tracking_weight*muon_eff*muon_eff*halfmm_Pileup_eff);
+      hist("error_halfmm_Pileup")->Fill(1,pow(mcWeight*tracking_weight*muon_eff*muon_eff*halfmm_Pileup_eff, 2));
+      
+      hist("Fakes")->Fill(1,mcWeight*tracking_weight*muon_eff*muon_eff*Pileup_eff*Fakes_eff);
+      hist("error_Fakes")->Fill(1,pow(mcWeight*tracking_weight*muon_eff*muon_eff*Pileup_eff*Fakes_eff, 2));
+      
+      hist("halfmm_Fakes")->Fill(1,mcWeight*tracking_weight*muon_eff*muon_eff*halfmm_Pileup_eff*halfmm_Fakes_eff);
+      hist("error_halfmm_Fakes")->Fill(1,pow(mcWeight*tracking_weight*muon_eff*muon_eff*halfmm_Pileup_eff*halfmm_Fakes_eff, 2));
+
+  //Pseudo ee Entries
+
+      hist("p_Base_Case")->Fill(1,mcWeight);
+      hist("error_p_Base_Case")->Fill(1,mcWeight*mcWeight);
+      
+      hist("p_Tracks")->Fill(1,mcWeight*tracking_weight);
+      hist("error_p_Tracks")->Fill(1,pow(mcWeight*tracking_weight,2));
+      
+      hist("p_Lepton_Reco")->Fill(1,mcWeight*tracking_weight*p_electron_eff*p_electron_eff);
+      hist("error_p_Lepton_Reco")->Fill(1,pow(mcWeight*tracking_weight*p_electron_eff*p_electron_eff,2));
+      
+      hist("p_Pileup")->Fill(1,mcWeight*tracking_weight*p_electron_eff*p_electron_eff*Pileup_eff);
+      hist("error_p_Pileup")->Fill(1,pow(mcWeight*tracking_weight*p_electron_eff*p_electron_eff*Pileup_eff, 2));
+
+      hist("p_halfmm_Pileup")->Fill(1,mcWeight*tracking_weight*p_electron_eff*p_electron_eff*halfmm_Pileup_eff);
+      hist("error_p_halfmm_Pileup")->Fill(1,pow(mcWeight*tracking_weight*p_electron_eff*p_electron_eff*halfmm_Pileup_eff, 2));
+
+      hist("p_Fakes")->Fill(1,mcWeight*tracking_weight*p_electron_eff*p_electron_eff*Pileup_eff*Fakes_eff);
+      hist("error_p_Fakes")->Fill(1,pow(mcWeight*tracking_weight*p_electron_eff*p_electron_eff*Pileup_eff*Fakes_eff, 2));
+      
+      hist("p_halfmm_Fakes")->Fill(1,mcWeight*tracking_weight*p_electron_eff*p_electron_eff*halfmm_Pileup_eff*halfmm_Fakes_eff);
+      hist("error_p_halfmm_Fakes")->Fill(1,pow(mcWeight*tracking_weight*p_electron_eff*p_electron_eff*halfmm_Pileup_eff*halfmm_Fakes_eff, 2));
+
+    }
+
+//hist("weighted_number_of_events")->Fill(1,mcWeight*tracking_weight*electron_eff*muon_eff*Pileup_eff*Fakes_eff);
+  if (num_track_in_window > tracks_max_n) {saveTree(); return StatusCode::SUCCESS;}
   passCut(cut_exclusive);
   ANA_MSG_VERBOSE("Pass cut_exclusive");
-  hist("pass_2leps_OS_OF_sublep_leadlep_mll_ptll_0trk")->Fill(1,mcWeight*electron_eff*muon_eff);
-  hist("pass_2leps_OS_OF_sublep_leadlep_mll_ptll_0trk_withPU")->Fill(1,Pileup_eff*mcWeight*electron_eff*muon_eff);
   //Plots after all selections
   hist("sr_dilep_pt")->Fill(m_dilep_pt/GeV);
   hist("delta_phi")->Fill(m_delta_phi);
