@@ -40,39 +40,47 @@ void get_TruthAnalysis_Ratio(std::string p_f_exclWW, std::string p_f_inclWW, int
   //Getting the proper histograms.
   TFile *f_incl = TFile::Open(p_f_inclWW.c_str());
   TFile *f_excl = TFile::Open(p_f_exclWW.c_str());
-  TH1F *h_incl =(TH1F*) f_incl->Get("Fakes");
-  TH1F *h_excl = (TH1F*)f_excl->Get("Fakes");
+  TH1F *h_incl;
+  TH1F *h_excl = (TH1F*)f_excl->Get("weighted_number_of_events_mumu");
 
   TH1F *h_incl_cutflow =(TH1F*)  f_incl->Get("hCutFlow_Sum");
   TH1F *h_excl_cutflow = (TH1F*)f_excl->Get("hCutFlow_Sum");
 
-  TH1D *error_incl = (TH1D*) f_incl->Get("error_Fakes");
-  TH1D *error_excl = (TH1D*) f_excl->Get("error_Fakes");
+  TH1D *error_excl = (TH1D*) f_excl->Get("error_ee");
+  TH1D *error_incl;
+
+  h_incl =(TH1F*) f_incl->Get("weighted_number_of_events_mumu");
+  error_incl = (TH1D*) f_incl->Get("error_mumu");
 
   float y_ngen_incl = h_incl_cutflow->GetBinContent(2);
   float y_ngen_excl = h_excl_cutflow->GetBinContent(2);
-
-  float raw_incl = h_incl->GetBinContent(1);
-  float raw_excl = h_excl->GetBinContent(1);
 
    //Retrieval of correct scaling factor for respective sample type
   if ( Sample ==  "DYmumu")
     {
       xsec = DYmumu_xsec;
       filter_eff = DYmumu_filter_eff;
+      //h_incl =(TH1F*) f_incl->Get("weighted_number_of_events_pseudo_ee");
+      //error_incl = (TH1D*) f_incl->Get("error_pseudo_ee");
     }
   else if ( Sample ==  "InclWW")
     {
       xsec = inclWW_xsec*inclWW_kfactor;
       filter_eff = inclWW_filter_eff; 
+      //h_incl =(TH1F*) f_incl->Get("weighted_number_of_events_ee");
+      //error_incl = (TH1D*) f_incl->Get("error_ee");
     }
   else if ( Sample == "Ztautau" )
     {
       xsec = Ztautau_xsec;
       filter_eff = Ztautau_filter_eff;
+      //h_incl =(TH1F*) f_incl->Get("weighted_number_of_events_ee");
+      //error_incl = (TH1D*) f_incl->Get("error_ee");
     }
   else if ( Sample == "Zmumu" )
     {
+      //h_incl =(TH1F*) f_incl->Get("weighted_number_of_events_pseudo_ee");
+      //error_incl = (TH1D*) f_incl->Get("error_pseudo_ee");
       xsec = Zmumu_xsec;
       filter_eff = Zmumu_filter_eff;
     }
