@@ -27,8 +27,7 @@ float Ztautau_xsec = 1901; //pb
 float LowMassDY_filter_eff = 0.000811;
 float LowMassDY_xsec = 531379.2; //pb
 
-
-void  plot_Same_Flavor_w_error(std::string InclWW_Ratio_File, std::string InclWW_Error_File, std::string Zmumu_Ratio_File,std::string Zmumu_Error_File, std::string Ztautau_Ratio_File, std::string Ztautau_Error_File, std::string DYmumu_Ratio_File,std::string DYmumu_Error_File)
+void  plot_Same_Flavor_comp(std::string InclWW_Ratio_File, std::string InclWW_Error_File, std::string Zmumu_Ratio_File,std::string Zmumu_Error_File, std::string Ztautau_Ratio_File, std::string Ztautau_Error_File, std::string DYmumu_Ratio_File,std::string DYmumu_Error_File, std::string hInclWW_Ratio_File, std::string hInclWW_Error_File, std::string hZmumu_Ratio_File,std::string hZmumu_Error_File, std::string hZtautau_Ratio_File, std::string hZtautau_Error_File, std::string hDYmumu_Ratio_File,std::string hDYmumu_Error_File)
 {
   int n = 9;
   Double_t min_pT[n], incl_yield[n], excl_yield[n], DY_yield[n], Ztautau_yield[n], Zmumu_yield[n];
@@ -234,7 +233,213 @@ void  plot_Same_Flavor_w_error(std::string InclWW_Ratio_File, std::string InclWW
   array_index =0;
   counter = 0;
 
+//0.5mm Window
+
+  Double_t hincl_yield[n], hexcl_yield[n], hDY_yield[n], hZtautau_yield[n], hZmumu_yield[n];
+  Double_t hincl_error[n], hexcl_error[n], hDY_error[n], hZtautau_error[n], hZmumu_error[n];
+  Double_t hincl_sys_error[n], hexcl_sys_error[n], hDY_sys_error[n], hZtautau_sys_error[n], hZmumu_sys_error[n];
+  Double_t hRatio[n], hsqrt_Ratio[n], hRatio_e[n], hsqrt_Ratio_e[n], hRatio_sys_e[n], hsqrt_Ratio_sys_e[n];
+  Double_t hplot_sys_e[n], hplot_sqrt_sys_e[n];
+
+  //inclusive
+  std::ifstream hincl_rat_file;
+  hincl_rat_file.open( hInclWW_Ratio_File );
+  double hi;
+
+  while( hincl_rat_file >> hi)
+    {
+      counter++;
+      if ( counter == 1)
+	{
+	 hincl_yield[array_index] = hi;
+	}
+      else if (counter == 3)
+	{
+	  hexcl_yield[array_index] = hi;
+	  array_index++;
+	  counter = 0;
+	}
+    }
+  hincl_rat_file.close();
+  array_index = 0;
+  counter = 0;
+
+  std::ifstream hincl_err_file;
+  hincl_err_file.open(hInclWW_Error_File);
+  double hie;
+
+  while(hincl_err_file >> hie)
+    {
+      counter++;
+      if ( counter == 1)
+	{
+	  hincl_error[array_index] = hie;
+	}
+      else if (counter == 2)
+	{
+	  hincl_sys_error[array_index] = hie;
+	}
+      else if (counter == 3)
+	{
+	  hexcl_error[array_index]= hie;
+	}
+      else if (counter == 4 )
+	{
+	  hexcl_sys_error[array_index] = hie;
+	  array_index++;
+	  counter = 0;
+	}
+    }
+  hincl_err_file.close();
+  array_index =0;
+  counter = 0;
+
+  //Zmumu
+  std::ifstream hzmumu_rat_file;
+  hzmumu_rat_file.open( hZmumu_Ratio_File );
+  double hzm;
+
+  while( hzmumu_rat_file >> hzm)
+    {
+      counter++;
+      if ( counter == 1)
+	{
+	  hZmumu_yield[array_index] = hzm;
+	}
+      else if (counter == 3)
+	{
+	  array_index++;
+	  counter = 0;
+	}
+    }
+  hzmumu_rat_file.close();
+  array_index = 0;
+  counter = 0;
+
+  std::ifstream hzmumu_err_file;
+  hzmumu_err_file.open(hZmumu_Error_File);
+  double hzme;
+
+  while(hzmumu_err_file >> hzme)
+    {
+      counter++;
+      if ( counter == 1)
+	{
+	  hZmumu_error[array_index] = hzme;
+	}
+      else if (counter == 2)
+	{
+	  hZmumu_sys_error[array_index]= hzme;
+	  array_index++;
+	}
+      else if (counter == 4 )
+	{
+	  counter = 0;
+	}
+    }
+  hzmumu_err_file.close();
+  array_index =0;
+  counter = 0;
+
+  //Ztautau
+  std::ifstream hztautau_rat_file;
+  hztautau_rat_file.open( hZtautau_Ratio_File );
+  double hzt;
+
+  while( hztautau_rat_file >> hzt)
+    {
+      counter++;
+      if ( counter == 1)
+	{
+	  hZtautau_yield[array_index] = hzt;
+	}
+      else if (counter == 3)
+	{
+	  array_index++;
+	  counter = 0;
+	}
+    }
+  hztautau_rat_file.close();
+  array_index = 0;
+  counter = 0;
+
+  std::ifstream hztautau_err_file;
+  hztautau_err_file.open(hZtautau_Error_File);
+  double hzte;
+
+  while(hzmumu_err_file >> hzte)
+    {
+      counter++;
+      if ( counter == 1)
+	{
+	  hZtautau_error[array_index] = hzte;
+	}
+      else if (counter == 2)
+	{
+	  hZtautau_sys_error[array_index]=hzte;
+	  array_index++;
+	}
+      else if (counter == 4 )
+	{
+	  counter = 0;
+	}
+    }
+  hztautau_err_file.close();
+  array_index =0;
+  counter = 0;
+
+  //DYmumu
+  std::ifstream hdymumu_rat_file;
+  hdymumu_rat_file.open( hDYmumu_Ratio_File );
+  double hd;
+
+  while( hdymumu_rat_file >> hd)
+    {
+      counter++;
+      if ( counter == 1)
+	{
+	  hDY_yield[array_index] = hd;
+	}
+      else if (counter == 3)
+	{
+	  array_index++;
+	  counter = 0;
+	}
+    }
+  hdymumu_rat_file.close();
+  array_index = 0;
+  counter = 0;
+
+  std::ifstream hdymumu_err_file;
+  hdymumu_err_file.open(hDYmumu_Error_File);
+  double hde;
+
+  while(hdymumu_err_file >> hde)
+    {
+      counter++;
+      if ( counter == 1)
+	{
+	  hDY_error[array_index] = hde;
+	}
+      else if (counter == 2)
+	{
+	  hDY_sys_error[array_index]= hde;
+	  array_index++;
+	}
+      else if (counter == 4 )
+	{
+	  counter = 0;
+	}
+    }
+  hdymumu_err_file.close();
+  array_index =0;
+  counter = 0;
+
+  //Ratios
+
   Double_t prefactor[n],excl_comp[n],excl_sys_comp[n],back_error[n],back_sys_error[n];
+  Double_t hprefactor[n],hexcl_comp[n],hexcl_sys_comp[n],hback_error[n],hback_sys_error[n];
+
 
   for (int k = 0; k<n; k++)
     {
@@ -260,57 +465,106 @@ void  plot_Same_Flavor_w_error(std::string InclWW_Ratio_File, std::string InclWW
       plot_sys_e[k] = Ratio_e[k]+Ratio_sys_e[k];
       plot_sqrt_sys_e[k]=sqrt_Ratio_e[k]+sqrt_Ratio_sys_e[k];
 
-      std::cout << Ratio_e[k] << " " << sqrt_Ratio_e[k] << " " << Ratio_sys_e[k] << " " << sqrt_Ratio_sys_e[k] <<"\n";
+      //std::cout << Ratio_e[k] << " " << sqrt_Ratio_e[k] << " " << Ratio_sys_e[k] << " " << sqrt_Ratio_sys_e[k] <<"\n";
+    }
+
+  for (int hk = 0; hk<n; hk++)
+    {
+      hprefactor[hk] = 1/pow(  hincl_yield[hk]+hDY_yield[hk]+hZtautau_yield[hk]+hZmumu_yield[hk] , 2 );
+
+      hback_error[hk] = pow( hincl_error[hk],2 ) + pow( hDY_error[hk], 2) + pow(hZmumu_error[hk], 2);
+      hback_sys_error[hk] = pow( hincl_sys_error[hk],2 ) + pow( hDY_sys_error[hk], 2) + pow( hZtautau_sys_error[hk],2) + pow(hZmumu_sys_error[hk], 2);
+
+      hexcl_comp[hk] = pow( hexcl_error[hk]/ excl_yield[hk], 2);
+      hexcl_sys_comp[hk] = pow( hexcl_sys_error[hk]/ hexcl_yield[hk], 2);
+
+      hRatio[hk] = hexcl_yield[hk]/(  hincl_yield[hk]+hDY_yield[hk]+hZtautau_yield[hk]+hZmumu_yield[hk]  );
+
+      hRatio_e[hk] = hRatio[hk]*sqrt( hexcl_comp[hk]+hprefactor[hk]*hback_error[hk]);
+      hRatio_sys_e[hk] = hRatio[hk]*sqrt( hexcl_sys_comp[hk]+hprefactor[hk]*hback_sys_error[hk]);
+
+      //std::cout << hRatio_e[hk]-Ratio_e[hk]<< " ";
+
+      hsqrt_Ratio[hk] = hexcl_yield[hk]/sqrt(  hincl_yield[hk]+hDY_yield[hk]+hZtautau_yield[hk]+hZmumu_yield[hk]  );
+
+      hsqrt_Ratio_e[hk] = hsqrt_Ratio[hk]*sqrt(hexcl_comp[hk]+hprefactor[hk]*hback_error[hk]/4);
+      hsqrt_Ratio_sys_e[hk] = hsqrt_Ratio[hk]*sqrt(hexcl_sys_comp[hk]+hprefactor[hk]*hback_sys_error[hk]/4);
+
+      hplot_sys_e[hk] = hRatio_e[hk]+hRatio_sys_e[hk];
+      hplot_sqrt_sys_e[hk]=hsqrt_Ratio_e[hk]+hsqrt_Ratio_sys_e[hk];
+
+      //std::cout << Ratio_e[k] << " " << sqrt_Ratio_e[k] << " " << Ratio_sys_e[k] << " " << sqrt_Ratio_sys_e[k] <<"\n";
     }
 
 
   auto cl = new TCanvas("cl","cl");
-  auto mg = new TMultiGraph;
   auto ratio_plot = new TGraphErrors(n,min_pT,Ratio,0,Ratio_e);
-  //TLegend* legend = new TLegend();
+  auto hratio_plot = new TGraphErrors(n, min_pT, hRatio, 0 , hRatio_e);
+  TLegend* legend = new TLegend();
 
-  mg->SetTitle("Same Flavor S/B 0.5mm PU window (ee)");
-  mg->GetXaxis()->SetTitle("Min p_{T}(MeV)");
-  mg->GetYaxis()->SetTitle("Ratio of Excl to Inclusive yields");
-  //mg->GetYaxis()->SetRangeUser(0,9);
-
-  ratio_plot->SetMarkerStyle(6);
-  ratio_plot->SetMarkerSize(2);
   auto ratio_plot_sys = new TGraphErrors(n,min_pT,Ratio,0,plot_sys_e);
+  auto hratio_plot_sys = new TGraphErrors(n,min_pT,hRatio,0,hplot_sys_e);
 
-  mg->Add(ratio_plot_sys,"[]");
-  mg->Add(ratio_plot,"AP");
+  legend->AddEntry(ratio_plot,"1mm Window");
+  legend->AddEntry(hratio_plot,"0.5mm Window");
 
-  mg->GetXaxis()->SetLimits(50.,550.);
-  mg->SetMinimum(0.);
-  //mg->SetMaximum(9);
+  hratio_plot->SetLineColor(kRed);
+  hratio_plot_sys->SetLineColor(kRed);
+  hratio_plot->SetMarkerSize(2);
+  hratio_plot->SetMarkerColor(kRed);
+  hratio_plot->SetMarkerStyle(6);  
+  ratio_plot->SetMarkerSize(2);
+  ratio_plot->SetMarkerStyle(6);  
 
-  //legend->AddEntry(ratio_plot,"Stat");
-  //legend->AddEntry(ratio_plot_sys,"Sys");
-  mg->Draw("apl");
-  //legend->Draw();
+  ratio_plot->GetXaxis()->SetTitle("Min Track p_{T} [MeV]");
+  ratio_plot->GetYaxis()->SetTitle("Ratio of Signal to Background");
+  ratio_plot->SetTitle("Same Flavor S/B for #mu#mu");
+  ratio_plot->GetYaxis()->SetRangeUser(0,8.5);
+
+
+
+  ratio_plot->Draw("APE");
+  hratio_plot->Draw("PE same");
+  ratio_plot_sys->Draw("[] same");
+  hratio_plot_sys->Draw("[] same");
+  legend->Draw();
+
+
 
   auto cl2 = new TCanvas("cl2","cl2");
-  auto mg2 = new TMultiGraph;
+  TLegend* l2 = new TLegend();
   auto sqrt_ratio_plot = new TGraphErrors(n,min_pT,sqrt_Ratio,0,sqrt_Ratio_e);
   auto sqrt_ratio_plot_sys = new TGraphErrors(n,min_pT,sqrt_Ratio,0,plot_sqrt_sys_e);
+  auto hsqrt_ratio_plot = new TGraphErrors(n,min_pT, hsqrt_Ratio,0, hsqrt_Ratio_e);
+  auto hsqrt_ratio_plot_sys = new TGraphErrors(n,min_pT, hsqrt_Ratio,0, hplot_sqrt_sys_e);
 
-  mg2->SetTitle("Same Flavor S/#sqrt{B} 0.5mm PU window (ee)");
-  mg2->GetXaxis()->SetTitle("Min p_{T}(MeV)");
-  mg2->GetYaxis()->SetTitle("Ratio of Excl to Square Root Inclusive yields");
-  //mg2->GetYaxis()->SetRangeUser(0,14);
+  hsqrt_ratio_plot_sys->SetLineColor(kRed);
+  hsqrt_ratio_plot->SetLineColor(kRed);
+  sqrt_ratio_plot->SetMarkerSize(2);
+  hsqrt_ratio_plot->SetMarkerColor(kRed);
+  sqrt_ratio_plot->SetMarkerStyle(6);
+
+  hsqrt_ratio_plot->SetMarkerSize(2);
+  hsqrt_ratio_plot->SetMarkerStyle(6);
+
+  sqrt_ratio_plot->GetXaxis()->SetTitle("Min Track p_{T} [MeV]");
+  sqrt_ratio_plot->GetYaxis()->SetTitle("Ratio of Signal to Root Background");
+  sqrt_ratio_plot->SetTitle("Same Flavor S/#sqrt{B} for #mu#mu");
+  sqrt_ratio_plot->GetYaxis()->SetRangeUser(0,14);
+
 
   sqrt_ratio_plot->SetMarkerStyle(6);
   sqrt_ratio_plot->SetMarkerSize(2);
-  //sqrt_ratio_plot->Draw("AP");
-  mg2->Add(sqrt_ratio_plot,"AP");
-  mg2->Add(sqrt_ratio_plot_sys,"[]");
+  l2->AddEntry(sqrt_ratio_plot, "1mm Window");
+  l2->AddEntry(hsqrt_ratio_plot, "0.5mm Window");
 
-
-  mg2->GetXaxis()->SetLimits(50.,550.);
-  mg2->SetMinimum(0.);
-  //mg2->SetMaximum(35);
-
-  mg2->Draw("apl");
+  
+  sqrt_ratio_plot->Draw("APE");
+  l2->Draw();
+  hsqrt_ratio_plot->Draw("PE same");
+  sqrt_ratio_plot_sys->Draw("[] same");
+  hsqrt_ratio_plot_sys->Draw("[] same");
+  
+  
   
 }
